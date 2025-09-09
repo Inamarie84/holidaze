@@ -5,7 +5,7 @@
 ------------------------------ */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1c1c1c; /* brand text color for body by default */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +19,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans); /* Inter from layout.tsx */
-  --font-serif: var(--font-serif); /* DM Serif Display from layout.tsx */
+
+  /* Font vars come from layout.tsx */
+  --font-sans: var(--font-sans); /* Inter */
+  --font-serif: var(--font-serif); /* DM Serif Display */
 }
 
 /* ------------------------------
@@ -37,7 +39,7 @@ body {
   font-family: var(--font-sans); /* default = Inter */
 }
 
-/* Headings default to DM Serif (keeps semantics even without utility classes) */
+/* Headings default to DM Serif (semantics even without utilities) */
 h1,
 h2,
 h3 {
@@ -93,23 +95,28 @@ h3 {
    Semantic Typography Utilities
 ------------------------------ */
 @layer utilities {
-  /* Headings: DM Serif + sizes */
+  /* Headings */
   .display {
     @apply font-serif text-display leading-display tracking-tight;
+    color: var(--color-brand); /* display = brand text */
   }
   .h1 {
-    @apply font-serif text-h1      leading-h1      tracking-tight;
+    @apply font-serif text-h1 leading-h1 tracking-tight;
+    color: #ffffff; /* h1 is always white */
   }
   .h2 {
-    @apply font-serif text-h2      leading-h2      tracking-tight;
+    @apply font-serif text-h2 leading-h2 tracking-tight;
+    color: var(--color-brand); /* matte black */
   }
   .h3 {
-    @apply font-serif text-h3      leading-h3      tracking-tight;
+    @apply font-serif text-h3 leading-h3 tracking-tight;
+    color: var(--color-brand); /* matte black */
   }
 
-  /* Body: Inter + comfy leading */
+  /* Body text */
   .body {
     @apply font-sans text-body leading-body;
+    color: var(--color-brand); /* matte black */
   }
 
   /* Muted helper */
