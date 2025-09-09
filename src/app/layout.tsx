@@ -32,3 +32,34 @@ export default function RootLayout({
     </html>
   )
 }
+
+// // src/app/layout.tsx
+// import type { Metadata } from 'next'
+// import { Inter, DM_Serif_Display } from 'next/font/google'
+// import './globals.css'
+
+// const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+// const dmSerif = DM_Serif_Display({
+//   subsets: ['latin'],
+//   variable: '--font-serif',
+// })
+
+// export const metadata: Metadata = {
+//   title: 'Holidaze',
+//   description: 'Modern accommodation booking site',
+// }
+
+// export default function RootLayout({
+//   children,
+// }: {
+//   children: React.ReactNode
+// }) {
+//   return (
+//     <html lang="en">
+//       {/* expose font variables to CSS */}
+//       <body className={`${inter.variable} ${dmSerif.variable} antialiased`}>
+//         {children}
+//       </body>
+//     </html>
+//   )
+// }
