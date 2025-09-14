@@ -19,7 +19,9 @@ function requireAuth() {
  */
 export async function getMyProfile(): Promise<TProfile> {
   const { token, username } = requireAuth()
-  return api<TProfile>(`/profiles/${encodeURIComponent(username)}`, { token })
+  return api<TProfile>(`/holidaze/profiles/${encodeURIComponent(username)}`, {
+    token,
+  })
 }
 
 /**
@@ -31,7 +33,7 @@ export async function updateMyAvatar(
   alt?: string
 ): Promise<TProfile> {
   const { token, username } = requireAuth()
-  return api<TProfile>(`/profiles/${encodeURIComponent(username)}`, {
+  return api<TProfile>(`/holidaze/profiles/${encodeURIComponent(username)}`, {
     method: 'PUT',
     token,
     body: { avatar: { url, alt } },
@@ -45,7 +47,7 @@ export async function updateMyAvatar(
 export async function getMyBookings(): Promise<TBooking[]> {
   const { token, username } = requireAuth()
   return api<TBooking[]>(
-    `/profiles/${encodeURIComponent(username)}/bookings?_venue=true`,
+    `/holidaze/profiles/${encodeURIComponent(username)}/bookings?_venue=true`,
     { token }
   )
 }
@@ -55,7 +57,10 @@ export async function getMyBookings(): Promise<TBooking[]> {
  */
 export async function getMyVenues(): Promise<TVenue[]> {
   const { token, username } = requireAuth()
-  return api<TVenue[]>(`/profiles/${encodeURIComponent(username)}/venues`, {
-    token,
-  })
+  return api<TVenue[]>(
+    `/holidaze/profiles/${encodeURIComponent(username)}/venues`,
+    {
+      token,
+    }
+  )
 }

@@ -3,22 +3,14 @@
 
 import { useEffect, useState } from 'react'
 import { api } from '@/lib/api'
+import { useSession } from '@/store/session'
 import type { TVenue } from '@/types/api'
 import VenueCard from '@/components/venue/VenueCard'
 
-/**
- * ManagerVenues
- * Renders venue cards for a manager.
- *
- * Usage:
- *  - <ManagerVenues venues={array} />
- *  - <ManagerVenues ownerName="Ina" />
- */
 type Props =
   | { venues: TVenue[]; ownerName?: never }
   | { ownerName: string; venues?: never }
 
-// Type guards for clean narrowing
 function hasVenuesProp(p: Props): p is { venues: TVenue[] } {
   return 'venues' in p
 }
@@ -27,7 +19,8 @@ function hasOwnerNameProp(p: Props): p is { ownerName: string } {
 }
 
 export default function ManagerVenues(props: Props) {
-  // if venues were provided, no loading; otherwise we’ll fetch by owner
+  const { token } = useSession()
+
   const [loading, setLoading] = useState(!hasVenuesProp(props))
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<TVenue[]>(
@@ -42,24 +35,23 @@ export default function ManagerVenues(props: Props) {
         setLoading(true)
         setError(null)
         const venues = await api<TVenue[]>(
-          `/profiles/${encodeURIComponent(ownerName)}/venues?_bookings=true`
+          `/holidaze/profiles/${encodeURIComponent(ownerName)}/venues?_bookings=true`,
+          { token }
         )
         if (!mounted) return
         setData(Array.isArray(venues) ? venues : [])
-      } catch (err: unknown) {
+      } catch (err) {
         if (!mounted) return
-        const msg = err instanceof Error ? err.message : 'Failed to load venues'
-        setError(msg)
+        setError(err instanceof Error ? err.message : 'Failed to load venues')
       } finally {
         mounted && setLoading(false)
       }
     }
 
     if (hasOwnerNameProp(props)) {
-      // props.ownerName is guaranteed string here
+      if (!token) return
       loadByOwner(props.ownerName)
     } else if (hasVenuesProp(props)) {
-      // If the caller swaps from fetch-mode to provided-venues, sync them
       setData(props.venues)
       setLoading(false)
     }
@@ -67,8 +59,11 @@ export default function ManagerVenues(props: Props) {
     return () => {
       mounted = false
     }
-    // It’s safe to depend on the whole props object because the guards re-narrow
-  }, [props])
+  }, [props, token])
+
+  if (hasOwnerNameProp(props) && !token) {
+    return <p className="body muted">Please log in to view your venues.</p>
+  }
 
   if (loading) return <p className="body muted">Loading your venues…</p>
   if (error) return <p className="body text-red-600">{error}</p>

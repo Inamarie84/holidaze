@@ -4,7 +4,7 @@
 /**
  * Profile page (protected).
  * - Uses AuthGate to redirect if not logged in
- * - Fetches current profile (token from Zustand)
+ * - Fetches current profile (token from Zustand) via getMyProfile()
  * - Fetches bookings (with _venue=true) and manager venues (with _bookings=true)
  * - Renders header, manager-only venues, and user bookings
  */
@@ -20,7 +20,7 @@ import MyBookings from '@/components/profile/MyBookings'
 import { useSession } from '@/store/session'
 
 export default function ProfilePage() {
-  const { user, token } = useSession()
+  const { token } = useSession()
   const [profile, setProfile] = useState<TProfile | null>(null)
   const [bookings, setBookings] = useState<TBooking[]>([])
   const [venues, setVenues] = useState<TVenue[]>([])
@@ -35,28 +35,27 @@ export default function ProfilePage() {
         setLoading(true)
         setError(null)
 
-        // 1) Profile
+        // 1) Profile (getMyProfile already sends token + API key)
         const p = (await getMyProfile()) as TProfile
         if (!mounted) return
         setProfile(p)
 
-        // Guard: we need a name to fetch /profiles/:name resources
         const name = p.name
         if (!name) return
 
-        // 2) Bookings for this user (include venue objects for nicer cards)
+        // 2) Bookings for this user (include venue objects)
         const b = await api<TBooking[]>(
-          `/profiles/${encodeURIComponent(name)}/bookings?_venue=true`,
-          { token: token ?? undefined }
+          `/holidaze/profiles/${encodeURIComponent(name)}/bookings?_venue=true`,
+          { token: token ?? undefined, useApiKey: true }
         )
         if (!mounted) return
         setBookings(Array.isArray(b) ? b : [])
 
-        // 3) If manager, load their venues (include bookings for badges/availability)
+        // 3) If manager, load their venues (include bookings)
         if (p.venueManager) {
           const v = await api<TVenue[]>(
-            `/profiles/${encodeURIComponent(name)}/venues?_bookings=true`,
-            { token: token ?? undefined }
+            `/holidaze/profiles/${encodeURIComponent(name)}/venues?_bookings=true`,
+            { token: token ?? undefined, useApiKey: true }
           )
           if (!mounted) return
           setVenues(Array.isArray(v) ? v : [])
@@ -77,7 +76,6 @@ export default function ProfilePage() {
     if (token) {
       load()
     } else {
-      // If AuthGate hasn’t redirected yet, show a light state
       setLoading(false)
     }
 
@@ -99,20 +97,17 @@ export default function ProfilePage() {
             {profile.venueManager && (
               <section className="mt-10">
                 <h2 className="h2 mb-4">My Venues</h2>
-                {/* Pass the venues array (not ownerName) */}
                 <ManagerVenues venues={venues} />
               </section>
             )}
 
             <section className="mt-10">
               <h2 className="h2 mb-4">My Bookings</h2>
-              {/* Pass bookings array as expected by MyBookings */}
               <MyBookings bookings={bookings} />
             </section>
           </>
         )}
 
-        {/* Optional: empty state if somehow no profile and no loading/error */}
         {!loading && !error && !profile && (
           <p className="body muted">
             You’re not logged in. (If this persists, try refreshing.)

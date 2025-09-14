@@ -15,7 +15,6 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
   const headers = new Headers()
   headers.set('Accept', 'application/json')
   headers.set('Content-Type', 'application/json')
-
   if (opts.token) headers.set('Authorization', `Bearer ${opts.token}`)
   if (opts.useApiKey && process.env.NEXT_PUBLIC_API_KEY) {
     headers.set('X-Noroff-API-Key', process.env.NEXT_PUBLIC_API_KEY)
@@ -31,9 +30,19 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
   })
 
   const text = await res.text()
-  const json = text ? JSON.parse(text) : null
+  let json: any = null
+  try {
+    json = text ? JSON.parse(text) : null
+  } catch {}
 
   if (!res.ok) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[api error]', {
+        url,
+        status: res.status,
+        body: json ?? text,
+      })
+    }
     const msg =
       (json && (json.message || json.errors?.[0])) ||
       `${res.status} ${res.statusText}`
