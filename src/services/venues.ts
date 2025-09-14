@@ -40,7 +40,7 @@ function toQuery(params?: TVenueInclude): string {
  */
 export async function getVenues(params?: TVenueInclude): Promise<TVenue[]> {
   const query = toQuery(params)
-  return api<TVenue[]>(`/venues${query}`)
+  return api<TVenue[]>(`/holidaze/venues${query}`)
 }
 
 /**
@@ -58,7 +58,7 @@ export async function getVenueById(
   params?: TVenueInclude
 ): Promise<TVenue> {
   const query = toQuery(params)
-  return api<TVenue>(`/venues/${id}${query}`)
+  return api<TVenue>(`/holidaze/venues/${id}${query}`)
 }
 
 /**
@@ -106,7 +106,9 @@ export async function searchVenues({
   guests,
 }: SearchInput): Promise<TVenueWithBookings[]> {
   // Include bookings so we can filter by availability on the client
-  const venues = await api<TVenueWithBookings[]>('/venues?_bookings=true')
+  const venues = await api<TVenueWithBookings[]>(
+    '/holidaze/venues?_bookings=true'
+  )
 
   const norm = (s: unknown) =>
     String(s ?? '')

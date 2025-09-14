@@ -87,7 +87,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Register modal (ONLY register links) */}
+      {/* Register modal */}
       <Modal
         open={openRegister}
         onClose={() => setOpenRegister(false)}
@@ -98,6 +98,7 @@ export default function Navbar() {
           <Link
             prefetch={false}
             href="/register?role=customer"
+            onClick={() => setOpenRegister(false)} // <-- close
             className="inline-flex w-full items-center justify-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90"
           >
             I’m a Customer
@@ -105,17 +106,18 @@ export default function Navbar() {
           <Link
             prefetch={false}
             href="/register?role=manager"
+            onClick={() => setOpenRegister(false)} // <-- close
             className="inline-flex w-full items-center justify-center rounded-lg border border-black/10 px-4 py-2 hover:bg-sand text-brand"
           >
             I’m a Venue Manager
           </Link>
         </div>
         <p className="muted mt-3">
-          Use your <b>@stud.noroff.no</b> email.
+          Note: Use your <b>@stud.noroff.no</b> email.
         </p>
       </Modal>
 
-      {/* Login modal (ONLY login links) */}
+      {/* Login modal */}
       <Modal
         open={openLogin}
         onClose={() => setOpenLogin(false)}
@@ -126,6 +128,7 @@ export default function Navbar() {
           <Link
             prefetch={false}
             href="/login?role=customer"
+            onClick={() => setOpenLogin(false)} // <-- close
             className="inline-flex w-full items-center justify-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90"
           >
             Customer login
@@ -133,6 +136,7 @@ export default function Navbar() {
           <Link
             prefetch={false}
             href="/login?role=manager"
+            onClick={() => setOpenLogin(false)} // <-- close
             className="inline-flex w-full items-center justify-center rounded-lg border border-black/10 px-4 py-2 hover:bg-sand text-brand"
           >
             Venue Manager login

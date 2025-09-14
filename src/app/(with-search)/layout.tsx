@@ -13,9 +13,9 @@ export default function WithSearchLayout({
       <section className="bg-[var(--color-foreground)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center text-white">
           <h1 className="h1 text-white">Find your next stay</h1>
-          <p className="body mt-3 opacity-90">
+          <h2 className="body mt-3 opacity-90">
             Hand-picked venues, easy booking.
-          </p>
+          </h2>
         </div>
       </section>
 
