@@ -1,54 +1,50 @@
-// src/services/auth.ts
 import { api } from '@/lib/api'
-import type { TAuthResponse, TRegisterInput, TLoginInput } from '@/types/api'
 import { useSession } from '@/store/session'
 
-/**
- * Register a new user.
- * The API supports "venueManager" on register. We enforce @stud.noroff.no.
- */
-export async function registerUser(
-  input: TRegisterInput & { venueManager?: boolean }
-) {
-  // Safety: block non-Noroff student emails
-  if (!/@stud\.noroff\.no$/i.test(input.email)) {
-    throw new Error('Please use your @stud.noroff.no email to register.')
+type RegisterInput = {
+  name: string
+  email: string
+  password: string
+  venueManager?: boolean
+}
+
+type LoginInput = {
+  email: string
+  password: string
+}
+
+type AuthResponse = {
+  accessToken: string
+  name: string
+  email: string
+  venueManager?: boolean
+}
+
+/** Register a new user (Noroff API). */
+export async function registerUser(input: RegisterInput) {
+  // Noroff typically requires @stud.noroff.no. You can hard-block or warn.
+  if (input.venueManager && !input.email.endsWith('@stud.noroff.no')) {
+    throw new Error('Venue Manager requires a @stud.noroff.no email.')
   }
-
-  // API expects: { name, email, password, venueManager? }
-  return api<
-    TAuthResponse | { name: string; email: string; venueManager?: boolean }
-  >('/auth/register', {
-    method: 'POST',
-    body: {
-      name: input.name.trim(),
-      email: input.email.trim(),
-      password: input.password, // keep as-is
-      venueManager: Boolean(input.venueManager),
-    },
-  })
+  return api<AuthResponse>('/auth/register', { method: 'POST', body: input })
 }
 
-/**
- * Login user and receive accessToken + basic user info.
- */
-export async function loginUser(input: TLoginInput) {
-  return api<TAuthResponse>('/auth/login', {
+/** Login and store token+user in Zustand. */
+export async function loginUser(input: LoginInput) {
+  const res = await api<AuthResponse>('/auth/login', {
     method: 'POST',
-    body: {
-      email: input.email.trim(),
-      password: input.password,
-    },
+    body: input,
   })
+  useSession.getState().login({
+    token: res.accessToken,
+    user: { name: res.name, email: res.email, venueManager: res.venueManager },
+  })
+  return res
 }
 
-/**
- * Fetch the current logged-in user's profile.
- * Requires a valid access token in the session store.
- */
+/** Example: get the current profile using the token from Zustand (client-only). */
 export async function getMyProfile() {
   const token = useSession.getState().token
   if (!token) throw new Error('Not authenticated')
-
   return api('/profiles/me', { token })
 }

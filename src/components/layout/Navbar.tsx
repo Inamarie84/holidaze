@@ -22,6 +22,7 @@ export default function Navbar() {
             alt="Holidaze"
             width={120}
             height={32}
+            priority
           />
           <span className="sr-only">Holidaze</span>
         </Link>
@@ -50,13 +51,13 @@ export default function Navbar() {
             <>
               <button
                 onClick={() => setOpenRegister(true)}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10"
+                className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10 cursor-pointer"
               >
                 Register
               </button>
               <button
                 onClick={() => setOpenLogin(true)}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10"
+                className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10 cursor-pointer"
               >
                 <LogIn size={18} />
                 <span className="hidden sm:inline">Log in</span>
@@ -86,7 +87,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Register modal */}
+      {/* Register modal (ONLY register links) */}
       <Modal
         open={openRegister}
         onClose={() => setOpenRegister(false)}
@@ -95,24 +96,26 @@ export default function Navbar() {
         <p className="body mb-4">Choose the type of account to create:</p>
         <div className="grid gap-2">
           <Link
-            href="/(auth)/register?role=customer"
+            prefetch={false}
+            href="/register?role=customer"
             className="inline-flex w-full items-center justify-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90"
           >
             I’m a Customer
           </Link>
           <Link
-            href="/(auth)/register?role=manager"
-            className="inline-flex w-full items-center justify-center rounded-lg border border-black/10 px-4 py-2 hover:bg-sand"
+            prefetch={false}
+            href="/register?role=manager"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-black/10 px-4 py-2 hover:bg-sand text-brand"
           >
             I’m a Venue Manager
           </Link>
         </div>
         <p className="muted mt-3">
-          Note: Use your <b>@stud.noroff.no</b> email.
+          Use your <b>@stud.noroff.no</b> email.
         </p>
       </Modal>
 
-      {/* Login modal */}
+      {/* Login modal (ONLY login links) */}
       <Modal
         open={openLogin}
         onClose={() => setOpenLogin(false)}
@@ -121,14 +124,16 @@ export default function Navbar() {
         <p className="body mb-4">Log in to your account:</p>
         <div className="grid gap-2">
           <Link
-            href="/(auth)/login?role=customer"
+            prefetch={false}
+            href="/login?role=customer"
             className="inline-flex w-full items-center justify-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90"
           >
             Customer login
           </Link>
           <Link
-            href="/(auth)/login?role=manager"
-            className="inline-flex w-full items-center justify-center rounded-lg border border-black/10 px-4 py-2 hover:bg-sand"
+            prefetch={false}
+            href="/login?role=manager"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-black/10 px-4 py-2 hover:bg-sand text-brand"
           >
             Venue Manager login
           </Link>

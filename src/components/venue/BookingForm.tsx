@@ -1,14 +1,22 @@
+// src/components/booking/BookingForm.tsx
 'use client'
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { createBooking } from '@/services/bookings'
-import type { TBooking, TVenue } from '@/types/api'
+import type { TBooking } from '@/types/api'
 import { useSession } from '@/store/session'
 
 type Props = {
-  venue: Pick<TVenue, 'id' | 'maxGuests' | 'bookings' | 'price' | 'name'>
+  venue: {
+    id: string
+    name: string
+    price: number
+    maxGuests: number
+    /** Pass this from the venue detail page; can be empty if API didn’t include _bookings */
+    bookings?: TBooking[]
+  }
 }
 
 function toDay(dateStr: string | Date) {
@@ -17,11 +25,11 @@ function toDay(dateStr: string | Date) {
 }
 
 function rangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) {
-  // Treat ranges as [start, end) — end is exclusive
+  // [start, end) — end is exclusive
   return !(aEnd <= bStart || aStart >= bEnd)
 }
 
-/** Returns true if [from, to) is available (no overlap with any existing booking). */
+/** True if [from, to) has no overlap with existing bookings. */
 function isRangeAvailable(
   bookings: TBooking[] | undefined,
   from: Date,
@@ -75,8 +83,10 @@ export default function BookingForm({ venue }: Props) {
 
     if (!token) {
       toast.error('Please log in to book')
-      // Optional: navigate to login route with redirect back
-      // router.push('/(auth)/login?redirect=' + encodeURIComponent(window.location.pathname))
+      // ✅ correct path (no route-group in URL) + redirect back
+      const back =
+        typeof window !== 'undefined' ? window.location.pathname : '/'
+      router.push(`/login?redirect=${encodeURIComponent(back)}`)
       return
     }
 
@@ -101,7 +111,6 @@ export default function BookingForm({ venue }: Props) {
         token
       )
       toast.success('Booking confirmed 🎉')
-      // Reset form and refresh data (if you later render user bookings, etc.)
       setDateFrom('')
       setDateTo('')
       setGuests(1)
@@ -114,7 +123,6 @@ export default function BookingForm({ venue }: Props) {
     }
   }
 
-  // Simple price preview (no taxes/fees)
   const nights = (() => {
     if (!dateFrom || !dateTo) return 0
     const from = new Date(dateFrom)
@@ -130,8 +138,6 @@ export default function BookingForm({ venue }: Props) {
       className="mt-6 grid gap-4 rounded-xl border border-black/10 p-4 md:grid-cols-5"
       aria-label={`Book ${venue.name}`}
     >
-      {/* Destination is fixed on a venue detail page; on list pages, this would be part of SearchBar */}
-
       <div className="grid gap-1 md:col-span-1">
         <label className="text-sm font-medium" htmlFor="check-in">
           Check-in
