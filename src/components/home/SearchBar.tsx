@@ -66,7 +66,7 @@ export default function SearchBar() {
   }
 
   return (
-    <section className="w-full border-b border-black/10 bg-white">
+    <section className="w-full border-b border-black/10 bg-sand">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
         <form
           onSubmit={onSubmit}
@@ -76,7 +76,7 @@ export default function SearchBar() {
           {/* Destination */}
           <div className="sm:col-span-2 lg:col-span-1.5">
             <label htmlFor="destination" className="body block mb-1">
-              Where / Destination
+              Destination
             </label>
             <input
               id="destination"

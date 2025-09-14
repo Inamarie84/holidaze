@@ -10,8 +10,8 @@ export default function WithSearchLayout({
   return (
     <>
       {/* Hero */}
-      <section className="bg-[var(--color-foreground)]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center text-white">
+      <section className="bg-terracotta pt-16">
+        <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6 py-8 text-center text-white">
           <h1 className="h1 text-white">Find your next stay</h1>
           <p className="mt-3 text-base text-white/80">
             Hand-picked venues, easy booking.

@@ -8,6 +8,7 @@ type ModalProps = {
   onClose: () => void
 }
 
+/** Registration picker modal */
 export function RegisterModal({ open, onClose }: ModalProps) {
   return (
     <Modal open={open} onClose={onClose} title="Create account">
@@ -37,6 +38,7 @@ export function RegisterModal({ open, onClose }: ModalProps) {
   )
 }
 
+/** Login picker modal */
 export function LoginModal({ open, onClose }: ModalProps) {
   return (
     <Modal open={open} onClose={onClose} title="Log in">

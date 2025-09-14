@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from '@/store/session'
 import { LogIn, LogOut, User2, PlusCircle } from 'lucide-react'
 import { RegisterModal, LoginModal } from './AuthModals'
@@ -12,8 +12,25 @@ export default function Navbar() {
   const [openRegister, setOpenRegister] = useState(false)
   const [openLogin, setOpenLogin] = useState(false)
 
+  // Add a soft shadow when the page is scrolled
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="w-full border-b border-black/10 bg-[var(--color-foreground)] text-white">
+    <header
+      className={[
+        'fixed top-0 left-0 right-0 z-50', // ✅ fixed instead of sticky
+        'w-full border-b border-black/10 text-white',
+        'bg-[var(--color-foreground)] supports-[backdrop-filter]:bg-[var(--color-foreground)]/90 backdrop-blur',
+        scrolled ? 'shadow-md shadow-black/10' : '',
+        'transition-shadow',
+      ].join(' ')}
+    >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
           <Image
@@ -26,11 +43,12 @@ export default function Navbar() {
           <span className="sr-only">Holidaze</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
+        {/* If you want the Venues link back, uncomment */}
+        {/* <div className="hidden md:flex items-center gap-6">
           <Link href="/venues" className="body hover:underline">
             Venues
           </Link>
-        </div>
+        </div> */}
 
         <div className="flex items-center gap-2">
           {user?.venueManager && (

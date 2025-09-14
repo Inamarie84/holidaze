@@ -1,28 +1,61 @@
 // src/services/profiles.ts
 import { api } from '@/lib/api'
+import { useSession } from '@/store/session'
+import type { TProfile, TBooking, TVenue } from '@/types/api'
 
-export const getProfile = (name: string, token: string) =>
-  api(`/profiles/${name}`, { token, useApiKey: true })
+/**
+ * Resolve current token & username from the client store.
+ * Throws if unauthenticated.
+ */
+function requireAuth() {
+  const { token, user } = useSession.getState()
+  if (!token || !user?.name) throw new Error('Not authenticated')
+  return { token, username: user.name }
+}
 
-export const updateProfile = (
-  name: string,
-  data: {
-    bio?: string
-    avatar?: { url: string; alt?: string }
-    banner?: { url: string; alt?: string }
-    venueManager?: boolean
-  },
-  token: string
-) =>
-  api(`/profiles/${name}`, {
+/**
+ * Get the current user's profile.
+ * Uses /profiles/:name
+ */
+export async function getMyProfile(): Promise<TProfile> {
+  const { token, username } = requireAuth()
+  return api<TProfile>(`/profiles/${encodeURIComponent(username)}`, { token })
+}
+
+/**
+ * Update avatar for current user.
+ * API shape: { avatar: { url, alt? } }
+ */
+export async function updateMyAvatar(
+  url: string,
+  alt?: string
+): Promise<TProfile> {
+  const { token, username } = requireAuth()
+  return api<TProfile>(`/profiles/${encodeURIComponent(username)}`, {
     method: 'PUT',
-    body: data,
     token,
-    useApiKey: true,
+    body: { avatar: { url, alt } },
   })
+}
 
-export const getProfileBookings = (name: string, token: string) =>
-  api(`/profiles/${name}/bookings`, { token, useApiKey: true })
+/**
+ * Get upcoming bookings for current user.
+ * You can add includes like ?_venue=true later.
+ */
+export async function getMyBookings(): Promise<TBooking[]> {
+  const { token, username } = requireAuth()
+  return api<TBooking[]>(
+    `/profiles/${encodeURIComponent(username)}/bookings?_venue=true`,
+    { token }
+  )
+}
 
-export const getProfileVenues = (name: string, token: string) =>
-  api(`/profiles/${name}/venues`, { token, useApiKey: true })
+/**
+ * Get venues owned by current user (for managers).
+ */
+export async function getMyVenues(): Promise<TVenue[]> {
+  const { token, username } = requireAuth()
+  return api<TVenue[]>(`/profiles/${encodeURIComponent(username)}/venues`, {
+    token,
+  })
+}
