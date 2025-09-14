@@ -25,6 +25,13 @@
   --font-serif: var(--font-serif); /* DM Serif Display */
 }
 
+@layer utilities {
+  .body--inverse {
+    @apply font-sans text-body leading-body;
+    color: #ffffff;
+  }
+}
+
 /* ------------------------------
    Body Defaults
 ------------------------------ */

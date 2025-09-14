@@ -1,55 +1,50 @@
 // src/lib/api.ts
-const BASE = (process.env.NEXT_PUBLIC_BASE_URL ?? '').replace(/\/+$/, '')
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? ''
+const RAW_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
+const BASE = RAW_BASE.replace(/\/+$/, '') // trim trailing slashes
 
 type Opts = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: unknown
-  token?: string | null // JWT from /auth/login
-  useApiKey?: boolean // set true for profiles endpoints
-  cache?: RequestCache
+  token?: string | null
+  useApiKey?: boolean // opt-in for endpoints that require X-Noroff-API-Key
 }
 
+/**
+ * Call the Holidaze API with JSON conventions.
+ */
 export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
-  if (!BASE) throw new Error('Missing NEXT_PUBLIC_BASE_URL')
+  if (!BASE) throw new Error('Missing NEXT_PUBLIC_API_URL')
 
   const headers = new Headers()
   headers.set('Accept', 'application/json')
   headers.set('Content-Type', 'application/json')
 
-  if (opts.token) headers.set('Authorization', `Bearer ${opts.token}`)
-  // Only attach the Noroff key when requested (profiles)
-  if (opts.useApiKey && API_KEY) headers.set('X-Noroff-API-Key', API_KEY)
+  if (opts.token) {
+    headers.set('Authorization', `Bearer ${opts.token}`)
+  }
+  if (opts.useApiKey && process.env.NEXT_PUBLIC_API_KEY) {
+    headers.set('X-Noroff-API-Key', process.env.NEXT_PUBLIC_API_KEY)
+  }
 
   const url = `${BASE}${path.startsWith('/') ? path : `/${path}`}`
+
   const res = await fetch(url, {
     method: opts.method ?? 'GET',
     headers,
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
-    cache: opts.cache ?? 'no-store',
+    cache: 'no-store',
   })
 
-  // Try to parse JSON, but don’t crash on empty body
   const text = await res.text()
-  const data = text ? safeJson(text) : null
+  const json = text ? JSON.parse(text) : null
 
   if (!res.ok) {
     const msg =
-      (data && (data.message || (data.errors && data.errors[0]))) ||
+      (json && (json.message || json.errors?.[0])) ||
       `${res.status} ${res.statusText}`
-    throw new Error(String(msg))
+    throw new Error(msg)
   }
 
-  // Noroff v2 returns { data, meta }
-  return data && typeof data === 'object' && 'data' in (data as any)
-    ? ((data as any).data as T)
-    : (data as T)
-}
-
-function safeJson(text: string) {
-  try {
-    return JSON.parse(text)
-  } catch {
-    return text
-  }
+  // Unwrap { data } if present
+  return json && json.data ? (json.data as T) : (json as T)
 }

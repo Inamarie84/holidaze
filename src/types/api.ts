@@ -26,10 +26,10 @@ export type TProfile = {
 
 /** Amenity flags for a venue. */
 export type TVenueMeta = {
-  wifi: boolean
-  parking: boolean
-  breakfast: boolean
-  pets: boolean
+  wifi?: boolean
+  parking?: boolean
+  breakfast?: boolean
+  pets?: boolean
 }
 
 /** Geolocation & address info for a venue. */
@@ -48,17 +48,46 @@ export type TVenue = {
   id: string
   name: string
   description?: string
-  media: TMedia[]
+  /** May be empty or omitted on some records. */
+  media?: TMedia[]
   price: number
   maxGuests: number
-  rating: number
-  created: string
-  updated: string
-  meta: TVenueMeta
-  location: TVenueLocation
-  /** Present when included via query (_owner or similar). */
+  /** Optional when not present in payloads. */
+  rating?: number
+  created?: string
+  updated?: string
+  meta?: TVenueMeta
+  location?: TVenueLocation
+  /** Present when included via query (_owner=true). */
   owner?: Pick<TProfile, 'name' | 'email' | 'avatar' | 'banner'>
 }
+
+/** Booking (light shape when embedded under a venue). */
+export type TBookingLite = {
+  id: string
+  dateFrom: string
+  dateTo: string
+  guests: number
+  created?: string
+  updated?: string
+}
+
+export type TVenueWithBookings = TVenue & {
+  bookings: Array<{
+    id: string
+    dateFrom: string
+    dateTo: string
+    guests: number
+    created: string
+    updated: string
+    // Add nested venue/customer if you ever include them
+  }>
+}
+
+// /** Venue with bookings included when `_bookings=true`. */
+// export type TVenueWithBookings = TVenue & {
+//   bookings?: TBookingLite[]
+// }
 
 /** A single booking. Optional relations appear when requested via query flags. */
 export type TBooking = {
@@ -66,8 +95,8 @@ export type TBooking = {
   dateFrom: string
   dateTo: string
   guests: number
-  created: string
-  updated: string
+  created?: string
+  updated?: string
   /** Present if `_venue=true` in query. */
   venue?: TVenue
   /** Present if `_customer=true` in query. */
@@ -144,4 +173,24 @@ export type TBookingInclude = {
   page?: number
   limit?: number
   sort?: string
+}
+
+/** Optional query/include flags for venues lists. */
+export type TVenueInclude = {
+  /** Include nested owner profile. */
+  _owner?: boolean
+  /** Include bookings for availability checks. */
+  _bookings?: boolean
+  /** Optional pagination & sorting if you implement them. */
+  page?: number
+  limit?: number
+  sort?: string
+}
+
+/** Search params we read from /venues route. */
+export type TVenueSearchParams = {
+  q?: string
+  dateFrom?: string
+  dateTo?: string
+  guests?: string
 }
