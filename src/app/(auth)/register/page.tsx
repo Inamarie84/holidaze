@@ -23,9 +23,21 @@ export default function RegisterPage() {
       const venueManager = role === 'manager'
       await registerUser({ name, email, password, venueManager })
       toast.success('Account created! You can now log in.')
-      router.push('/login')
-    } catch (err: any) {
-      toast.error(err?.message ?? 'Registration failed')
+      router.push(`/login?role=${role}`)
+    } catch (err) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Registration failed. Please try again.'
+      // common Noroff cases: existing email, invalid domain, weak password
+      if (/exist/i.test(msg)) {
+        toast.error('That email is already registered.')
+      } else if (/stud\.noroff\.no/i.test('') && /noroff/i.test(msg)) {
+        // just a guard to keep the eslint happy; we key off `msg`:
+        toast.error(msg)
+      } else {
+        toast.error(msg)
+      }
     } finally {
       setLoading(false)
     }
@@ -110,6 +122,7 @@ export default function RegisterPage() {
 
         <button
           disabled={loading}
+          aria-busy={loading}
           className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60"
         >
           {loading ? 'Creating…' : 'Create account'}

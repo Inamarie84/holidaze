@@ -1,28 +1,27 @@
 // src/app/(with-search)/venues/page.tsx
-import { getVenues } from '@/services/venues'
-import VenueCard from '@/components/venue/VenueCard'
+import VenueList, { VenueSearchParams } from '@/components/venue/VenueList'
 
-export const dynamic = 'force-dynamic' // always fetch fresh data
+export const dynamic = 'force-dynamic'
 
-export default async function VenuesPage() {
-  const venues = await getVenues({ _bookings: true, page: 1, limit: 12 })
+export default async function VenuesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const spRaw = await searchParams
+  const sp: VenueSearchParams = {
+    q: typeof spRaw.q === 'string' ? spRaw.q : undefined,
+    dateFrom: typeof spRaw.dateFrom === 'string' ? spRaw.dateFrom : undefined,
+    dateTo: typeof spRaw.dateTo === 'string' ? spRaw.dateTo : undefined,
+    guests: typeof spRaw.guests === 'string' ? spRaw.guests : undefined,
+    page: typeof spRaw.page === 'string' ? spRaw.page : '1',
+    limit: typeof spRaw.limit === 'string' ? spRaw.limit : '12',
+  }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <header className="mb-6">
-        <h1 className="h1">Venues</h1>
-        <p className="muted mt-1">Browse all available stays</p>
-      </header>
-
-      {venues.length === 0 ? (
-        <p className="body muted">No venues found.</p>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {venues.map((v) => (
-            <VenueCard key={v.id} venue={v} />
-          ))}
-        </div>
-      )}
+    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* @ts-expect-error Async Server Component */}
+      <VenueList sp={sp} title="All venues" />
     </main>
   )
 }
