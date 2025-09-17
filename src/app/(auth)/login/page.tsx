@@ -4,12 +4,13 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { loginUser } from '@/services/auth'
 import { useSession } from '@/store/session'
+import { errMsg } from '@/utils/errors'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const router = useRouter()
   const sp = useSearchParams()
-  const role = sp.get('role') // optional: tweak copy if needed
+  const role = sp.get('role')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,23 +22,11 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await loginUser({ email: email.trim(), password })
-
-      // get latest user from Zustand after loginUser updates the store
       const { user } = useSession.getState()
       toast.success(`Welcome, ${user?.name ?? 'there'}!`)
-
-      // per brief: both Customers and Venue Managers go to their profile
       router.push('/profile')
     } catch (err) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : 'Login failed. Please check your email and password.'
-      if (/invalid/i.test(msg)) {
-        toast.error('Invalid email or password.')
-      } else {
-        toast.error(msg)
-      }
+      toast.error(errMsg(err))
     } finally {
       setLoading(false)
     }
@@ -88,7 +77,7 @@ export default function LoginPage() {
           type="submit"
           disabled={loading}
           aria-busy={loading}
-          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
+          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60"
         >
           {loading ? 'Signing in…' : 'Log in'}
         </button>

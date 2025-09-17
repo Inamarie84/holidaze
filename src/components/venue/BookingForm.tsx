@@ -1,12 +1,13 @@
-// src/components/booking/BookingForm.tsx
 'use client'
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { createBooking } from '@/services/bookings'
-import type { TBooking } from '@/types/api'
 import { useSession } from '@/store/session'
+import type { TBooking } from '@/types/api'
+import { errMsg } from '@/utils/errors'
+import FormError from '@/components/ui/FormError'
 
 type Props = {
   venue: {
@@ -14,7 +15,6 @@ type Props = {
     name: string
     price: number
     maxGuests: number
-    /** Pass this from the venue detail page; can be empty if API didn’t include _bookings */
     bookings?: TBooking[]
   }
 }
@@ -25,11 +25,9 @@ function toDay(dateStr: string | Date) {
 }
 
 function rangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) {
-  // [start, end) — end is exclusive
   return !(aEnd <= bStart || aStart >= bEnd)
 }
 
-/** True if [from, to) has no overlap with existing bookings. */
 function isRangeAvailable(
   bookings: TBooking[] | undefined,
   from: Date,
@@ -47,10 +45,9 @@ export default function BookingForm({ venue }: Props) {
 
   const todayYMD = useMemo(() => {
     const t = new Date()
-    const y = t.getFullYear()
-    const m = String(t.getMonth() + 1).padStart(2, '0')
-    const d = String(t.getDate()).padStart(2, '0')
-    return `${y}-${m}-${d}`
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(
+      t.getDate()
+    ).padStart(2, '0')}`
   }, [])
 
   const [dateFrom, setDateFrom] = useState('')
@@ -80,44 +77,33 @@ export default function BookingForm({ venue }: Props) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-
     if (!token) {
       toast.error('Please log in to book')
-      // ✅ correct path (no route-group in URL) + redirect back
       const back =
         typeof window !== 'undefined' ? window.location.pathname : '/'
       router.push(`/login?redirect=${encodeURIComponent(back)}`)
       return
     }
-
     if (guestError || dateError) {
       toast.error(guestError ?? dateError ?? 'Please fix the errors')
-      return
-    }
-    if (!dateFrom || !dateTo) {
-      toast.error('Please pick check-in and check-out dates')
       return
     }
 
     try {
       setLoading(true)
-      await createBooking(
-        {
-          dateFrom: new Date(dateFrom).toISOString(),
-          dateTo: new Date(dateTo).toISOString(),
-          guests,
-          venueId: venue.id,
-        },
-        token
-      )
+      await createBooking({
+        dateFrom: new Date(dateFrom).toISOString(),
+        dateTo: new Date(dateTo).toISOString(),
+        guests,
+        venueId: venue.id,
+      })
       toast.success('Booking confirmed 🎉')
       setDateFrom('')
       setDateTo('')
       setGuests(1)
       router.refresh()
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to book'
-      toast.error(msg)
+    } catch (err) {
+      toast.error(errMsg(err)) // ✅ unified errors (401, 422, etc.)
     } finally {
       setLoading(false)
     }
@@ -139,18 +125,20 @@ export default function BookingForm({ venue }: Props) {
       aria-label={`Book ${venue.name}`}
     >
       <div className="grid gap-1 md:col-span-1">
-        <label className="text-sm font-medium" htmlFor="check-in">
-          Check-in
+        <label className="text-sm font-medium" htmlFor="guests">
+          Guests (max {venue.maxGuests})
         </label>
         <input
-          id="check-in"
-          type="date"
-          min={todayYMD}
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
+          id="guests"
+          type="number"
+          min={1}
+          max={venue.maxGuests}
+          value={guests}
+          onChange={(e) => setGuests(Number(e.target.value))}
           className="rounded-lg border border-black/15 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald"
           required
         />
+        <FormError message={guestError} />
       </div>
 
       <div className="grid gap-1 md:col-span-1">
@@ -210,8 +198,8 @@ export default function BookingForm({ venue }: Props) {
       </div>
 
       {dateError && (
-        <div className="md:col-span-5 -mt-2 text-sm text-red-600">
-          {dateError}
+        <div className="md:col-span-5">
+          <FormError message={dateError} className="-mt-2" />
         </div>
       )}
     </form>

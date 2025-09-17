@@ -9,17 +9,16 @@ export type SessionUser = {
   name: string
   email: string
   venueManager?: boolean
+  avatar?: { url: string; alt?: string }
 }
 
 type SessionState = {
   token: string | null
   user: SessionUser | null
-  /** Persist to localStorage and set in memory */
   login: (payload: { token: string; user: SessionUser }) => void
-  /** Clear localStorage and memory */
   logout: () => void
-  /** Restore from localStorage (call once on app mount) */
   hydrate: () => void
+  setUser: (user: SessionUser) => void // ✅ added for avatar updates
 }
 
 export const useSession = create<SessionState>((set) => ({
@@ -27,34 +26,31 @@ export const useSession = create<SessionState>((set) => ({
   user: null,
 
   login: ({ token, user }) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }))
-    } catch {
-      /* ignore quota errors */
-    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }))
     set({ token, user })
   },
 
   logout: () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY)
-    } catch {
-      /* ignore */
-    }
+    localStorage.removeItem(STORAGE_KEY)
     set({ token: null, user: null })
   },
 
   hydrate: () => {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
       const parsed = JSON.parse(raw) as { token: string; user: SessionUser }
       if (parsed?.token && parsed?.user) {
         set({ token: parsed.token, user: parsed.user })
       }
     } catch {
-      // bad JSON? just clear
       localStorage.removeItem(STORAGE_KEY)
     }
+  },
+
+  setUser: (user) => {
+    const token = useSession.getState().token
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }))
+    set({ user })
   },
 }))

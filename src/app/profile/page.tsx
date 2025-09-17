@@ -95,7 +95,7 @@ export default function ProfilePage() {
 
   return (
     <AuthGate>
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
+      <main className="pt-20 md:pt-24 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {loading && <p className="body muted">Loading your profile…</p>}
         {error && !loading && <p className="body text-red-600">{error}</p>}
 

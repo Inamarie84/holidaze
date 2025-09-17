@@ -131,11 +131,16 @@ export async function getProfile(
  * @example
  * const me = await getMyProfile({ _bookings: true })
  */
-export async function getMyProfile() {
-  const token = useSession.getState().token
-  if (!token) throw new Error('Not authenticated')
-  // NOTE: add useApiKey: true
-  return api('/holidaze/profiles/me', { token, useApiKey: true })
+
+export async function getMyProfile(): Promise<TProfile> {
+  const { token, user } = useSession.getState()
+  if (!token || !user?.name) throw new Error('Not authenticated')
+
+  const username = encodeURIComponent(user.name)
+  return api<TProfile>(`/holidaze/profiles/${username}`, {
+    token,
+    useApiKey: true,
+  })
 }
 
 /**

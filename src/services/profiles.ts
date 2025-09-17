@@ -3,31 +3,25 @@ import { api } from '@/lib/api'
 import { useSession } from '@/store/session'
 import type { TProfile, TBooking, TVenue } from '@/types/api'
 
-/**
- * Resolve current token & username from the client store.
- * Throws if unauthenticated.
- */
 function requireAuth() {
   const { token, user } = useSession.getState()
   if (!token || !user?.name) throw new Error('Not authenticated')
   return { token, username: user.name }
 }
 
-/**
- * Get the current user's profile.
- * Uses /profiles/:name
- */
+/** Get current user's profile */
 export async function getMyProfile(): Promise<TProfile> {
-  const { token, username } = requireAuth()
-  return api<TProfile>(`/holidaze/profiles/${encodeURIComponent(username)}`, {
+  const { token, user } = useSession.getState()
+  if (!token || !user?.name) throw new Error('Not authenticated')
+
+  const username = encodeURIComponent(user.name)
+  return api<TProfile>(`/holidaze/profiles/${username}`, {
     token,
+    useApiKey: true,
   })
 }
 
-/**
- * Update avatar for current user.
- * API shape: { avatar: { url, alt? } }
- */
+/** Pure: update avatar; returns updated profile */
 export async function updateMyAvatar(
   url: string,
   alt?: string
@@ -36,8 +30,29 @@ export async function updateMyAvatar(
   return api<TProfile>(`/holidaze/profiles/${encodeURIComponent(username)}`, {
     method: 'PUT',
     token,
+    useApiKey: true,
     body: { avatar: { url, alt } },
   })
+}
+
+/**
+ * Helper: update avatar AND sync Zustand/localStorage immediately.
+ * Use this if you don’t want to call setUser in your components.
+ */
+export async function updateMyAvatarAndSync(
+  url: string,
+  alt?: string
+): Promise<TProfile> {
+  const updated = await updateMyAvatar(url, alt)
+  const { setUser } = useSession.getState()
+  setUser({
+    // map TProfile -> SessionUser shape if needed
+    name: updated.name,
+    email: updated.email,
+    venueManager: updated.venueManager,
+    avatar: updated.avatar,
+  } as any)
+  return updated
 }
 
 /**

@@ -1,8 +1,9 @@
 // src/app/(with-search)/venues/[id]/page.tsx
 import { getVenueById } from '@/services/venues'
-import type { TVenueWithBookings, TVenue } from '@/types/api'
+import type { TVenue, TVenueWithBookings } from '@/types/api'
 import Image from 'next/image'
 import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
+import BookingForm from '@/components/venue/BookingForm' // client component
 
 type Params = { id: string }
 
@@ -13,7 +14,7 @@ export default async function VenueDetail({
 }) {
   const { id } = await params
 
-  // Include bookings so we can show calendar
+  // Ask for bookings so we can show calendar + validate dates in the form
   const venue = (await getVenueById(id, { _bookings: true })) as
     | TVenue
     | TVenueWithBookings
@@ -21,7 +22,6 @@ export default async function VenueDetail({
   const image = venue.media?.[0]?.url || '/images/placeholder.jpg'
   const alt = venue.media?.[0]?.alt || venue.name
 
-  // Type guard
   const hasBookings = (
     v: TVenue | TVenueWithBookings
   ): v is TVenueWithBookings =>
@@ -44,7 +44,7 @@ export default async function VenueDetail({
           />
         </div>
 
-        {/* Details + Calendar */}
+        {/* Details + Calendar + Booking */}
         <div>
           <h1 className="h1 mb-2">{venue.name}</h1>
           <p className="body text-grey mb-4">{venue.description}</p>
@@ -64,6 +64,16 @@ export default async function VenueDetail({
             <h2 className="h3 mb-2">Availability</h2>
             <AvailabilityCalendar bookings={bookings} />
           </div>
+
+          <BookingForm
+            venue={{
+              id,
+              name: venue.name,
+              price: venue.price,
+              maxGuests: venue.maxGuests,
+              bookings, // ok if empty
+            }}
+          />
         </div>
       </div>
     </main>

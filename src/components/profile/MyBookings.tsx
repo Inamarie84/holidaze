@@ -35,7 +35,7 @@ export default function MyBookings({ bookings }: Props) {
               </div>
               {v && (
                 <a
-                  href={`/venues/${v.id}`}
+                  href={`/${v.id}`}
                   className="text-sm underline hover:opacity-80 cursor-pointer"
                 >
                   View venue

@@ -15,7 +15,7 @@ export default function ProfileActions({ role }: Props) {
             Create Venue
           </a>
           <a
-            href="/venues"
+            href="/"
             className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5 cursor-pointer"
           >
             Browse Venues
@@ -23,7 +23,7 @@ export default function ProfileActions({ role }: Props) {
         </>
       ) : (
         <a
-          href="/venues"
+          href="/"
           className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 cursor-pointer"
         >
           Browse Venues

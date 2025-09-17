@@ -2,6 +2,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useSession } from '@/store/session'
 import type { TProfile } from '@/types/api'
 
 export default function ProfileHeader({
@@ -11,8 +12,15 @@ export default function ProfileHeader({
   profile: TProfile
   onEditAvatar?: () => void
 }) {
-  const avatar = profile.avatar?.url || '/images/placeholder.jpg'
-  const avatarAlt = profile.avatar?.alt || profile.name
+  const sessionUser = useSession((s) => s.user)
+
+  // ✅ Fallback to session name/email if API profile is missing them
+  const displayName = profile.name || sessionUser?.name || ''
+  const displayEmail = profile.email || sessionUser?.email || ''
+
+  const avatar =
+    profile.avatar?.url || sessionUser?.avatar?.url || '/images/placeholder.jpg'
+  const avatarAlt = profile.avatar?.alt || displayName || 'User avatar'
 
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -27,8 +35,9 @@ export default function ProfileHeader({
           />
         </div>
         <div>
-          <h1 className="h1">{profile.name}</h1>
-          <p className="muted">{profile.email}</p>
+          {/* ✅ force visible text color so it's not blending with the bg */}
+          <h1 className="h1 text-gray-900">{displayName}</h1>
+          <p className="muted text-gray-600">{displayEmail}</p>
         </div>
       </div>
 
@@ -46,7 +55,6 @@ export default function ProfileHeader({
             {profile._count.venues} venues
           </span>
         )}
-
         {onEditAvatar && (
           <button
             onClick={onEditAvatar}

@@ -44,7 +44,7 @@ export default function SearchBar() {
   useEffect(() => {
     const qs = buildQuery(debouncedDestination, from, to, guests)
     if (onVenuesPage && qs) {
-      router.replace(`/venues${qs}`)
+      router.replace(`/${qs}`)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedDestination])
@@ -53,7 +53,7 @@ export default function SearchBar() {
   useEffect(() => {
     const qs = buildQuery(destination, from, to, guests)
     if (onVenuesPage && qs) {
-      router.replace(`/venues${qs}`)
+      router.replace(`/${qs}`)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, to, guests])
@@ -62,7 +62,7 @@ export default function SearchBar() {
     e.preventDefault()
     const qs = buildQuery(destination, from, to, guests)
     // If no filters, go to plain /venues; if filters, add the query
-    router.push(qs ? `/venues${qs}` : '/venues')
+    router.push(qs ? `/${qs}` : '/')
   }
 
   return (

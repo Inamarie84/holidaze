@@ -1,89 +1,96 @@
+// src/services/bookings.ts
 import { api } from '@/lib/api'
-import type {
-  TBooking,
-  TBookingInclude,
-  TCreateBookingInput,
-  TUpdateBookingInput,
-  TListResponse,
-  TItemResponse,
-} from '@/types/api'
+import { useSession } from '@/store/session'
+import type { TBooking, TBookingInclude } from '@/types/api'
+
+/** Build a clean query string from optional include flags. */
+function toQuery(params?: TBookingInclude): string {
+  if (!params) return ''
+  const usp = new URLSearchParams()
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null || v === '') return
+    usp.set(k, String(v))
+  })
+  const qs = usp.toString()
+  return qs ? `?${qs}` : ''
+}
+
+/** Auth helpers */
+function requireAuth() {
+  const { token, user } = useSession.getState()
+  if (!token) throw new Error('Not authenticated')
+  return { token, user }
+}
+
+function requireCustomerAuth() {
+  const { token, user } = requireAuth()
+  if (user?.venueManager) {
+    throw new Error('Only customers can perform this action')
+  }
+  return { token, user }
+}
 
 /**
- * Fetch all bookings (requires authentication).
- *
- * @param {string} token - The access token for the current user.
- * @param {TBookingInclude} [params] - Optional query flags like `_venue`, `_customer`.
- * @returns {Promise<TBooking[]>} Resolves with an array of bookings.
- *
- * @example
- * const bookings = await getBookings(userToken, { _venue: true })
+ * Fetch bookings (auth required).
+ * Useful for e.g. managers viewing bookings on their venues if your endpoint permits.
+ * Add include flags with params (e.g. { _venue: true, _customer: true }).
  */
 export async function getBookings(
-  token: string,
   params?: TBookingInclude
 ): Promise<TBooking[]> {
-  const query = params
-    ? `?${new URLSearchParams(params as any).toString()}`
-    : ''
-  return api<TListResponse<TBooking>>(`/bookings${query}`, { token }).then(
-    (res) => res.data
-  )
-}
-
-/**
- * Create a new booking (requires authentication).
- *
- * @param {string} token - The access token for the current user.
- * @param {TCreateBookingInput} payload - The booking data to send.
- * @returns {Promise<TBooking>} Resolves with the created booking object.
- *
- * @example
- * await createBooking(userToken, {
- *   venueId: 'abc123',
- *   dateFrom: new Date().toISOString(),
- *   dateTo: new Date().toISOString(),
- *   guests: 2
- * })
- */
-export async function createBooking(
-  input: TCreateBookingInput,
-  token: string
-): Promise<TBooking> {
-  const res = await api<TItemResponse<TBooking>>('/bookings', {
-    method: 'POST',
-    body: input,
+  const { token } = requireAuth()
+  const query = toQuery(params)
+  // Holidaze base path, consistent with your other services
+  return api<TBooking[]>(`/holidaze/bookings${query}`, {
     token,
+    useApiKey: true,
   })
-  return res.data
+}
+
+/** Payload for creating/updating a booking */
+export type BookingUpsertInput = {
+  venueId: string
+  dateFrom: string // ISO
+  dateTo: string // ISO
+  guests: number
+}
+
+/** Create a booking (customer-only) */
+export async function createBooking(
+  input: BookingUpsertInput
+): Promise<TBooking> {
+  const { token } = requireCustomerAuth()
+  return api<TBooking>('/holidaze/bookings', {
+    method: 'POST',
+    token,
+    useApiKey: true,
+    body: input,
+  })
 }
 
 /**
- * Update an existing booking (requires authentication).
- *
- * @param {string} token - The access token for the current user.
- * @param {string} id - The booking ID to update.
- * @param {TUpdateBookingInput} payload - The updated fields.
- * @returns {Promise<TBooking>} Resolves with the updated booking object.
+ * Update an existing booking (customer-only).
+ * (Only include fields you allow users to change.)
  */
 export async function updateBooking(
-  token: string,
   id: string,
-  payload: TUpdateBookingInput
+  input: Partial<BookingUpsertInput>
 ): Promise<TBooking> {
-  return api<TItemResponse<TBooking>>(`/bookings/${id}`, {
+  const { token } = requireCustomerAuth()
+  return api<TBooking>(`/holidaze/bookings/${id}`, {
     method: 'PUT',
     token,
-    body: payload,
-  }).then((res) => res.data)
+    useApiKey: true,
+    body: input,
+  })
 }
 
-/**
- * Delete a booking (requires authentication).
- *
- * @param {string} token - The access token for the current user.
- * @param {string} id - The booking ID to delete.
- * @returns {Promise<void>} Resolves with nothing on success.
- */
-export async function deleteBooking(token: string, id: string): Promise<void> {
-  await api(`/bookings/${id}`, { method: 'DELETE', token })
+/** Delete a booking (customer-only). */
+export async function deleteBooking(id: string): Promise<void> {
+  const { token } = requireCustomerAuth()
+  await api<void>(`/holidaze/bookings/${id}`, {
+    method: 'DELETE',
+    token,
+    useApiKey: true,
+  })
 }

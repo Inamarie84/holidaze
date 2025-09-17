@@ -35,6 +35,10 @@
 /* ------------------------------
    Body Defaults
 ------------------------------ */
+html {
+  scroll-padding-top: 5rem;
+} /* ~80px */
+
 html,
 body {
   height: 100%;

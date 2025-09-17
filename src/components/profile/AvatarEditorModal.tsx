@@ -1,19 +1,20 @@
-// src/components/profile/AvatarEditorModal.tsx
 'use client'
 
 import { useState } from 'react'
 import { updateMyAvatar } from '@/services/profiles'
+import { useSession } from '@/store/session'
 import toast from 'react-hot-toast'
+import { errMsg } from '@/utils/errors'
 
-type Props = {
-  open: boolean
-  onClose: () => void
-}
+type Props = { open: boolean; onClose: () => void }
 
 export default function AvatarEditorModal({ open, onClose }: Props) {
   const [url, setUrl] = useState('')
   const [alt, setAlt] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // ✅ get setUser from the store
+  const { setUser } = useSession()
 
   if (!open) return null
 
@@ -25,15 +26,20 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
     }
     setLoading(true)
     try {
-      await updateMyAvatar(url, alt || undefined)
+      const updated = await updateMyAvatar(url, alt || undefined)
+      // ✅ update store immediately
+      setUser({
+        name: updated.name,
+        email: updated.email,
+        venueManager: updated.venueManager,
+        avatar: updated.avatar,
+      } as any)
+
       toast.success('Avatar updated!')
       onClose()
-      // simplest refresh to reflect new avatar in header
-      window.location.reload()
+      // If needed: router.refresh() when crossing server boundaries
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'Failed to update avatar'
-      )
+      toast.error(errMsg(err))
     } finally {
       setLoading(false)
     }
