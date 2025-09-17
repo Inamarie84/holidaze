@@ -3,12 +3,13 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { loginUser } from '@/services/auth'
+import { useSession } from '@/store/session'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const router = useRouter()
   const sp = useSearchParams()
-  const role = sp.get('role') // optional: could tweak copy if needed
+  const role = sp.get('role') // optional: tweak copy if needed
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -16,17 +17,22 @@ export default function LoginPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (loading) return
     setLoading(true)
     try {
-      await loginUser({ email, password })
-      toast.success('Welcome back!')
-      router.push('/') // or `/manage` for venueManager if you like
+      await loginUser({ email: email.trim(), password })
+
+      // get latest user from Zustand after loginUser updates the store
+      const { user } = useSession.getState()
+      toast.success(`Welcome, ${user?.name ?? 'there'}!`)
+
+      // per brief: both Customers and Venue Managers go to their profile
+      router.push('/profile')
     } catch (err) {
       const msg =
         err instanceof Error
           ? err.message
           : 'Login failed. Please check your email and password.'
-      // common Noroff responses include "Invalid email or password"
       if (/invalid/i.test(msg)) {
         toast.error('Invalid email or password.')
       } else {
@@ -57,6 +63,7 @@ export default function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
             className="w-full rounded-lg border border-black/15 px-3 py-2"
           />
         </div>
@@ -72,14 +79,16 @@ export default function LoginPage() {
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
             className="w-full rounded-lg border border-black/15 px-3 py-2"
           />
         </div>
 
         <button
+          type="submit"
           disabled={loading}
           aria-busy={loading}
-          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
         >
           {loading ? 'Signing in…' : 'Log in'}
         </button>

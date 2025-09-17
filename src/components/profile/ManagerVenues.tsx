@@ -36,7 +36,7 @@ export default function ManagerVenues(props: Props) {
         setError(null)
         const venues = await api<TVenue[]>(
           `/holidaze/profiles/${encodeURIComponent(ownerName)}/venues?_bookings=true`,
-          { token }
+          { token, useApiKey: true }
         )
         if (!mounted) return
         setData(Array.isArray(venues) ? venues : [])
@@ -67,8 +67,19 @@ export default function ManagerVenues(props: Props) {
 
   if (loading) return <p className="body muted">Loading your venues…</p>
   if (error) return <p className="body text-red-600">{error}</p>
+
   if (!data.length)
-    return <p className="body muted">You haven’t created any venues yet.</p>
+    return (
+      <div className="rounded-xl border border-black/10 p-6">
+        <p className="body muted mb-3">You haven’t created any venues yet.</p>
+        <a
+          href="/venues/new"
+          className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 cursor-pointer"
+        >
+          Create your first venue
+        </a>
+      </div>
+    )
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

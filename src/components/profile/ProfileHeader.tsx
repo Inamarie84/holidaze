@@ -1,14 +1,16 @@
+// src/components/profile/ProfileHeader.tsx
 'use client'
-
-/**
- * Simple profile header.
- * Displays avatar, name, email, and role chip.
- */
 
 import Image from 'next/image'
 import type { TProfile } from '@/types/api'
 
-export default function ProfileHeader({ profile }: { profile: TProfile }) {
+export default function ProfileHeader({
+  profile,
+  onEditAvatar,
+}: {
+  profile: TProfile
+  onEditAvatar?: () => void
+}) {
   const avatar = profile.avatar?.url || '/images/placeholder.jpg'
   const avatarAlt = profile.avatar?.alt || profile.name
 
@@ -30,7 +32,7 @@ export default function ProfileHeader({ profile }: { profile: TProfile }) {
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <span className="inline-flex items-center rounded-full border border-black/10 px-3 py-1 text-sm">
           {profile.venueManager ? 'Venue Manager' : 'Customer'}
         </span>
@@ -43,6 +45,15 @@ export default function ProfileHeader({ profile }: { profile: TProfile }) {
           <span className="inline-flex items-center rounded-full border border-black/10 px-3 py-1 text-sm">
             {profile._count.venues} venues
           </span>
+        )}
+
+        {onEditAvatar && (
+          <button
+            onClick={onEditAvatar}
+            className="ml-2 inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 text-sm hover:bg-black/5 cursor-pointer"
+          >
+            Edit avatar
+          </button>
         )}
       </div>
     </header>
