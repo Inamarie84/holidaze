@@ -3,25 +3,24 @@ import { api } from '@/lib/api'
 import { useSession } from '@/store/session'
 import type { TProfile, TBooking, TVenue } from '@/types/api'
 
+/** Pull token + username from Zustand or throw */
 function requireAuth() {
   const { token, user } = useSession.getState()
-  if (!token || !user?.name) throw new Error('Not authenticated')
-  return { token, username: user.name }
+  const username = user?.name
+  if (!token || !username) throw new Error('Not authenticated')
+  return { token, username }
 }
 
-/** Get current user's profile */
+/** Get the current user's profile via their username (your preferred pattern) */
 export async function getMyProfile(): Promise<TProfile> {
-  const { token, user } = useSession.getState()
-  if (!token || !user?.name) throw new Error('Not authenticated')
-
-  const username = encodeURIComponent(user.name)
-  return api<TProfile>(`/holidaze/profiles/${username}`, {
+  const { token, username } = requireAuth()
+  return api<TProfile>(`/holidaze/profiles/${encodeURIComponent(username)}`, {
     token,
     useApiKey: true,
   })
 }
 
-/** Pure: update avatar; returns updated profile */
+/** Update your avatar using the username endpoint; returns the updated profile */
 export async function updateMyAvatar(
   url: string,
   alt?: string
@@ -36,8 +35,8 @@ export async function updateMyAvatar(
 }
 
 /**
- * Helper: update avatar AND sync Zustand/localStorage immediately.
- * Use this if you don’t want to call setUser in your components.
+ * Update avatar *and* immediately sync the session store so UI updates
+ * (navbar/profile header) without a reload.
  */
 export async function updateMyAvatarAndSync(
   url: string,
@@ -46,7 +45,6 @@ export async function updateMyAvatarAndSync(
   const updated = await updateMyAvatar(url, alt)
   const { setUser } = useSession.getState()
   setUser({
-    // map TProfile -> SessionUser shape if needed
     name: updated.name,
     email: updated.email,
     venueManager: updated.venueManager,
@@ -55,27 +53,23 @@ export async function updateMyAvatarAndSync(
   return updated
 }
 
-/**
- * Get upcoming bookings for current user.
- * You can add includes like ?_venue=true later.
- */
+/** Upcoming bookings for current user (with venue included) */
 export async function getMyBookings(): Promise<TBooking[]> {
   const { token, username } = requireAuth()
   return api<TBooking[]>(
     `/holidaze/profiles/${encodeURIComponent(username)}/bookings?_venue=true`,
-    { token }
+    { token, useApiKey: true }
   )
 }
 
-/**
- * Get venues owned by current user (for managers).
- */
-export async function getMyVenues(): Promise<TVenue[]> {
+/** Venues owned by current user (optionally include bookings) */
+export async function getMyVenues(opts?: {
+  includeBookings?: boolean
+}): Promise<TVenue[]> {
   const { token, username } = requireAuth()
+  const qs = opts?.includeBookings ? '?_bookings=true' : ''
   return api<TVenue[]>(
-    `/holidaze/profiles/${encodeURIComponent(username)}/venues`,
-    {
-      token,
-    }
+    `/holidaze/profiles/${encodeURIComponent(username)}/venues${qs}`,
+    { token, useApiKey: true }
   )
 }

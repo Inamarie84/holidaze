@@ -2,90 +2,128 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { api } from '@/lib/api'
-import { useSession } from '@/store/session'
+import Image from 'next/image'
+import Link from 'next/link'
+import toast from 'react-hot-toast'
 import type { TVenue } from '@/types/api'
-import VenueCard from '@/components/venue/VenueCard'
+import { deleteVenue } from '@/services/venues'
 
-type Props =
-  | { venues: TVenue[]; ownerName?: never }
-  | { ownerName: string; venues?: never }
+type Props = { venues: TVenue[] }
 
-function hasVenuesProp(p: Props): p is { venues: TVenue[] } {
-  return 'venues' in p
-}
-function hasOwnerNameProp(p: Props): p is { ownerName: string } {
-  return 'ownerName' in p
+// Convert ISO -> timestamp. Returns 0 if missing/invalid.
+function safeTime(iso?: string) {
+  if (!iso) return 0
+  const t = Date.parse(iso)
+  return Number.isNaN(t) ? 0 : t
 }
 
-export default function ManagerVenues(props: Props) {
-  const { token } = useSession()
+// Prefer `updated`, fall back to `created`.
+function updatedAt(v: TVenue) {
+  const u = safeTime(v.updated as any) // types sometimes mark these optional
+  const c = safeTime(v.created as any)
+  return u || c // if u is 0, use c
+}
 
-  const [loading, setLoading] = useState(!hasVenuesProp(props))
-  const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<TVenue[]>(
-    hasVenuesProp(props) ? props.venues : []
-  )
+export default function ManagerVenues({ venues }: Props) {
+  const [items, setItems] = useState<TVenue[]>([])
 
   useEffect(() => {
-    let mounted = true
+    const list = Array.isArray(venues) ? [...venues] : []
+    list.sort((a, b) => updatedAt(b) - updatedAt(a))
+    setItems(list)
+  }, [venues])
 
-    async function loadByOwner(ownerName: string) {
-      try {
-        setLoading(true)
-        setError(null)
-        const venues = await api<TVenue[]>(
-          `/holidaze/profiles/${encodeURIComponent(ownerName)}/venues?_bookings=true`,
-          { token, useApiKey: true }
-        )
-        if (!mounted) return
-        setData(Array.isArray(venues) ? venues : [])
-      } catch (err) {
-        if (!mounted) return
-        setError(err instanceof Error ? err.message : 'Failed to load venues')
-      } finally {
-        mounted && setLoading(false)
-      }
+  async function onDelete(id: string) {
+    if (!confirm('Delete this venue? This cannot be undone.')) return
+    const prev = items
+    setItems((cur) => cur.filter((v) => v.id !== id)) // optimistic
+    try {
+      await deleteVenue(id)
+      toast.success('Venue deleted')
+    } catch (err: any) {
+      setItems(prev) // rollback
+      toast.error(err?.message || 'Failed to delete venue')
     }
-
-    if (hasOwnerNameProp(props)) {
-      if (!token) return
-      loadByOwner(props.ownerName)
-    } else if (hasVenuesProp(props)) {
-      setData(props.venues)
-      setLoading(false)
-    }
-
-    return () => {
-      mounted = false
-    }
-  }, [props, token])
-
-  if (hasOwnerNameProp(props) && !token) {
-    return <p className="body muted">Please log in to view your venues.</p>
   }
 
-  if (loading) return <p className="body muted">Loading your venues…</p>
-  if (error) return <p className="body text-red-600">{error}</p>
-
-  if (!data.length)
+  if (!items.length) {
     return (
-      <div className="rounded-xl border border-black/10 p-6">
+      <div className="rounded-xl border border-black/10 bg-white p-6 text-center">
         <p className="body muted mb-3">You haven’t created any venues yet.</p>
-        <a
+        <Link
           href="/venues/new"
-          className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 cursor-pointer"
+          className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90"
         >
-          Create your first venue
-        </a>
+          Create venue
+        </Link>
       </div>
     )
+  }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {data.map((v) => (
-        <VenueCard key={v.id} venue={v} />
-      ))}
-    </div>
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((v) => {
+        const img = v.media?.[0]?.url || '/images/placeholder.jpg'
+        const alt = v.media?.[0]?.alt || v.name
+        const city = v.location?.city ?? ''
+        const country = v.location?.country ?? ''
+
+        return (
+          <li
+            key={v.id}
+            className="overflow-hidden rounded-xl border border-black/10 bg-white"
+          >
+            <div className="relative aspect-[4/3] w-full">
+              <Image
+                src={img}
+                alt={alt}
+                fill
+                className="object-cover"
+                sizes="(max-width:1024px) 50vw, 33vw"
+              />
+            </div>
+
+            <div className="p-4">
+              <h3 className="h4 mb-1">{v.name}</h3>
+              <p className="muted text-sm">
+                {city}
+                {city && country ? ', ' : ''}
+                {country}
+              </p>
+
+              <div className="mt-3 flex items-center gap-3 text-sm">
+                <span className="inline-flex items-center rounded-full border border-black/10 px-2 py-0.5">
+                  {v.price} NOK / night
+                </span>
+                <span className="inline-flex items-center rounded-full border border-black/10 px-2 py-0.5">
+                  Max {v.maxGuests}
+                </span>
+              </div>
+
+              <div className="mt-4 flex items-center gap-2">
+                <Link
+                  href={`/venues/${v.id}`}
+                  className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5"
+                >
+                  View
+                </Link>
+                <Link
+                  href={`/venues/${v.id}/edit`}
+                  className="inline-flex items-center rounded-lg bg-terracotta/90 px-3 py-1.5 text-white hover:opacity-90"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={() => onDelete(v.id)}
+                  className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-white hover:opacity-90"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
   )
 }

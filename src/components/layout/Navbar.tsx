@@ -112,7 +112,10 @@ export default function Navbar() {
                   </span>
                 </Link>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout()
+                    router.push('/') // go to home after logout
+                  }}
                   className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10 cursor-pointer"
                 >
                   <LogOut size={18} />

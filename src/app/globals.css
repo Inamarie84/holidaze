@@ -8,12 +8,14 @@
   --foreground: #1c1c1c; /* brand text color for body by default */
 }
 
-/* @media (prefers-color-scheme: dark) {
+/* If you enable dark mode later, you can restore this:
+@media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-} */
+}
+*/
 
 /* Expose Next font variables from layout.tsx to Tailwind tokens */
 @theme inline {
@@ -25,19 +27,12 @@
   --font-serif: var(--font-serif); /* DM Serif Display */
 }
 
-@layer utilities {
-  .body--inverse {
-    @apply font-sans text-body leading-body;
-    color: #ffffff;
-  }
-}
-
 /* ------------------------------
    Body Defaults
 ------------------------------ */
 html {
-  scroll-padding-top: 5rem;
-} /* ~80px */
+  scroll-padding-top: 5rem; /* offset for sticky navbar */
+}
 
 html,
 body {
@@ -50,7 +45,7 @@ body {
   font-family: var(--font-sans); /* default = Inter */
 }
 
-/* Headings default to DM Serif (semantics even without utilities) */
+/* Headings default to DM Serif even without utility classes */
 h1,
 h2,
 h3 {
@@ -103,32 +98,44 @@ h3 {
 }
 
 /* ------------------------------
-   Semantic Typography Utilities
+   Semantic Typography (Components layer so utilities override)
 ------------------------------ */
-@layer utilities {
+@layer components {
   /* Headings */
   .display {
-    @apply font-serif text-display leading-display tracking-tight;
+    @apply font-serif tracking-tight;
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
     color: var(--color-brand);
   }
+
   .h1 {
-    @apply font-serif text-h1 leading-h1 tracking-tight;
-    color: #ffffff; /* h1 is always white */
+    @apply font-serif tracking-tight;
+    font-size: var(--text-h1);
+    line-height: var(--leading-h1);
+    color: var(--color-brand); /* default everywhere */
   }
+
   .h2 {
-    @apply font-serif text-h2 leading-h2 tracking-tight;
+    @apply font-serif tracking-tight;
+    font-size: var(--text-h2);
+    line-height: var(--leading-h2);
     color: var(--color-brand);
   }
+
   .h3 {
-    @apply font-serif text-h3 leading-h3 tracking-tight;
+    @apply font-semibold;
+    font-size: var(--text-h3);
+    line-height: var(--leading-h3);
     color: var(--color-brand);
   }
 
   /* Body text */
   .body {
-    @apply font-sans text-body leading-body;
-    /* IMPORTANT: let color inherit so parent utilities like `text-white` work */
-    color: inherit;
+    @apply font-sans;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: inherit; /* allow parent (e.g. text-white) to control color */
   }
 
   /* Muted helper */
@@ -137,35 +144,53 @@ h3 {
   }
 }
 
+/* Optional inverse helper for special cases */
+@layer utilities {
+  .body--inverse {
+    @apply font-sans;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: #ffffff;
+  }
+}
+
 /* ------------------------------
    Responsive Scaling
 ------------------------------ */
 @media (min-width: 640px) {
   .display {
-    @apply text-display-sm leading-display-sm;
+    font-size: var(--text-display-sm);
+    line-height: var(--leading-display-sm);
   }
   .h1 {
-    @apply text-h1-sm      leading-h1-sm;
+    font-size: var(--text-h1-sm);
+    line-height: var(--leading-h1-sm);
   }
   .h2 {
-    @apply text-h2-sm      leading-h2-sm;
+    font-size: var(--text-h2-sm);
+    line-height: var(--leading-h2-sm);
   }
   .h3 {
-    @apply text-h3-sm      leading-h3-sm;
+    font-size: var(--text-h3-sm);
+    line-height: var(--leading-h3-sm);
   }
 }
 
 @media (min-width: 1024px) {
   .display {
-    @apply text-display-lg leading-display-lg;
+    font-size: var(--text-display-lg);
+    line-height: var(--leading-display-lg);
   }
   .h1 {
-    @apply text-h1-lg      leading-h1-lg;
+    font-size: var(--text-h1-lg);
+    line-height: var(--leading-h1-lg);
   }
   .h2 {
-    @apply text-h2-lg      leading-h2-lg;
+    font-size: var(--text-h2-lg);
+    line-height: var(--leading-h2-lg);
   }
   .h3 {
-    @apply text-h3-lg      leading-h3-lg;
+    font-size: var(--text-h3-lg);
+    line-height: var(--leading-h3-lg);
   }
 }

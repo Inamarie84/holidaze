@@ -1,12 +1,15 @@
+// src/app/venues/[id]/page.tsx
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 import { getVenueById, deleteVenue } from '@/services/venues'
-import { createBooking } from '@/services/bookings'
 import type { TVenueWithBookings, TBooking } from '@/types/api'
 import toast from 'react-hot-toast'
+import { createBooking } from '@/services/bookings'
+import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
 
 // When we fetch with _bookings=true&_owner=true, we’ll get bookings and owner
 type VenueWithExtras = TVenueWithBookings & { owner?: { name?: string } }
@@ -28,7 +31,7 @@ export default function VenueDetailsPage() {
 
   useEffect(() => {
     let mounted = true
-    async function load() {
+    ;(async () => {
       try {
         setLoading(true)
         setError(null)
@@ -44,8 +47,7 @@ export default function VenueDetailsPage() {
       } finally {
         mounted && setLoading(false)
       }
-    }
-    load()
+    })()
     return () => {
       mounted = false
     }
@@ -56,12 +58,11 @@ export default function VenueDetailsPage() {
   const canBook = !!token && !isManager
 
   type Interval = { from: Date; to: Date; guests: number }
-
   const bookedIntervals = useMemo<Interval[]>(() => {
     const list = venue?.bookings ?? []
     return list.map((b: TBooking) => ({
       from: new Date(b.dateFrom),
-      to: new Date(b.dateTo), // treat as exclusive
+      to: new Date(b.dateTo), // exclusive
       guests: b.guests,
     }))
   }, [venue])
@@ -70,7 +71,6 @@ export default function VenueDetailsPage() {
     if (!fromISO || !toISO) return false
     const from = new Date(fromISO)
     const to = new Date(toISO)
-    // overlap exists unless one range ends before the other starts
     return bookedIntervals.some(
       (bi: Interval) => !(to <= bi.from || from >= bi.to)
     )
@@ -115,8 +115,7 @@ export default function VenueDetailsPage() {
   }
 
   async function onDeleteVenue() {
-    if (!venue) return
-    if (!isOwner) return
+    if (!venue || !isOwner) return
     if (!confirm('Delete this venue? This cannot be undone.')) return
     try {
       await deleteVenue(venue.id)
@@ -146,15 +145,8 @@ export default function VenueDetailsPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-6">
-        <img
-          src={mainImage}
-          alt={venue.media?.[0]?.alt || venue.name}
-          className="aspect-[16/9] w-full rounded-xl object-cover border border-black/10 bg-white"
-        />
-      </div>
-
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Title ABOVE the image */}
+      <header className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="h1">{venue.name}</h1>
           <p className="muted">
@@ -164,99 +156,76 @@ export default function VenueDetailsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center rounded-full border border-black/10 px-3 py-1 text-sm">
-            {venue.price} NOK / night
-          </span>
-          <span className="inline-flex items-center rounded-full border border-black/10 px-3 py-1 text-sm">
-            Max {venue.maxGuests} guests
-          </span>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Chip>{venue.price} NOK / night</Chip>
+          <Chip>Max {venue.maxGuests} guests</Chip>
 
           {isOwner && (
-            <>
-              <a
+            <div className="flex items-center gap-2">
+              <Link
                 href={`/venues/${venue.id}/edit`}
-                className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5 cursor-pointer"
+                className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5"
               >
                 Edit
-              </a>
+              </Link>
               <button
                 onClick={onDeleteVenue}
-                className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-white hover:opacity-90 cursor-pointer"
+                className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-white hover:opacity-90"
               >
                 Delete
               </button>
-            </>
+            </div>
           )}
         </div>
       </header>
 
-      <section className="mt-6">
-        <h2 className="h3 mb-2">About</h2>
-        <p className="body">
-          {venue.description || 'No description provided.'}
-        </p>
-      </section>
+      {/* Main image */}
+      <div className="mb-8">
+        <img
+          src={mainImage}
+          alt={venue.media?.[0]?.alt || venue.name}
+          className="aspect-[16/9] w-full rounded-xl object-cover border border-black/10 bg-white"
+        />
+      </div>
 
-      <section className="mt-6">
-        <h3 className="h4 mb-2">Amenities</h3>
-        <div className="flex flex-wrap gap-2">
-          {venue.meta?.wifi && <Chip>Wi-Fi</Chip>}
-          {venue.meta?.parking && <Chip>Parking</Chip>}
-          {venue.meta?.breakfast && <Chip>Breakfast</Chip>}
-          {venue.meta?.pets && <Chip>Pets</Chip>}
-          {!venue.meta && <p className="muted">No amenities listed.</p>}
-        </div>
-      </section>
-
-      <section className="mt-8 grid gap-6 md:grid-cols-2">
+      {/* Availability + Booking */}
+      <section className="grid gap-6 md:grid-cols-2">
+        {/* Calendar is public: always visible */}
         <div className="rounded-xl border border-black/10 bg-white p-4">
-          <h3 className="h4 mb-3">Booked dates</h3>
-          {venue.bookings?.length ? (
-            <ul className="list-disc pl-5 space-y-1">
-              {venue.bookings
-                .slice()
-                .sort(
-                  (a: TBooking, b: TBooking) =>
-                    +new Date(a.dateFrom) - +new Date(b.dateFrom)
-                )
-                .map((b: TBooking) => (
-                  <li key={b.id} className="text-sm">
-                    {fmt(b.dateFrom)} – {fmt(b.dateTo)} ({b.guests} guest
-                    {b.guests > 1 ? 's' : ''})
-                  </li>
-                ))}
-            </ul>
-          ) : (
-            <p className="muted text-sm">No bookings yet.</p>
-          )}
+          <h3 className="h3 mb-3">Availability</h3>
+          <AvailabilityCalendar bookings={venue.bookings ?? []} />
           <p className="muted text-xs mt-2">
             * Check-out day is available for new check-ins.
           </p>
         </div>
 
+        {/* Booking panel */}
         <div className="rounded-xl border border-black/10 bg-white p-4">
-          <h3 className="h4 mb-3">Book this venue</h3>
+          <h3 className="h3 mb-4">Book this venue</h3>
+
+          {/* Clean, compact login prompt */}
           {!token && (
-            <div className="space-y-2">
-              <p className="muted text-sm">
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald/30 bg-sand px-3 py-2">
+              <p className="body text-sm">
                 Please log in as a customer to book.
               </p>
-              <a
+              <Link
                 href="/login?role=customer"
-                className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 cursor-pointer"
+                className="inline-flex items-center rounded-md bg-emerald px-3 py-1.5 text-white hover:opacity-90"
               >
                 Log in
-              </a>
+              </Link>
             </div>
           )}
 
           {token && isManager && (
-            <p className="muted text-sm">Managers can’t book venues.</p>
+            <p className="muted text-sm">
+              Managers can’t book venues. Switch to a customer account to book.
+            </p>
           )}
 
           {canBook && (
-            <form onSubmit={onBook} className="space-y-3">
+            <form onSubmit={onBook} className="mt-2 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="body mb-1 block">Check-in</label>
@@ -299,12 +268,31 @@ export default function VenueDetailsPage() {
                 type="submit"
                 disabled={bookingLoading}
                 aria-busy={bookingLoading}
-                className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
+                className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60"
               >
                 {bookingLoading ? 'Booking…' : 'Book now'}
               </button>
             </form>
           )}
+        </div>
+      </section>
+
+      {/* About / Amenities */}
+      <section className="mt-10">
+        <h2 className="h3 mb-2">About</h2>
+        <p className="body">
+          {venue.description || 'No description provided.'}
+        </p>
+      </section>
+
+      <section className="mt-6">
+        <h3 className="h3 mb-2">Amenities</h3>
+        <div className="flex flex-wrap gap-2">
+          {venue.meta?.wifi && <Chip>Wi-Fi</Chip>}
+          {venue.meta?.parking && <Chip>Parking</Chip>}
+          {venue.meta?.breakfast && <Chip>Breakfast</Chip>}
+          {venue.meta?.pets && <Chip>Pets</Chip>}
+          {!venue.meta && <p className="muted">No amenities listed.</p>}
         </div>
       </section>
     </main>
@@ -317,12 +305,4 @@ function Chip({ children }: { children: React.ReactNode }) {
       {children}
     </span>
   )
-}
-
-function fmt(d: string | Date) {
-  return new Date(d).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
 }

@@ -1,8 +1,8 @@
+// src/components/profile/AvatarEditorModal.tsx
 'use client'
 
-import { useState } from 'react'
-import { updateMyAvatar } from '@/services/profiles'
-import { useSession } from '@/store/session'
+import { useEffect, useMemo, useState } from 'react'
+import { updateMyAvatarAndSync } from '@/services/profiles'
 import toast from 'react-hot-toast'
 import { errMsg } from '@/utils/errors'
 
@@ -13,31 +13,41 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
   const [alt, setAlt] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // ✅ get setUser from the store
-  const { setUser } = useSession()
+  // Reset fields whenever the modal closes/opens
+  useEffect(() => {
+    if (!open) {
+      setUrl('')
+      setAlt('')
+      setLoading(false)
+    }
+  }, [open])
 
+  // 🔑 Always call hooks — even if the modal is closed.
+  // Simple URL sanity check + preview
+  const previewUrl = useMemo(() => {
+    if (!url) return ''
+    try {
+      const u = new URL(url)
+      return u.protocol === 'http:' || u.protocol === 'https:' ? url : ''
+    } catch {
+      return ''
+    }
+  }, [url])
+
+  // After all hooks, you can render-null safely
   if (!open) return null
 
   async function onSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!url) {
+    if (!url.trim()) {
       toast.error('Please provide an image URL.')
       return
     }
     setLoading(true)
     try {
-      const updated = await updateMyAvatar(url, alt || undefined)
-      // ✅ update store immediately
-      setUser({
-        name: updated.name,
-        email: updated.email,
-        venueManager: updated.venueManager,
-        avatar: updated.avatar,
-      } as any)
-
+      await updateMyAvatarAndSync(url.trim(), alt.trim() || undefined)
       toast.success('Avatar updated!')
       onClose()
-      // If needed: router.refresh() when crossing server boundaries
     } catch (err) {
       toast.error(errMsg(err))
     } finally {
@@ -62,8 +72,10 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://…"
               className="w-full rounded-lg border border-black/15 px-3 py-2"
+              autoFocus
             />
           </div>
+
           <div>
             <label htmlFor="avatar-alt" className="body mb-1 block">
               Alt text (optional)
@@ -76,6 +88,17 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
               className="w-full rounded-lg border border-black/15 px-3 py-2"
             />
           </div>
+
+          {previewUrl && (
+            <div className="rounded-lg border border-black/10 p-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt={alt || 'Avatar preview'}
+                className="h-24 w-24 rounded-full object-cover"
+              />
+            </div>
+          )}
 
           <div className="mt-2 flex items-center justify-end gap-2">
             <button

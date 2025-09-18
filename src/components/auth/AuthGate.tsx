@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from '@/store/session'
 
 export default function AuthGate({
-  redirectTo = '/login?role=customer',
+  redirectTo = '/', // default to home,
   children,
 }: {
   redirectTo?: string

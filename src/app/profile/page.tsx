@@ -55,12 +55,12 @@ export default function ProfilePage() {
         if (!mounted) return
         setBookings(Array.isArray(rawBookings) ? rawBookings : [])
 
-        // 3) Venues for managers (include bookings)
         if (p.venueManager) {
           const v = await api<TVenue[]>(
-            `/holidaze/profiles/${encodeURIComponent(name)}/venues?_bookings=true`,
+            `/holidaze/profiles/${encodeURIComponent(p.name)}/venues?_bookings=true&_owner=true&sort=created&sortOrder=desc`,
             { token: token ?? undefined, useApiKey: true }
           )
+          console.log('My profile venues payload:', v)
           if (!mounted) return
           setVenues(Array.isArray(v) ? v : [])
         } else {

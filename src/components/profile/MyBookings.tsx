@@ -1,6 +1,6 @@
-// src/components/profile/MyBookings.tsx
 'use client'
 
+import Link from 'next/link'
 import type { TBooking } from '@/types/api'
 
 type Props = { bookings: TBooking[] }
@@ -33,13 +33,16 @@ export default function MyBookings({ bookings }: Props) {
                   {v ? ` • ${v.name}` : ''}
                 </div>
               </div>
-              {v && (
-                <a
-                  href={`/${v.id}`}
-                  className="text-sm underline hover:opacity-80 cursor-pointer"
+
+              {v?.id ? (
+                <Link
+                  href={`/venues/${v.id}`}
+                  className="text-sm underline hover:opacity-80"
                 >
                   View venue
-                </a>
+                </Link>
+              ) : (
+                <span className="text-sm text-grey">Venue unavailable</span>
               )}
             </div>
           </li>
