@@ -38,7 +38,7 @@ export default function Pagination({
       <button
         disabled={!hasPrev}
         onClick={() => go(page - 1)}
-        className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-sand disabled:opacity-50"
+        className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-sand disabled:opacity-50 cursor-pointer"
       >
         ← Previous
       </button>
@@ -46,7 +46,7 @@ export default function Pagination({
       <button
         disabled={!hasNext}
         onClick={() => go(page + 1)}
-        className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-sand disabled:opacity-50"
+        className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-sand disabled:opacity-50 cursor-pointer"
       >
         Next →
       </button>

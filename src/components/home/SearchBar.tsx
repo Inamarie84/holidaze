@@ -1,8 +1,7 @@
-// src/components/home/SearchBar.tsx
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 
 export default function SearchBar() {
@@ -18,8 +17,19 @@ export default function SearchBar() {
     sp.get('guests') ? Number(sp.get('guests')) : ''
   )
 
+  // keep local state in sync when user navigates
+  useEffect(() => {
+    setDestination(sp.get('q') ?? '')
+    setFrom(sp.get('dateFrom') ?? '')
+    setTo(sp.get('dateTo') ?? '')
+    setGuests(sp.get('guests') ? Number(sp.get('guests')) : '')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp])
+
   const debouncedDestination = useDebounce(destination, 450)
-  const onVenuesPage = pathname.startsWith('/venues')
+
+  // ✅ only treat the *index* as the live-search page (NOT /venues/[id])
+  const onVenuesIndex = pathname === '/venues'
 
   function buildQuery(q?: string, f?: string, t?: string, g?: number | '') {
     const params = new URLSearchParams()
@@ -34,35 +44,31 @@ export default function SearchBar() {
       !!t ||
       (typeof g === 'number' && g > 0)
 
-    // only include page when there are filters (and we’re navigating to /venues)
-    if (hasFilters) params.set('page', '1')
-
-    return hasFilters ? `?${params.toString()}` : ''
+    if (hasFilters) params.set('page', '1') // reset pagination on new filters
+    const qs = params.toString()
+    return qs ? `?${qs}` : ''
   }
 
-  // Auto-update URL while typing ONLY if already on /venues
+  // Debounced destination updates (only on /venues)
   useEffect(() => {
+    if (!onVenuesIndex) return
     const qs = buildQuery(debouncedDestination, from, to, guests)
-    if (onVenuesPage && qs) {
-      router.replace(`/${qs}`)
-    }
+    router.replace(`/venues${qs}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedDestination])
 
-  // If dates or guests change, navigate immediately ONLY if already on /venues
+  // Immediate updates for dates/guests (only on /venues)
   useEffect(() => {
+    if (!onVenuesIndex) return
     const qs = buildQuery(destination, from, to, guests)
-    if (onVenuesPage && qs) {
-      router.replace(`/${qs}`)
-    }
+    router.replace(`/venues${qs}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, to, guests])
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     const qs = buildQuery(destination, from, to, guests)
-    // If no filters, go to plain /venues; if filters, add the query
-    router.push(qs ? `/${qs}` : '/')
+    router.push(`/venues${qs}`) // go to venues (with or without filters)
   }
 
   return (
