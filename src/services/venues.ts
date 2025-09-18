@@ -3,7 +3,15 @@ import { api } from '@/lib/api'
 import { useSession } from '@/store/session'
 import type { TVenue, TVenueWithBookings, TVenueInclude } from '@/types/api'
 
-function toQuery(params?: TVenueInclude): string {
+// Add generic query options (API supports these)
+export type VenuesQuery = TVenueInclude & {
+  page?: number | string
+  limit?: number | string
+  sort?: string // 'created' | 'updated' | 'name' | 'price' ...
+  sortOrder?: 'asc' | 'desc'
+}
+
+function toQuery(params?: Record<string, unknown>): string {
   if (!params) return ''
   const usp = new URLSearchParams()
   Object.entries(params).forEach(([k, v]) => {
@@ -14,14 +22,19 @@ function toQuery(params?: TVenueInclude): string {
   return qs ? `?${qs}` : ''
 }
 
-/** -------- Existing: list & read -------- */
-export async function getVenues(params?: TVenueInclude): Promise<TVenue[]> {
-  const query = toQuery(params)
+/** -------- List & read -------- */
+export async function getVenues(params?: VenuesQuery): Promise<TVenue[]> {
+  // default to newest first, reasonable page size
+  const query = toQuery({
+    sort: 'created',
+    sortOrder: 'desc',
+    page: 1,
+    limit: 24,
+    ...params,
+  })
   return api<TVenue[]>(`/holidaze/venues${query}`)
 }
 
-// in services/venues.ts
-// Read a single venue
 export function getVenueById(id: string): Promise<TVenue>
 export function getVenueById(
   id: string,
@@ -32,12 +45,13 @@ export async function getVenueById(id: string, params?: TVenueInclude) {
   return api(`/holidaze/venues/${id}${query}`)
 }
 
-/** -------- Client-side search (yours) -------- */
+/** -------- Client-side search (your filter) -------- */
 type SearchInput = {
   q?: string
   dateFrom?: string
   dateTo?: string
   guests?: number
+  limit?: number | string
 }
 
 export async function searchVenues({
@@ -45,10 +59,10 @@ export async function searchVenues({
   dateFrom,
   dateTo,
   guests,
+  limit = 100, // pull a bigger, *newest-first* slice to filter locally
 }: SearchInput): Promise<TVenueWithBookings[]> {
-  const venues = await api<TVenueWithBookings[]>(
-    '/holidaze/venues?_bookings=true'
-  )
+  const url = `/holidaze/venues?_bookings=true&sort=created&sortOrder=desc&limit=${limit}`
+  const venues = await api<TVenueWithBookings[]>(url)
 
   const norm = (s: unknown) =>
     String(s ?? '')
@@ -65,9 +79,7 @@ export async function searchVenues({
   return venues.filter((v) => {
     if (q) {
       const needle = norm(q)
-      const hay = `${norm(v.name)} ${norm(v.description)} ${norm(
-        v.location?.city
-      )} ${norm(v.location?.country)}`
+      const hay = `${norm(v.name)} ${norm(v.description)} ${norm(v.location?.city)} ${norm(v.location?.country)}`
       if (!hay.includes(needle)) return false
     }
     if (guests && v.maxGuests < guests) return false
@@ -81,8 +93,7 @@ export async function searchVenues({
   })
 }
 
-/** -------- NEW: manager CRUD helpers -------- */
-
+/** -------- Manager CRUD (unchanged) -------- */
 function requireManagerAuth() {
   const { token, user } = useSession.getState()
   if (!token) throw new Error('Not authenticated')
@@ -114,7 +125,6 @@ export type UpsertVenueInput = {
   }
 }
 
-/** Create */
 export async function createVenue(input: UpsertVenueInput): Promise<TVenue> {
   const { token } = requireManagerAuth()
   return api<TVenue>('/holidaze/venues', {
@@ -125,7 +135,6 @@ export async function createVenue(input: UpsertVenueInput): Promise<TVenue> {
   })
 }
 
-/** Update */
 export async function updateVenue(
   id: string,
   input: Partial<UpsertVenueInput>
@@ -139,7 +148,6 @@ export async function updateVenue(
   })
 }
 
-/** Delete */
 export async function deleteVenue(id: string): Promise<void> {
   const { token } = requireManagerAuth()
   await api<void>(`/holidaze/venues/${id}`, {

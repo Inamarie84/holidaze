@@ -14,12 +14,10 @@ export default function ProfileHeader({
 }) {
   const sessionUser = useSession((s) => s.user)
 
-  // ✅ Fallback to session name/email if API profile is missing them
   const displayName = profile.name || sessionUser?.name || ''
   const displayEmail = profile.email || sessionUser?.email || ''
 
-  const avatar =
-    profile.avatar?.url || sessionUser?.avatar?.url || '/images/placeholder.jpg'
+  const avatar = profile.avatar?.url || '/images/placeholder.jpg'
   const avatarAlt = profile.avatar?.alt || displayName || 'User avatar'
 
   return (
@@ -34,10 +32,13 @@ export default function ProfileHeader({
             sizes="64px"
           />
         </div>
+
         <div>
-          {/* ✅ force visible text color so it's not blending with the bg */}
-          <h1 className="h1 text-gray-900">{displayName}</h1>
-          <p className="muted text-gray-600">{displayEmail}</p>
+          {/* use explicit Tailwind, not the global .h1 */}
+          <h1 className="text-xl sm:text-2xl font-semibold leading-tight text-brand">
+            {displayName}
+          </h1>
+          <p className="text-sm text-gray-600">{displayEmail}</p>
         </div>
       </div>
 
@@ -55,6 +56,7 @@ export default function ProfileHeader({
             {profile._count.venues} venues
           </span>
         )}
+
         {onEditAvatar && (
           <button
             onClick={onEditAvatar}

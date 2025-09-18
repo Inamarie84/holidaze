@@ -28,8 +28,10 @@ export default function RootLayout({
       <body className={`${inter.variable} ${dmSerif.variable} antialiased`}>
         <SessionHydrator />
         <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+
+        {/* Sticky navbar is 64px (h-16). We offset once here with pt-16. */}
         <Navbar />
-        {children}
+        <main className="pt-16 min-h-[100dvh]">{children}</main>
       </body>
     </html>
   )

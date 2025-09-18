@@ -9,8 +9,8 @@ export default function WithSearchLayout({
 }) {
   return (
     <>
-      {/* Hero */}
-      <section className="bg-terracotta pt-16">
+      {/* Hero (no extra pt-16 here—root <main> already adds it) */}
+      <section className="bg-terracotta">
         <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6 py-8 text-center text-white">
           <h1 className="h1 text-white">Find your next stay</h1>
           <p className="mt-3 text-base text-white/80">
