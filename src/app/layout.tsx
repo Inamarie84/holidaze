@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter, DM_Serif_Display } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
 import SessionHydrator from '@/components/SessionHydrator'
 import { Toaster } from 'react-hot-toast'
 import BackToTop from '@/components/ui/BackToTop'
@@ -26,17 +27,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${dmSerif.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${dmSerif.variable} antialiased flex min-h-screen flex-col`}
+      >
         <SessionHydrator />
         <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
-
-        {/* Sticky navbar is 64px (h-16). Offset page content with pt-16 on <main>. */}
         <Navbar />
-        <main id="content" className="pt-16 min-h-[100dvh]">
+        {/* Offset for sticky navbar */}
+        <main id="content" className="pt-16 flex-1">
           {children}
         </main>
-
-        {/* Floating action button visible site-wide */}
+        <Footer />
         <BackToTop />
       </body>
     </html>

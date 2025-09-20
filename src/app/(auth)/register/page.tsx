@@ -57,7 +57,7 @@ export default function RegisterPage() {
     <main className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="h1 mb-4">Create account</h1>
       <p className="muted mb-6">
-        Use your <b>@stud.noroff.no</b> email (required for Venue Manager).
+        Use your <b>@stud.noroff.no</b> email (required).
       </p>
 
       <form onSubmit={onSubmit} className="space-y-4">
