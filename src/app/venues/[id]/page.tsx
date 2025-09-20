@@ -11,6 +11,7 @@ import toast from 'react-hot-toast'
 import { createBooking } from '@/services/bookings'
 import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
 import SmartBackButton from '@/components/ui/SmartBackButton'
+import VenueDetailSkeleton from '@/components/venue/VenueDetailSkeleton'
 
 // When we fetch with _bookings=true&_owner=true, we’ll get bookings and owner
 type VenueWithExtras = TVenueWithBookings & { owner?: { name?: string } }
@@ -72,9 +73,7 @@ export default function VenueDetailsPage() {
     if (!fromISO || !toISO) return false
     const from = new Date(fromISO)
     const to = new Date(toISO)
-    return bookedIntervals.some(
-      (bi: Interval) => !(to <= bi.from || from >= bi.to)
-    )
+    return bookedIntervals.some((bi) => !(to <= bi.from || from >= bi.to))
   }
 
   async function onBook(e: React.FormEvent) {
@@ -127,13 +126,9 @@ export default function VenueDetailsPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
-        <p className="body muted">Loading venue…</p>
-      </main>
-    )
-  }
+  // ----- RENDER STATES -----
+  if (loading) return <VenueDetailSkeleton />
+
   if (error || !venue) {
     return (
       <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
@@ -149,6 +144,7 @@ export default function VenueDetailsPage() {
       <div className="mb-3">
         <SmartBackButton className="mb-2" fallback="/venues" />
       </div>
+
       {/* Title ABOVE the image */}
       <header className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -185,6 +181,7 @@ export default function VenueDetailsPage() {
 
       {/* Main image */}
       <div className="mb-8">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={mainImage}
           alt={venue.media?.[0]?.alt || venue.name}
@@ -207,7 +204,7 @@ export default function VenueDetailsPage() {
         <div className="rounded-xl border border-black/10 bg-white p-4">
           <h3 className="h3 mb-4">Book this venue</h3>
 
-          {/* Clean, compact login prompt */}
+          {/* Compact login prompt */}
           {!token && (
             <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald/30 bg-sand px-3 py-2">
               <p className="body text-sm">Please log in to book this venue.</p>

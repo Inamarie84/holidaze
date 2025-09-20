@@ -1,13 +1,18 @@
+// src/components/profile/MyBookings.tsx
 'use client'
 
 import Link from 'next/link'
 import type { TBooking } from '@/types/api'
 
-type Props = { bookings: TBooking[] }
+type Props = {
+  bookings: TBooking[]
+  /** Shown when the list is empty */
+  emptyText?: string
+}
 
-export default function MyBookings({ bookings }: Props) {
+export default function MyBookings({ bookings, emptyText }: Props) {
   if (!bookings?.length) {
-    return <p className="body muted">No upcoming bookings yet.</p>
+    return <p className="body muted">{emptyText ?? 'No bookings yet.'}</p>
   }
 
   const fmt = (d: string | Date) =>
@@ -34,15 +39,13 @@ export default function MyBookings({ bookings }: Props) {
                 </div>
               </div>
 
-              {v?.id ? (
+              {v && (
                 <Link
                   href={`/venues/${v.id}`}
                   className="text-sm underline hover:opacity-80"
                 >
                   View venue
                 </Link>
-              ) : (
-                <span className="text-sm text-grey">Venue unavailable</span>
               )}
             </div>
           </li>

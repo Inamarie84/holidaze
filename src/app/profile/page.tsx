@@ -1,26 +1,19 @@
 // src/app/profile/page.tsx
 'use client'
 
-/**
- * Profile page (protected).
- * - Redirects if not logged in via AuthGate
- * - Fetches current profile (token from Zustand) via getMyProfile()
- * - Fetches bookings (with _venue=true) and manager venues (with _bookings=true)
- * - Filters bookings to upcoming and sorts ascending
- * - Renders role-specific actions, manager venues, and upcoming bookings
- */
-
 import { useEffect, useMemo, useState } from 'react'
 import AuthGate from '@/components/auth/AuthGate'
 import { getMyProfile } from '@/services/auth'
 import { api } from '@/lib/api'
 import type { TProfile, TBooking, TVenue } from '@/types/api'
 import ProfileHeader from '@/components/profile/ProfileHeader'
+import ProfileHeaderSkeleton from '@/components/profile/ProfileHeaderSkeleton'
 import ManagerVenues from '@/components/profile/ManagerVenues'
 import MyBookings from '@/components/profile/MyBookings'
 import { useSession } from '@/store/session'
 import ProfileActions from '@/components/profile/ProfileActions'
 import AvatarEditorModal from '@/components/profile/AvatarEditorModal'
+import Skeleton from '@/components/ui/Skeleton'
 
 export default function ProfilePage() {
   const { token } = useSession()
@@ -39,17 +32,14 @@ export default function ProfilePage() {
         setLoading(true)
         setError(null)
 
-        // 1) Profile
         const p = (await getMyProfile()) as TProfile
         if (!mounted) return
         setProfile(p)
 
-        const name = p.name
-        if (!name) return
+        if (!p.name) return
 
-        // 2) Bookings (include venue)
         const rawBookings = await api<TBooking[]>(
-          `/holidaze/profiles/${encodeURIComponent(name)}/bookings?_venue=true`,
+          `/holidaze/profiles/${encodeURIComponent(p.name)}/bookings?_venue=true`,
           { token: token ?? undefined, useApiKey: true }
         )
         if (!mounted) return
@@ -60,7 +50,6 @@ export default function ProfilePage() {
             `/holidaze/profiles/${encodeURIComponent(p.name)}/venues?_bookings=true&_owner=true&sort=created&sortOrder=desc`,
             { token: token ?? undefined, useApiKey: true }
           )
-
           if (!mounted) return
           setVenues(Array.isArray(v) ? v : [])
         } else {
@@ -68,9 +57,7 @@ export default function ProfilePage() {
         }
       } catch (err: unknown) {
         if (!mounted) return
-        const msg =
-          err instanceof Error ? err.message : 'Failed to load profile'
-        setError(msg)
+        setError(err instanceof Error ? err.message : 'Failed to load profile')
       } finally {
         mounted && setLoading(false)
       }
@@ -84,22 +71,89 @@ export default function ProfilePage() {
     }
   }, [token])
 
-  // Only upcoming bookings (>= today), sorted by start date ascending
-  const upcomingBookings = useMemo(() => {
+  // Partition bookings into upcoming/current vs past
+  // Treat bookings as [dateFrom, dateTo) — past if dateTo < today (midnight)
+  const { upcomingBookings, pastBookings } = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    return bookings
-      .filter((b) => new Date(b.dateFrom) >= today)
-      .sort((a, b) => +new Date(a.dateFrom) - +new Date(b.dateFrom))
+
+    const past: TBooking[] = []
+    const upcoming: TBooking[] = []
+
+    for (const b of bookings) {
+      const end = new Date(b.dateTo)
+      if (end < today) past.push(b)
+      else upcoming.push(b) // includes “current” and future
+    }
+
+    upcoming.sort((a, b) => +new Date(a.dateFrom) - +new Date(b.dateFrom))
+    past.sort((a, b) => +new Date(b.dateFrom) - +new Date(a.dateFrom)) // newest past first
+
+    return { upcomingBookings: upcoming, pastBookings: past }
   }, [bookings])
 
   return (
     <AuthGate>
       <main className="pt-8 md:pt-12 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        {loading && <p className="body muted">Loading your profile…</p>}
         {error && !loading && <p className="body text-red-600">{error}</p>}
 
-        {profile && (
+        {/* Loading skeletons */}
+        {loading && (
+          <>
+            <ProfileHeaderSkeleton />
+            <section aria-hidden className="mt-6">
+              <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-10 w-32 rounded-lg" />
+                <Skeleton className="h-10 w-40 rounded-lg" />
+                <Skeleton className="h-10 w-28 rounded-lg" />
+              </div>
+            </section>
+
+            <section aria-hidden className="mt-10">
+              <Skeleton className="h-7 w-40 mb-4" />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="overflow-hidden rounded-xl border border-black/10 bg-white"
+                  >
+                    <Skeleton className="aspect-[4/3] w-full" />
+                    <div className="p-4">
+                      <Skeleton className="h-5 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-1/2 mb-3" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-8 w-20 rounded-lg" />
+                        <Skeleton className="h-8 w-16 rounded-lg" />
+                        <Skeleton className="h-8 w-16 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section aria-hidden className="mt-10">
+              <Skeleton className="h-7 w-48 mb-4" />
+              <div className="rounded-xl border border-black/10 bg-white divide-y divide-black/10">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="p-4 flex items-center justify-between"
+                  >
+                    <div>
+                      <Skeleton className="h-4 w-40 mb-2" />
+                      <Skeleton className="h-4 w-56" />
+                    </div>
+                    <Skeleton className="h-8 w-24 rounded-lg" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* Loaded */}
+        {profile && !loading && !error && (
           <>
             <ProfileHeader
               profile={profile}
@@ -119,7 +173,18 @@ export default function ProfilePage() {
 
             <section className="mt-10">
               <h2 className="h2 mb-4">Upcoming Bookings</h2>
-              <MyBookings bookings={upcomingBookings} />
+              <MyBookings
+                bookings={upcomingBookings}
+                emptyText="No upcoming bookings yet."
+              />
+            </section>
+
+            <section className="mt-10">
+              <h2 className="h2 mb-4">Previous Bookings</h2>
+              <MyBookings
+                bookings={pastBookings}
+                emptyText="No previous bookings."
+              />
             </section>
 
             <AvatarEditorModal
