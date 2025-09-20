@@ -5,6 +5,7 @@ import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import SessionHydrator from '@/components/SessionHydrator'
 import { Toaster } from 'react-hot-toast'
+import BackToTop from '@/components/ui/BackToTop'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const dmSerif = DM_Serif_Display({
@@ -29,9 +30,14 @@ export default function RootLayout({
         <SessionHydrator />
         <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
 
-        {/* Sticky navbar is 64px (h-16). We offset once here with pt-16. */}
+        {/* Sticky navbar is 64px (h-16). Offset page content with pt-16 on <main>. */}
         <Navbar />
-        <main className="pt-16 min-h-[100dvh]">{children}</main>
+        <main id="content" className="pt-16 min-h-[100dvh]">
+          {children}
+        </main>
+
+        {/* Floating action button visible site-wide */}
+        <BackToTop />
       </body>
     </html>
   )

@@ -10,6 +10,7 @@ import type { TVenueWithBookings, TBooking } from '@/types/api'
 import toast from 'react-hot-toast'
 import { createBooking } from '@/services/bookings'
 import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
+import SmartBackButton from '@/components/ui/SmartBackButton'
 
 // When we fetch with _bookings=true&_owner=true, we’ll get bookings and owner
 type VenueWithExtras = TVenueWithBookings & { owner?: { name?: string } }
@@ -80,7 +81,7 @@ export default function VenueDetailsPage() {
     e.preventDefault()
     if (!venue) return
     if (!canBook) {
-      toast.error('Please log in as a customer to book.')
+      toast.error('Please log in to book this venue.')
       router.push('/login?role=customer')
       return
     }
@@ -145,6 +146,9 @@ export default function VenueDetailsPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mb-3">
+        <SmartBackButton className="mb-2" fallback="/venues" />
+      </div>
       {/* Title ABOVE the image */}
       <header className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -206,9 +210,7 @@ export default function VenueDetailsPage() {
           {/* Clean, compact login prompt */}
           {!token && (
             <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald/30 bg-sand px-3 py-2">
-              <p className="body text-sm">
-                Please log in as a customer to book.
-              </p>
+              <p className="body text-sm">Please log in to book this venue.</p>
               <Link
                 href="/login?role=customer"
                 className="inline-flex items-center rounded-md bg-emerald px-3 py-1.5 text-white hover:opacity-90"
