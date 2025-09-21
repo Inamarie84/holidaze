@@ -31,7 +31,7 @@ export default function BackToTop() {
       className="fixed bottom-6 right-6 z-[70]
                  inline-flex h-11 w-11 items-center justify-center
                  rounded-full bg-emerald text-white shadow-lg
-                 border border-black/10 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-emerald"
+                 border border-black/10 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-emerald cursor-pointer"
       style={{
         // respect iOS safe areas
         right: 'max(1.5rem, env(safe-area-inset-right))',

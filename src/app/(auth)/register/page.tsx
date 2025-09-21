@@ -25,7 +25,7 @@ export default function RegisterPage() {
   const nameError = !name.trim() ? 'Name is required.' : null
   const emailError =
     role === 'manager' && !isNoroffEmail(email)
-      ? 'Managers must use @stud.noroff.no'
+      ? '@stud.noroff.no address required'
       : null
   const passwordError =
     password.length < 8 ? 'Password must be at least 8 characters' : null
@@ -134,7 +134,7 @@ export default function RegisterPage() {
           type="submit"
           disabled={loading}
           aria-busy={loading}
-          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
         >
           {loading ? 'Creating…' : 'Create account'}
         </button>

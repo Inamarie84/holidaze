@@ -144,7 +144,7 @@ export default function SearchBar() {
 
           <button
             type="submit"
-            className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 cursor-pointer focus:outline-none focus:ring-4 focus:ring-emerald/30 transition mt-1"
             aria-label="Search venues"
           >
             Search
