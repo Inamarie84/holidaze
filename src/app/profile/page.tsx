@@ -1,4 +1,3 @@
-// src/app/profile/page.tsx
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -8,6 +7,8 @@ import { api } from '@/lib/api'
 import type { TProfile, TBooking, TVenue } from '@/types/api'
 import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileHeaderSkeleton from '@/components/profile/ProfileHeaderSkeleton'
+import ManagerVenuesSkeleton from '@/components/profile/ManagerVenuesSkeleton'
+import BookingListSkeleton from '@/components/profile/BookingListSkeleton'
 import ManagerVenues from '@/components/profile/ManagerVenues'
 import MyBookings from '@/components/profile/MyBookings'
 import { useSession } from '@/store/session'
@@ -18,42 +19,48 @@ import Skeleton from '@/components/ui/Skeleton'
 export default function ProfilePage() {
   const { token } = useSession()
   const [profile, setProfile] = useState<TProfile | null>(null)
+
+  // Customer’s personal bookings (only filled when NOT a manager)
   const [bookings, setBookings] = useState<TBooking[]>([])
+
+  // Manager’s venues (+ each venue’s bookings)
   const [venues, setVenues] = useState<TVenue[]>([])
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [avatarOpen, setAvatarOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
-
     async function load() {
       try {
         setLoading(true)
         setError(null)
 
+        // 1) Who am I?
         const p = (await getMyProfile()) as TProfile
         if (!mounted) return
         setProfile(p)
-
         if (!p.name) return
 
-        const rawBookings = await api<TBooking[]>(
-          `/holidaze/profiles/${encodeURIComponent(p.name)}/bookings?_venue=true`,
-          { token: token ?? undefined, useApiKey: true }
-        )
-        if (!mounted) return
-        setBookings(Array.isArray(rawBookings) ? rawBookings : [])
-
         if (p.venueManager) {
+          // 2a) MANAGER: get my venues with bookings so I can see upcoming bookings for my venues
           const v = await api<TVenue[]>(
-            `/holidaze/profiles/${encodeURIComponent(p.name)}/venues?_bookings=true&_owner=true&sort=created&sortOrder=desc`,
+            `/holidaze/profiles/${encodeURIComponent(p.name)}/venues?_bookings=true&_owner=true&sort=updated&sortOrder=desc`,
             { token: token ?? undefined, useApiKey: true }
           )
           if (!mounted) return
           setVenues(Array.isArray(v) ? v : [])
+          setBookings([]) // ensure personal bookings list is empty/unused for managers
         } else {
-          setVenues([])
+          // 2b) CUSTOMER: get my personal bookings (with venue)
+          const rawBookings = await api<TBooking[]>(
+            `/holidaze/profiles/${encodeURIComponent(p.name)}/bookings?_venue=true`,
+            { token: token ?? undefined, useApiKey: true }
+          )
+          if (!mounted) return
+          setBookings(Array.isArray(rawBookings) ? rawBookings : [])
+          setVenues([]) // no manager venues for customers
         }
       } catch (err: unknown) {
         if (!mounted) return
@@ -71,26 +78,46 @@ export default function ProfilePage() {
     }
   }, [token])
 
-  // Partition bookings into upcoming/current vs past
+  // --- Helpers to partition bookings by time ---
   // Treat bookings as [dateFrom, dateTo) — past if dateTo < today (midnight)
-  const { upcomingBookings, pastBookings } = useMemo(() => {
+  const partitionBookings = (list: TBooking[]) => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-
     const past: TBooking[] = []
     const upcoming: TBooking[] = []
-
-    for (const b of bookings) {
+    for (const b of list) {
       const end = new Date(b.dateTo)
       if (end < today) past.push(b)
-      else upcoming.push(b) // includes “current” and future
+      else upcoming.push(b)
     }
-
     upcoming.sort((a, b) => +new Date(a.dateFrom) - +new Date(b.dateFrom))
-    past.sort((a, b) => +new Date(b.dateFrom) - +new Date(a.dateFrom)) // newest past first
+    past.sort((a, b) => +new Date(b.dateFrom) - +new Date(a.dateFrom))
+    return { upcoming, past }
+  }
 
-    return { upcomingBookings: upcoming, pastBookings: past }
-  }, [bookings])
+  // For CUSTOMERS: split their personal bookings
+  const customerBookings = useMemo(
+    () => partitionBookings(bookings),
+    [bookings]
+  )
+
+  // For MANAGERS: flatten venue bookings into a single list (include venue on each)
+  const managerVenueBookings = useMemo<TBooking[]>(() => {
+    const out: TBooking[] = []
+    for (const v of venues) {
+      const bs = (v as any).bookings as TBooking[] | undefined
+      if (!bs?.length) continue
+      for (const b of bs) {
+        out.push({ ...b, venue: v }) // ensure booking.venue exists for linking
+      }
+    }
+    return out
+  }, [venues])
+
+  const managerUpcoming = useMemo(
+    () => partitionBookings(managerVenueBookings).upcoming,
+    [managerVenueBookings]
+  )
 
   return (
     <AuthGate>
@@ -101,6 +128,8 @@ export default function ProfilePage() {
         {loading && (
           <>
             <ProfileHeaderSkeleton />
+
+            {/* Quick actions row (skeleton buttons) */}
             <section aria-hidden className="mt-6">
               <div className="flex flex-wrap gap-3">
                 <Skeleton className="h-10 w-32 rounded-lg" />
@@ -109,45 +138,15 @@ export default function ProfilePage() {
               </div>
             </section>
 
+            {/* My Venues grid skeleton */}
             <section aria-hidden className="mt-10">
-              <Skeleton className="h-7 w-40 mb-4" />
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {[...Array(6)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="overflow-hidden rounded-xl border border-black/10 bg-white"
-                  >
-                    <Skeleton className="aspect-[4/3] w-full" />
-                    <div className="p-4">
-                      <Skeleton className="h-5 w-3/4 mb-2" />
-                      <Skeleton className="h-4 w-1/2 mb-3" />
-                      <div className="flex gap-2">
-                        <Skeleton className="h-8 w-20 rounded-lg" />
-                        <Skeleton className="h-8 w-16 rounded-lg" />
-                        <Skeleton className="h-8 w-16 rounded-lg" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <ManagerVenuesSkeleton />
             </section>
 
+            {/* Bookings list skeleton */}
             <section aria-hidden className="mt-10">
-              <Skeleton className="h-7 w-48 mb-4" />
-              <div className="rounded-xl border border-black/10 bg-white divide-y divide-black/10">
-                {[...Array(3)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="p-4 flex items-center justify-between"
-                  >
-                    <div>
-                      <Skeleton className="h-4 w-40 mb-2" />
-                      <Skeleton className="h-4 w-56" />
-                    </div>
-                    <Skeleton className="h-8 w-24 rounded-lg" />
-                  </div>
-                ))}
-              </div>
+              <h2 className="h2 mb-4">Upcoming Bookings</h2>
+              <BookingListSkeleton />
             </section>
           </>
         )}
@@ -164,28 +163,42 @@ export default function ProfilePage() {
               role={profile.venueManager ? 'manager' : 'customer'}
             />
 
-            {profile.venueManager && (
-              <section className="mt-10">
-                <h2 className="h2 mb-4">My Venues</h2>
-                <ManagerVenues venues={venues} />
-              </section>
+            {profile.venueManager ? (
+              <>
+                {/* Manager view */}
+                <section className="mt-10">
+                  <h2 className="h2 mb-4">My Venues</h2>
+                  <ManagerVenues venues={venues} />
+                </section>
+
+                <section className="mt-10">
+                  <h2 className="h2 mb-4">Upcoming bookings for your venues</h2>
+                  <MyBookings
+                    bookings={managerUpcoming}
+                    emptyText="No upcoming bookings for your venues yet."
+                  />
+                </section>
+              </>
+            ) : (
+              <>
+                {/* Customer view */}
+                <section className="mt-10">
+                  <h2 className="h2 mb-4">Upcoming Bookings</h2>
+                  <MyBookings
+                    bookings={customerBookings.upcoming}
+                    emptyText="No upcoming bookings yet."
+                  />
+                </section>
+
+                <section className="mt-10">
+                  <h2 className="h2 mb-4">Previous Bookings</h2>
+                  <MyBookings
+                    bookings={customerBookings.past}
+                    emptyText="No previous bookings."
+                  />
+                </section>
+              </>
             )}
-
-            <section className="mt-10">
-              <h2 className="h2 mb-4">Upcoming Bookings</h2>
-              <MyBookings
-                bookings={upcomingBookings}
-                emptyText="No upcoming bookings yet."
-              />
-            </section>
-
-            <section className="mt-10">
-              <h2 className="h2 mb-4">Previous Bookings</h2>
-              <MyBookings
-                bookings={pastBookings}
-                emptyText="No previous bookings."
-              />
-            </section>
 
             <AvatarEditorModal
               open={avatarOpen}
