@@ -114,7 +114,14 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
               aria-busy={loading}
               className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
             >
-              {loading ? 'Saving…' : 'Save'}
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
+                  Saving…
+                </span>
+              ) : (
+                'Save'
+              )}
             </button>
           </div>
         </form>

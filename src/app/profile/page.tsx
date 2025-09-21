@@ -157,6 +157,17 @@ export default function ProfilePage() {
             <ProfileHeader
               profile={profile}
               onEditAvatar={() => setAvatarOpen(true)}
+              customerUpcomingCount={
+                !profile.venueManager
+                  ? customerBookings.upcoming.length
+                  : undefined
+              }
+              managerUpcomingCount={
+                profile.venueManager ? managerUpcoming.length : undefined
+              }
+              managerVenuesCount={
+                profile.venueManager ? venues.length : undefined
+              }
             />
 
             <ProfileActions
