@@ -8,7 +8,7 @@ import type { TProfile } from '@/types/api'
 type Props = {
   profile: TProfile
   onEditAvatar?: () => void
-  // Optional, so we can show role-appropriate counts
+  // Optional counters so we can show role-appropriate badges
   customerUpcomingCount?: number
   managerUpcomingCount?: number
   managerVenuesCount?: number
@@ -25,9 +25,15 @@ export default function ProfileHeader({
 
   const displayName = profile.name || sessionUser?.name || ''
   const displayEmail = profile.email || sessionUser?.email || ''
-  const avatar =
-    profile.avatar?.url || sessionUser?.avatar?.url || '/images/placeholder.jpg'
-  const avatarAlt = profile.avatar?.alt || displayName || 'User avatar'
+
+  // ✅ Prefer the session avatar first (store updates immediately after PUT)
+  const avatarUrl =
+    sessionUser?.avatar?.url ?? profile.avatar?.url ?? '/images/placeholder.jpg'
+
+  const avatarAlt =
+    sessionUser?.avatar?.alt ??
+    profile.avatar?.alt ??
+    (displayName || 'User avatar')
 
   const isManager = !!profile.venueManager
 
@@ -36,7 +42,8 @@ export default function ProfileHeader({
       <div className="flex items-center gap-4">
         <div className="relative h-16 w-16 overflow-hidden rounded-full border border-black/10">
           <Image
-            src={avatar}
+            key={avatarUrl} // 🔑 force Image to re-render when URL changes
+            src={avatarUrl}
             alt={avatarAlt}
             fill
             className="object-cover"

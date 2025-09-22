@@ -5,15 +5,19 @@ import { useEffect, useMemo, useState } from 'react'
 import { updateMyAvatarAndSync } from '@/services/profiles'
 import toast from 'react-hot-toast'
 import { errMsg } from '@/utils/errors'
+import type { TProfile } from '@/types/api'
 
-type Props = { open: boolean; onClose: () => void }
+type Props = {
+  open: boolean
+  onClose: () => void
+  onSaved?: (p: TProfile) => void
+}
 
-export default function AvatarEditorModal({ open, onClose }: Props) {
+export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
   const [url, setUrl] = useState('')
   const [alt, setAlt] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Reset fields whenever the modal closes/opens
   useEffect(() => {
     if (!open) {
       setUrl('')
@@ -22,8 +26,6 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
     }
   }, [open])
 
-  // 🔑 Always call hooks — even if the modal is closed.
-  // Simple URL sanity check + preview
   const previewUrl = useMemo(() => {
     if (!url) return ''
     try {
@@ -34,7 +36,6 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
     }
   }, [url])
 
-  // After all hooks, you can render-null safely
   if (!open) return null
 
   async function onSave(e: React.FormEvent) {
@@ -45,7 +46,11 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
     }
     setLoading(true)
     try {
-      await updateMyAvatarAndSync(url.trim(), alt.trim() || undefined)
+      const updated = await updateMyAvatarAndSync(
+        url.trim(),
+        alt.trim() || undefined
+      )
+      onSaved?.(updated) // 👈 inform parent so it can patch local state
       toast.success('Avatar updated!')
       onClose()
     } catch (err) {
@@ -114,14 +119,7 @@ export default function AvatarEditorModal({ open, onClose }: Props) {
               aria-busy={loading}
               className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
             >
-              {loading ? (
-                <span className="inline-flex items-center gap-2">
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
-                  Saving…
-                </span>
-              ) : (
-                'Save'
-              )}
+              {loading ? 'Saving…' : 'Save'}
             </button>
           </div>
         </form>

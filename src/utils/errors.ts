@@ -1,42 +1,43 @@
 // src/utils/errors.ts
 
 /**
- * Extract a human-friendly message from Noroff v2 API errors, fetch/Response,
- * or generic JS errors. Safe to use everywhere.
+ * Extract a human-friendly message from Noroff v2 API errors, our api() throws,
+ * fetch/Response shapes, or generic JS errors. Safe to use everywhere.
  */
 export function errMsg(e: unknown): string {
-  // JS Error objects
-  if (e instanceof Error) return e.message
+  // Standard JS Error
+  if (e instanceof Error && e.message) return e.message
 
-  // Noroff v2 "wrapped" error objects thrown by your api() helper, e.g.:
-  // { status: 401, body: { status: 'Unauthorized', statusCode: 401, errors: [{ message: '...' }] } }
   const anyE = e as any
   const body = anyE?.body
 
-  // Noroff body.errors[]
-  const noroffErrArray = body?.errors
-  if (Array.isArray(noroffErrArray) && noroffErrArray.length > 0) {
-    const messages = noroffErrArray
-      .map((it: any) => it?.message)
+  // Noroff { body: { errors: [{ message }] } }
+  const noroffErrs = body?.errors
+  if (Array.isArray(noroffErrs) && noroffErrs.length > 0) {
+    const messages = noroffErrs
+      .map((it: any) => (typeof it === 'string' ? it : it?.message))
       .filter(Boolean)
       .join(', ')
     if (messages) return humanize(messages, body?.statusCode)
   }
 
-  // Noroff body.status/body.message
+  // Noroff { body: { message, status, statusCode } }
   if (body?.message || body?.status) {
     return humanize(String(body.message ?? body.status), body?.statusCode)
   }
 
-  // Flat error shape { message, statusCode }
-  if (anyE?.message || anyE?.statusCode) {
+  // Flat error shapes { message, statusCode }
+  if (
+    typeof anyE?.message === 'string' ||
+    typeof anyE?.statusCode === 'number'
+  ) {
     return humanize(String(anyE.message ?? 'Error'), anyE?.statusCode)
   }
 
-  // String error
+  // Plain string
   if (typeof e === 'string') return e
 
-  // Fallback
+  // Fallback to JSON
   try {
     return JSON.stringify(e)
   } catch {
@@ -45,7 +46,7 @@ export function errMsg(e: unknown): string {
 }
 
 /**
- * Map common Noroff / auth / validation statuses to nicer copy.
+ * Map common statuses/phrases to friendlier copy.
  */
 function humanize(message: string, statusCode?: number): string {
   const m = message.toLowerCase()
@@ -62,7 +63,7 @@ function humanize(message: string, statusCode?: number): string {
     return 'You don’t have permission to perform this action.'
   }
 
-  // Auth: invalid credentials
+  // Invalid credentials
   if (
     m.includes('invalid email or password') ||
     m.includes('invalid credentials')
@@ -70,7 +71,7 @@ function humanize(message: string, statusCode?: number): string {
     return 'Invalid email or password.'
   }
 
-  // Registration: email conflict
+  // Registration conflicts
   if (
     statusCode === 409 ||
     m.includes('already registered') ||
@@ -89,7 +90,7 @@ function humanize(message: string, statusCode?: number): string {
     return 'Resource not found.'
   }
 
-  // Otherwise return original (capitalized)
+  // Otherwise keep original (capitalized)
   return capitalize(message)
 }
 

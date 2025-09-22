@@ -12,10 +12,10 @@ export default function SearchBar() {
   const pathname = usePathname()
 
   // Refs so the entire field container can focus the input
-  const destRef = useRef<HTMLInputElement>(null)
-  const fromRef = useRef<HTMLInputElement>(null)
-  const toRef = useRef<HTMLInputElement>(null)
-  const guestsRef = useRef<HTMLInputElement>(null)
+  const destRef = useRef<HTMLInputElement | null>(null)
+  const fromRef = useRef<HTMLInputElement | null>(null)
+  const toRef = useRef<HTMLInputElement | null>(null)
+  const guestsRef = useRef<HTMLInputElement | null>(null)
 
   // initialize from URL
   const [destination, setDestination] = useState(sp.get('q') ?? '')
@@ -36,7 +36,7 @@ export default function SearchBar() {
 
   const debouncedDestination = useDebounce(destination, 450)
 
-  // Live-update on / and /venues (if you only want /venues, change this)
+  // Live-update on / and /venues
   const onVenuesIndex = pathname === '/' || pathname === '/venues'
 
   function buildQuery(q?: string, f?: string, t?: string, g?: number | '') {
@@ -81,12 +81,12 @@ export default function SearchBar() {
 
   // Make the entire box clickable; open native date picker when supported
   function clickToFocus(
-    ref: React.RefObject<HTMLInputElement>,
+    ref: React.RefObject<HTMLInputElement | null>,
     openDate?: boolean
   ) {
     const el = ref.current
     if (!el) return
-    if (openDate && (el as any).showPicker) {
+    if (openDate && typeof (el as any).showPicker === 'function') {
       ;(el as any).showPicker()
       return
     }
