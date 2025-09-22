@@ -57,8 +57,8 @@ export default function Navbar() {
               alt="Holidaze"
               width={120}
               height={32}
-              priority
             />
+
             <span className="sr-only">Holidaze</span>
           </Link>
 
