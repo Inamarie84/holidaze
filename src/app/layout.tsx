@@ -34,7 +34,7 @@ export default function RootLayout({
         <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
         <Navbar />
         {/* Offset for sticky navbar */}
-        <main id="content" className="pt-16 flex-1">
+        <main id="content" className="flex-1 pt-[var(--nav-height,4rem)]">
           {children}
         </main>
         <Footer />

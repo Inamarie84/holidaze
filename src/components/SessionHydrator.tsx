@@ -1,26 +1,43 @@
-// src/components/SessionHydrator.tsx
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useSession } from '@/store/session'
+import { getMyProfile } from '@/services/auth'
 
+/**
+ * Reconciles the hydrated session with the latest profile data.
+ * - If token exists but session is missing venueManager or avatar,
+ *   fetch profile and update store.
+ * - Runs once per load (or when name/token changes).
+ */
 export default function SessionHydrator() {
-  const hydrate = useSession((s) => s.hydrate)
-  const logout = useSession((s) => s.logout)
+  const { token, user, setUser } = useSession()
+  const didSyncRef = useRef(false)
 
   useEffect(() => {
-    hydrate()
+    if (!token || !user?.name) return
+    if (didSyncRef.current) return
 
-    // cross-tab sync (logout/login in another tab)
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'holidaze_session') {
-        // just re-hydrate on any change
-        hydrate()
+    const missingRole = typeof user.venueManager !== 'boolean'
+    const missingAvatar = !user.avatar // optional: keep avatar fresh too
+
+    if (!missingRole && !missingAvatar) return
+    ;(async () => {
+      try {
+        const p = await getMyProfile()
+        setUser({
+          name: p.name,
+          email: p.email,
+          venueManager: p.venueManager,
+          avatar: p.avatar,
+        } as any)
+      } catch {
+        // silent: not critical to block the app
+      } finally {
+        didSyncRef.current = true
       }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [hydrate, logout])
+    })()
+  }, [token, user?.name, user?.venueManager, user?.avatar, setUser])
 
   return null
 }

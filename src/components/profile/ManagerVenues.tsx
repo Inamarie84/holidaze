@@ -1,31 +1,21 @@
-// src/components/profile/ManagerVenues.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import type { TVenue } from '@/types/api'
+import type { TVenueWithBookings } from '@/types/api'
 import { deleteVenue } from '@/services/venues'
+import { ts } from '@/utils/dates'
 
-type Props = { venues: TVenue[] }
+type Props = { venues: TVenueWithBookings[] }
 
-// Convert ISO -> timestamp. Returns 0 if missing/invalid.
-function safeTime(iso?: string) {
-  if (!iso) return 0
-  const t = Date.parse(iso)
-  return Number.isNaN(t) ? 0 : t
-}
-
-// Prefer `updated`, fall back to `created`.
-function updatedAt(v: TVenue) {
-  const u = safeTime(v.updated as any) // types sometimes mark these optional
-  const c = safeTime(v.created as any)
-  return u || c // if u is 0, use c
+function updatedAt(v: TVenueWithBookings) {
+  return ts(v.updated) || ts(v.created)
 }
 
 export default function ManagerVenues({ venues }: Props) {
-  const [items, setItems] = useState<TVenue[]>([])
+  const [items, setItems] = useState<TVenueWithBookings[]>([])
 
   useEffect(() => {
     const list = Array.isArray(venues) ? [...venues] : []
@@ -36,12 +26,12 @@ export default function ManagerVenues({ venues }: Props) {
   async function onDelete(id: string) {
     if (!confirm('Delete this venue? This cannot be undone.')) return
     const prev = items
-    setItems((cur) => cur.filter((v) => v.id !== id)) // optimistic
+    setItems((cur) => cur.filter((v) => v.id !== id))
     try {
       await deleteVenue(id)
       toast.success('Venue deleted')
     } catch (err: any) {
-      setItems(prev) // rollback
+      setItems(prev)
       toast.error(err?.message || 'Failed to delete venue')
     }
   }
@@ -93,10 +83,10 @@ export default function ManagerVenues({ venues }: Props) {
 
               <div className="mt-3 flex items-center gap-3 text-sm">
                 <span className="inline-flex items-center rounded-full border border-black/10 px-2 py-0.5">
-                  {v.price} NOK / night
+                  {`${v.price} NOK / night`}
                 </span>
                 <span className="inline-flex items-center rounded-full border border-black/10 px-2 py-0.5">
-                  Max {v.maxGuests}
+                  {`Max ${v.maxGuests}`}
                 </span>
               </div>
 
@@ -114,8 +104,10 @@ export default function ManagerVenues({ venues }: Props) {
                   Edit
                 </Link>
                 <button
+                  type="button"
                   onClick={() => onDelete(v.id)}
-                  className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-white hover:opacity-90 cursor-pointer"
+                  aria-label={`Delete venue ${v.name}`}
+                  className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-white hover:opacity-90"
                 >
                   Delete
                 </button>

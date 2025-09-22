@@ -6,25 +6,35 @@ import { loginUser } from '@/services/auth'
 import { useSession } from '@/store/session'
 import { errMsg } from '@/utils/errors'
 import toast from 'react-hot-toast'
+import { FormField } from '@/components/ui/FormField'
+import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
+/**
+ * LoginPage
+ * Renders the login form for customers and venue managers.
+ * Redirects to /profile (or ?redirect=...) on success.
+ */
 export default function LoginPage() {
   const router = useRouter()
   const sp = useSearchParams()
   const role = sp.get('role')
+  const redirect = sp.get('redirect') || '/profile'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (loading) return
+
     setLoading(true)
     try {
       await loginUser({ email: email.trim(), password })
       const { user } = useSession.getState()
       toast.success(`Welcome, ${user?.name ?? 'there'}!`)
-      router.push('/profile')
+      router.push(`${redirect}`)
     } catch (err) {
       toast.error(errMsg(err))
     } finally {
@@ -33,7 +43,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12">
+    <main
+      id="main-content"
+      className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12"
+    >
       <h1 className="h1 mb-4">Log in</h1>
       {role && (
         <p className="muted mb-4">
@@ -41,27 +54,27 @@ export default function LoginPage() {
         </p>
       )}
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="body block mb-1" htmlFor="email">
-            Email
-          </label>
-          <input
+      <form
+        onSubmit={onSubmit}
+        aria-describedby={loading ? 'login-status' : undefined}
+        className="space-y-4"
+      >
+        <FormField id="email" label="Email">
+          <Input
             id="email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            className="w-full rounded-lg border border-black/15 px-3 py-2"
+            inputMode="email"
+            aria-required="true"
+            disabled={loading}
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label className="body block mb-1" htmlFor="password">
-            Password
-          </label>
-          <input
+        <FormField id="password" label="Password">
+          <Input
             id="password"
             type="password"
             required
@@ -69,18 +82,23 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
-            className="w-full rounded-lg border border-black/15 px-3 py-2"
+            aria-required="true"
+            disabled={loading}
           />
-        </div>
+        </FormField>
 
-        <button
-          type="submit"
-          disabled={loading}
-          aria-busy={loading}
-          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
-        >
+        <SubmitButton busy={loading}>
           {loading ? 'Signing in…' : 'Log in'}
-        </button>
+        </SubmitButton>
+
+        <p
+          id="login-status"
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+        >
+          {loading ? 'Signing in…' : ''}
+        </p>
       </form>
     </main>
   )

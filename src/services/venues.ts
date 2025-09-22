@@ -1,13 +1,17 @@
-// src/services/venues.ts
 import { api } from '@/lib/api'
 import { useSession } from '@/store/session'
-import type { TVenue, TVenueWithBookings, TVenueInclude } from '@/types/api'
+import type {
+  TVenue,
+  TVenueWithBookings,
+  TVenueInclude,
+  UpsertVenueInput,
+} from '@/types/api'
 
 // Add generic query options (API supports these)
 export type VenuesQuery = TVenueInclude & {
   page?: number | string
   limit?: number | string
-  sort?: string // 'created' | 'updated' | 'name' | 'price' ...
+  sort?: string
   sortOrder?: 'asc' | 'desc'
 }
 
@@ -24,7 +28,6 @@ function toQuery(params?: Record<string, unknown>): string {
 
 /** -------- List & read -------- */
 export async function getVenues(params?: VenuesQuery): Promise<TVenue[]> {
-  // default to newest first, reasonable page size
   const query = toQuery({
     sort: 'created',
     sortOrder: 'desc',
@@ -45,7 +48,7 @@ export async function getVenueById(id: string, params?: TVenueInclude) {
   return api(`/holidaze/venues/${id}${query}`)
 }
 
-/** -------- Client-side search (your filter) -------- */
+/** -------- Client-side search -------- */
 type SearchInput = {
   q?: string
   dateFrom?: string
@@ -59,7 +62,7 @@ export async function searchVenues({
   dateFrom,
   dateTo,
   guests,
-  limit = 100, // pull a bigger, *newest-first* slice to filter locally
+  limit = 100,
 }: SearchInput): Promise<TVenueWithBookings[]> {
   const url = `/holidaze/venues?_bookings=true&sort=created&sortOrder=desc&limit=${limit}`
   const venues = await api<TVenueWithBookings[]>(url)
@@ -93,36 +96,13 @@ export async function searchVenues({
   })
 }
 
-/** -------- Manager CRUD (unchanged) -------- */
+/** -------- Manager CRUD -------- */
 function requireManagerAuth() {
   const { token, user } = useSession.getState()
   if (!token) throw new Error('Not authenticated')
   if (!user?.venueManager)
     throw new Error('Only venue managers can perform this action')
   return { token, user }
-}
-
-export type UpsertVenueInput = {
-  name: string
-  description?: string
-  media?: { url: string; alt?: string }[]
-  price: number
-  maxGuests: number
-  meta?: {
-    wifi?: boolean
-    parking?: boolean
-    breakfast?: boolean
-    pets?: boolean
-  }
-  location?: {
-    address?: string
-    city?: string
-    zip?: string
-    country?: string
-    continent?: string
-    lat?: number
-    lng?: number
-  }
 }
 
 export async function createVenue(input: UpsertVenueInput): Promise<TVenue> {

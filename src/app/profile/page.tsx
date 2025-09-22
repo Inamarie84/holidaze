@@ -1,115 +1,87 @@
+// src/app/profile/page.tsx
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import AuthGate from '@/components/auth/AuthGate'
-import { getMyProfile } from '@/services/auth'
-import { api } from '@/lib/api'
-import type { TProfile, TBooking, TVenue } from '@/types/api'
 import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileHeaderSkeleton from '@/components/profile/ProfileHeaderSkeleton'
 import ManagerVenuesSkeleton from '@/components/profile/ManagerVenuesSkeleton'
 import BookingListSkeleton from '@/components/profile/BookingListSkeleton'
 import ManagerVenues from '@/components/profile/ManagerVenues'
 import MyBookings from '@/components/profile/MyBookings'
-import { useSession } from '@/store/session'
 import ProfileActions from '@/components/profile/ProfileActions'
 import AvatarEditorModal from '@/components/profile/AvatarEditorModal'
 import Skeleton from '@/components/ui/Skeleton'
+import type { TProfile, TBooking, TVenueWithBookings } from '@/types/api'
+import {
+  getMyProfile,
+  getMyBookings,
+  getMyVenuesWithBookings,
+} from '@/services/profiles'
+import { partitionBookings } from '@/utils/dates'
 
+/**
+ * ProfilePage
+ * Shows current user's profile, bookings (customer), and venues+bookings (manager).
+ */
 export default function ProfilePage() {
-  const { token } = useSession()
   const [profile, setProfile] = useState<TProfile | null>(null)
-
-  // Customer’s personal bookings (only filled when NOT a manager)
   const [bookings, setBookings] = useState<TBooking[]>([])
-
-  // Manager’s venues (+ each venue’s bookings)
-  const [venues, setVenues] = useState<TVenue[]>([])
-
+  const [venues, setVenues] = useState<TVenueWithBookings[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [avatarOpen, setAvatarOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
+
     async function load() {
       try {
         setLoading(true)
         setError(null)
 
         // 1) Who am I?
-        const p = (await getMyProfile()) as TProfile
+        const me = await getMyProfile()
         if (!mounted) return
-        setProfile(p)
-        if (!p.name) return
+        setProfile(me)
 
-        if (p.venueManager) {
-          // 2a) MANAGER: get my venues with bookings so I can see upcoming bookings for my venues
-          const v = await api<TVenue[]>(
-            `/holidaze/profiles/${encodeURIComponent(p.name)}/venues?_bookings=true&_owner=true&sort=updated&sortOrder=desc`,
-            { token: token ?? undefined, useApiKey: true }
-          )
+        // 2) Role-based fetches
+        if (me.venueManager) {
+          const vs = await getMyVenuesWithBookings()
           if (!mounted) return
-          setVenues(Array.isArray(v) ? v : [])
-          setBookings([]) // ensure personal bookings list is empty/unused for managers
+          setVenues(Array.isArray(vs) ? vs : [])
+          setBookings([]) // managers don't use personal bookings list here
         } else {
-          // 2b) CUSTOMER: get my personal bookings (with venue)
-          const rawBookings = await api<TBooking[]>(
-            `/holidaze/profiles/${encodeURIComponent(p.name)}/bookings?_venue=true`,
-            { token: token ?? undefined, useApiKey: true }
-          )
+          const bs = await getMyBookings()
           if (!mounted) return
-          setBookings(Array.isArray(rawBookings) ? rawBookings : [])
-          setVenues([]) // no manager venues for customers
+          setBookings(Array.isArray(bs) ? bs : [])
+          setVenues([]) // customers don't manage venues
         }
-      } catch (err: unknown) {
+      } catch (err) {
         if (!mounted) return
-        setError(err instanceof Error ? err.message : 'Failed to load profile')
+        const msg =
+          err instanceof Error ? err.message : 'Failed to load profile'
+        setError(msg)
       } finally {
         mounted && setLoading(false)
       }
     }
 
-    if (token) load()
-    else setLoading(false)
-
+    load()
     return () => {
       mounted = false
     }
-  }, [token])
+  }, [])
 
-  // --- Helpers to partition bookings by time ---
-  // Treat bookings as [dateFrom, dateTo) — past if dateTo < today (midnight)
-  const partitionBookings = (list: TBooking[]) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const past: TBooking[] = []
-    const upcoming: TBooking[] = []
-    for (const b of list) {
-      const end = new Date(b.dateTo)
-      if (end < today) past.push(b)
-      else upcoming.push(b)
-    }
-    upcoming.sort((a, b) => +new Date(a.dateFrom) - +new Date(b.dateFrom))
-    past.sort((a, b) => +new Date(b.dateFrom) - +new Date(a.dateFrom))
-    return { upcoming, past }
-  }
+  // CUSTOMER: split personal bookings
+  const customer = useMemo(() => partitionBookings(bookings), [bookings])
 
-  // For CUSTOMERS: split their personal bookings
-  const customerBookings = useMemo(
-    () => partitionBookings(bookings),
-    [bookings]
-  )
-
-  // For MANAGERS: flatten venue bookings into a single list (include venue on each)
+  // MANAGER: flatten venue bookings with venue attached
   const managerVenueBookings = useMemo<TBooking[]>(() => {
     const out: TBooking[] = []
     for (const v of venues) {
-      const bs = (v as any).bookings as TBooking[] | undefined
-      if (!bs?.length) continue
-      for (const b of bs) {
-        out.push({ ...b, venue: v }) // ensure booking.venue exists for linking
-      }
+      if (!v.bookings?.length) continue
+      for (const b of v.bookings) out.push({ ...b, venue: v })
     }
     return out
   }, [venues])
@@ -121,29 +93,31 @@ export default function ProfilePage() {
 
   return (
     <AuthGate>
-      <main className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        {error && !loading && <p className="body text-red-600">{error}</p>}
+      <main
+        id="main-content"
+        className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8"
+      >
+        {/* errors */}
+        {error && !loading && (
+          <p role="alert" className="body text-red-600">
+            {error}
+          </p>
+        )}
 
-        {/* Loading skeletons */}
+        {/* loading state */}
         {loading && (
           <>
             <ProfileHeaderSkeleton />
-
-            {/* Quick actions row (skeleton buttons) */}
             <section aria-hidden className="mt-6">
               <div className="flex flex-wrap gap-3">
-                <Skeleton className="h-10 w-32 rounded-lg" />
-                <Skeleton className="h-10 w-40 rounded-lg" />
-                <Skeleton className="h-10 w-28 rounded-lg" />
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-10 w-40" />
+                <Skeleton className="h-10 w-28" />
               </div>
             </section>
-
-            {/* My Venues grid skeleton */}
             <section aria-hidden className="mt-10">
               <ManagerVenuesSkeleton />
             </section>
-
-            {/* Bookings list skeleton */}
             <section aria-hidden className="mt-10">
               <h2 className="h2 mb-4">Upcoming Bookings</h2>
               <BookingListSkeleton />
@@ -151,16 +125,14 @@ export default function ProfilePage() {
           </>
         )}
 
-        {/* Loaded */}
+        {/* loaded */}
         {profile && !loading && !error && (
           <>
             <ProfileHeader
               profile={profile}
               onEditAvatar={() => setAvatarOpen(true)}
               customerUpcomingCount={
-                !profile.venueManager
-                  ? customerBookings.upcoming.length
-                  : undefined
+                profile.venueManager ? undefined : customer.upcoming.length
               }
               managerUpcomingCount={
                 profile.venueManager ? managerUpcoming.length : undefined
@@ -176,7 +148,6 @@ export default function ProfilePage() {
 
             {profile.venueManager ? (
               <>
-                {/* Manager view */}
                 <section className="mt-10">
                   <h2 className="h2 mb-4">My Venues</h2>
                   <ManagerVenues venues={venues} />
@@ -192,11 +163,10 @@ export default function ProfilePage() {
               </>
             ) : (
               <>
-                {/* Customer view */}
                 <section className="mt-10">
                   <h2 className="h2 mb-4">Upcoming Bookings</h2>
                   <MyBookings
-                    bookings={customerBookings.upcoming}
+                    bookings={customer.upcoming}
                     emptyText="No upcoming bookings yet."
                   />
                 </section>
@@ -204,7 +174,7 @@ export default function ProfilePage() {
                 <section className="mt-10">
                   <h2 className="h2 mb-4">Previous Bookings</h2>
                   <MyBookings
-                    bookings={customerBookings.past}
+                    bookings={customer.past}
                     emptyText="No previous bookings."
                   />
                 </section>
@@ -214,12 +184,13 @@ export default function ProfilePage() {
             <AvatarEditorModal
               open={avatarOpen}
               onClose={() => setAvatarOpen(false)}
+              onSaved={(p) => setProfile(p)}
             />
           </>
         )}
 
         {!loading && !error && !profile && (
-          <p className="body muted">
+          <p className="body muted" aria-live="polite">
             You’re not logged in. (If this persists, try refreshing.)
           </p>
         )}

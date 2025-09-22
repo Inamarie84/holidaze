@@ -1,16 +1,24 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { registerUser } from '@/services/auth'
 import { errMsg } from '@/utils/errors'
 import toast from 'react-hot-toast'
-import FormError from '@/components/ui/FormError'
+import { FormField } from '@/components/ui/FormField'
+import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { useAuthRole } from '@/hooks/useAuthRole'
+import { isNoroffStudentEmail, NOROFF_DOMAIN } from '@/utils/email'
 
+/**
+ * RegisterPage
+ * Creates an account (customer or venue manager).
+ * Enforces Noroff student email. Sends users to login with the chosen role.
+ */
 export default function RegisterPage() {
   const router = useRouter()
-  const sp = useSearchParams()
-  const initialRole = sp.get('role') === 'manager' ? 'manager' : 'customer'
+  const initialRole = useAuthRole()
 
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -18,31 +26,26 @@ export default function RegisterPage() {
   const [role, setRole] = useState<'customer' | 'manager'>(initialRole)
   const [loading, setLoading] = useState(false)
 
-  function isNoroffEmail(e: string) {
-    return /@stud\.noroff\.no$/i.test(e.trim())
-  }
-
   const nameError = !name.trim() ? 'Name is required.' : null
   const emailError =
-    role === 'manager' && !isNoroffEmail(email)
-      ? '@stud.noroff.no address required'
+    role === 'manager' && !isNoroffStudentEmail(email)
+      ? `${NOROFF_DOMAIN} address required`
       : null
   const passwordError =
     password.length < 8 ? 'Password must be at least 8 characters' : null
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (loading) return
     if (nameError || emailError || passwordError) return
 
     try {
       setLoading(true)
-      const venueManager = role === 'manager'
       await registerUser({
         name: name.trim(),
         email: email.trim(),
         password,
-        venueManager,
+        venueManager: role === 'manager',
       })
       toast.success('Account created! You can now log in.')
       router.push(`/login?role=${role}`)
@@ -54,55 +57,66 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12">
+    <main
+      id="main-content"
+      className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12"
+    >
       <h1 className="h1 mb-4">Create account</h1>
       <p className="muted mb-6">
-        Use your <b>@stud.noroff.no</b> email (required).
+        Use your <b>{NOROFF_DOMAIN}</b> email{' '}
+        {role === 'manager'
+          ? '(required for managers)'
+          : '(optional for customers)'}
+        .
       </p>
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="body block mb-1">
-            Name
-          </label>
-          <input
+      <form
+        onSubmit={onSubmit}
+        className="space-y-4"
+        aria-describedby={loading ? 'register-status' : undefined}
+      >
+        <FormField id="name" label="Name" error={nameError}>
+          <Input
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-black/15 px-3 py-2"
+            autoComplete="username"
+            disabled={loading}
+            aria-invalid={!!nameError}
+            aria-describedby={nameError ? 'name-error' : undefined}
           />
-          <FormError message={nameError} />
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="email" className="body block mb-1">
-            Email
-          </label>
-          <input
+        <FormField id="email" label="Email" error={emailError}>
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@stud.noroff.no"
-            className="w-full rounded-lg border border-black/15 px-3 py-2"
+            placeholder={`you${NOROFF_DOMAIN}`}
+            autoComplete="email"
+            inputMode="email"
+            pattern={`^.+${NOROFF_DOMAIN.replace('.', '\\.')}$`}
+            title={`Email must end with ${NOROFF_DOMAIN} for venue managers`}
+            disabled={loading}
+            aria-invalid={!!emailError}
+            aria-describedby={emailError ? 'email-error' : undefined}
           />
-          <FormError message={emailError} />
-        </div>
+        </FormField>
 
-        <div>
-          <label htmlFor="password" className="body block mb-1">
-            Password
-          </label>
-          <input
+        <FormField id="password" label="Password" error={passwordError}>
+          <Input
             id="password"
             type="password"
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-black/15 px-3 py-2"
+            autoComplete="new-password"
+            disabled={loading}
+            aria-invalid={!!passwordError}
+            aria-describedby={passwordError ? 'password-error' : undefined}
           />
-          <FormError message={passwordError} />
-        </div>
+        </FormField>
 
         <fieldset className="rounded-lg border border-black/10 p-3">
           <legend className="body mb-2">Account type</legend>
@@ -114,6 +128,7 @@ export default function RegisterPage() {
                 value="customer"
                 checked={role === 'customer'}
                 onChange={() => setRole('customer')}
+                disabled={loading}
               />
               Customer
             </label>
@@ -124,20 +139,25 @@ export default function RegisterPage() {
                 value="manager"
                 checked={role === 'manager'}
                 onChange={() => setRole('manager')}
+                disabled={loading}
               />
               Venue Manager
             </label>
           </div>
         </fieldset>
 
-        <button
-          type="submit"
-          disabled={loading}
-          aria-busy={loading}
-          className="inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
-        >
+        <SubmitButton busy={loading}>
           {loading ? 'Creating…' : 'Create account'}
-        </button>
+        </SubmitButton>
+
+        <p
+          id="register-status"
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+        >
+          {loading ? 'Creating your account…' : ''}
+        </p>
       </form>
     </main>
   )

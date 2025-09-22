@@ -1,34 +1,22 @@
-//app/components/ui/Skeleton.tsx
-
 'use client'
 
-import type { HTMLAttributes } from 'react'
-import clsx from 'clsx'
+import { cn } from '@/lib/cls'
 
-type Props = HTMLAttributes<HTMLDivElement> & {
-  rounded?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
-}
-
+/**
+ * Generic skeleton block. Use width/height via className.
+ */
 export default function Skeleton({
   className,
-  rounded = 'md',
-  ...rest
-}: Props) {
-  return (
-    <div
-      aria-hidden="true"
-      className={clsx(
-        'animate-pulse bg-black/10',
-        {
-          'rounded-sm': rounded === 'sm',
-          'rounded-md': rounded === 'md',
-          'rounded-lg': rounded === 'lg',
-          'rounded-xl': rounded === 'xl',
-          'rounded-full': rounded === 'full',
-        },
-        className
-      )}
-      {...rest}
-    />
-  )
+  rounded,
+}: {
+  className?: string
+  rounded?: 'md' | 'lg' | 'xl' | '2xl' | 'full'
+}) {
+  const r =
+    rounded === 'full'
+      ? 'rounded-full'
+      : rounded
+        ? `rounded-${rounded}`
+        : 'rounded-md'
+  return <div className={cn('animate-pulse bg-gray-200', r, className)} />
 }

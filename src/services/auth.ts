@@ -1,6 +1,8 @@
 // src/services/auth.ts
 import { api } from '@/lib/api'
+import { holidazeApi } from '@/lib/holidaze'
 import { useSession } from '@/store/session'
+import { isNoroffStudentEmail, NOROFF_DOMAIN } from '@/utils/email'
 import type {
   TRegisterInput,
   TLoginInput,
@@ -9,49 +11,18 @@ import type {
 } from '@/types/api'
 
 /**
- * Optional include flags when fetching profiles.
- * Matches Holidaze docs: `_bookings`, `_venues`, and optional pagination.
- */
-export type TProfileInclude = {
-  _bookings?: boolean
-  _venues?: boolean
-  page?: number
-  limit?: number
-  sort?: string
-}
-
-/** Case-insensitive endsWith for email domain checks. */
-function endsWithDomain(email: string, domain: string) {
-  return email.toLowerCase().endsWith(domain.toLowerCase())
-}
-
-/**
  * Register a new user.
- *
- * Holidaze/Noroff requires a `@stud.noroff.no` email.
- * If `venueManager` is provided, it will be stored on the profile.
- *
- * @param {TRegisterInput & { venueManager?: boolean }} input
- *   - name, email, password, optional venueManager
- * @returns {Promise<TAuthResponse>} Auth payload with `accessToken` + user info
- *
- * @example
- * await registerUser({
- *   name: 'jane_doe',
- *   email: 'jane@stud.noroff.no',
- *   password: 'P@ssw0rd!',
- *   venueManager: true
- * })
+ * For venue managers, a Noroff student email is required.
  */
 export async function registerUser(
   input: TRegisterInput & { venueManager?: boolean }
 ): Promise<TAuthResponse> {
-  // Enforce Noroff student email rule
-  if (!endsWithDomain(input.email, '@stud.noroff.no')) {
-    throw new Error('Registration requires a @stud.noroff.no email.')
+  if (input.venueManager && !isNoroffStudentEmail(input.email)) {
+    throw new Error(
+      `Registration as manager requires a ${NOROFF_DOMAIN} email.`
+    )
   }
 
-  // Auth lives at the API root (NOT under /holidaze)
   return api<TAuthResponse>('/auth/register', {
     method: 'POST',
     body: input,
@@ -59,30 +30,20 @@ export async function registerUser(
 }
 
 /**
- * Log a user in and persist the session in Zustand + localStorage.
- *
- * @param {TLoginInput} input
- *   - email, password
- * @returns {Promise<TAuthResponse>} Auth payload with `accessToken` + user info
- *
- * @example
- * const res = await loginUser({ email, password })
- * console.log(res.accessToken)
+ * Log a user in and persist the session.
  */
 export async function loginUser(input: TLoginInput): Promise<TAuthResponse> {
-  // Auth lives at the API root (NOT under /holidaze)
   const res = await api<TAuthResponse>('/auth/login', {
     method: 'POST',
     body: input,
   })
 
-  // Store token + minimal user in Zustand
   useSession.getState().login({
     token: res.accessToken,
     user: {
       name: res.name,
       email: res.email,
-      venueManager: res.venueManager,
+      venueManager: !!res.venueManager,
     },
   })
 
@@ -90,65 +51,36 @@ export async function loginUser(input: TLoginInput): Promise<TAuthResponse> {
 }
 
 /**
- * Fetch a specific profile by name.
- *
- * Holidaze profiles live under `/holidaze/profiles/:name`.
- * Use `TProfileInclude` flags to include `_bookings` or `_venues`.
- *
- * @param {string} name The profile name (username)
- * @param {TProfileInclude} [params] Optional include/pagination flags
- * @param {string} [token] Optional bearer token (required for some endpoints)
- * @returns {Promise<TProfile>} The profile object
- *
- * @example
- * const me = await getProfile('jane_doe', { _venues: true }, token)
+ * Fetch a specific profile by name. Supports include/pagination flags.
  */
 export async function getProfile(
   name: string,
-  params?: TProfileInclude,
+  params?: Record<string, string | number | boolean | undefined>,
   token?: string
 ): Promise<TProfile> {
   const usp = new URLSearchParams()
   Object.entries(params ?? {}).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') usp.set(k, String(v))
   })
-  const qs = usp.toString() ? `?${usp.toString()}` : ''
+  const qs = usp.toString() ? `?${usp}` : ''
 
-  return api<TProfile>(`/holidaze/profiles/${encodeURIComponent(name)}${qs}`, {
-    token,
+  // Use Holidaze helper so API key is always included
+  return holidazeApi<TProfile>(`/profiles/${encodeURIComponent(name)}${qs}`, {
+    method: 'GET',
+    token: token ?? null,
   })
-}
+} // ← this closing brace was missing
 
 /**
- * Convenience helper: fetch the **current** logged-in user’s profile.
- * Reads token & username from the Zustand session store.
- *
- * @param {TProfileInclude} [params] Optional include/pagination flags
- * @returns {Promise<TProfile>} The current user's profile
- *
- * @throws If no session is present
- *
- * @example
- * const me = await getMyProfile({ _bookings: true })
+ * Convenience: fetch the current user's profile (from stored session).
  */
-
 export async function getMyProfile(): Promise<TProfile> {
   const { token, user } = useSession.getState()
   if (!token || !user?.name) throw new Error('Not authenticated')
-
-  const username = encodeURIComponent(user.name)
-  return api<TProfile>(`/holidaze/profiles/${username}`, {
-    token,
-    useApiKey: true,
-  })
+  return getProfile(user.name, undefined, token)
 }
 
-/**
- * Optional helper to clear the stored session (wrapper for the store).
- *
- * @example
- * logoutUser()
- */
+/** Clear stored session. */
 export function logoutUser() {
   useSession.getState().logout()
 }

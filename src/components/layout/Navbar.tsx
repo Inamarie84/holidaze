@@ -3,11 +3,19 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSession } from '@/store/session'
 import { useRouter, usePathname } from 'next/navigation'
-import { LogIn, LogOut, User2, PlusCircle, MapPin } from 'lucide-react'
+import {
+  LogIn,
+  LogOut,
+  User2,
+  UserPlus,
+  PlusCircle,
+  MapPin,
+} from 'lucide-react'
 import { RegisterModal, LoginModal } from './AuthModals'
+import IconHint from '@/components/ui/IconHint'
 
 export default function Navbar() {
   const { user, token, logout } = useSession()
@@ -18,20 +26,38 @@ export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // ✅ Only redirect to /profile after a successful auth if a modal triggered it
+  // Publish header height as --nav-height
+  const headerRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+    const setVar = () =>
+      document.documentElement.style.setProperty(
+        '--nav-height',
+        `${el.offsetHeight}px`
+      )
+    setVar()
+    const ro = new ResizeObserver(setVar)
+    ro.observe(el)
+    window.addEventListener('resize', setVar, { passive: true })
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', setVar)
+    }
+  }, [])
+
+  // Redirect to profile after modal auth
   useEffect(() => {
     if (!token) return
     if (openLogin || openRegister) {
       setOpenLogin(false)
       setOpenRegister(false)
-      // optional: only redirect if you're currently on /login or /register routes
-      // or if you explicitly want to go to profile after modal auth:
       router.push('/profile')
     }
-    // If token exists but no modal was open, do nothing (no global bounce)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, openLogin, openRegister])
 
+  // Shadow on scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4)
     onScroll()
@@ -42,87 +68,147 @@ export default function Navbar() {
   return (
     <>
       <header
+        ref={headerRef}
         className={[
-          'fixed top-0 left-0 right-0 z-50',
-          'w-full border-b border-black/10 text-white',
-          'bg-[var(--color-foreground)] supports-[backdrop-filter]:bg-[var(--color-foreground)]/90 backdrop-blur',
+          'fixed inset-x-0 top-0 z-50',
+          // ↓ only add border when scrolled
+          scrolled ? 'border-b border-black/10' : 'border-b-0',
+          'text-white bg-[var(--color-foreground)] supports-[backdrop-filter]:bg-[var(--color-foreground)]/90 backdrop-blur',
           scrolled ? 'shadow-md shadow-black/10' : '',
-          'transition-shadow',
+          'transition-[box-shadow,border-color]',
         ].join(' ')}
       >
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/images/logo.svg"
-              alt="Holidaze"
-              width={120}
-              height={32}
-            />
-
-            <span className="sr-only">Holidaze</span>
-          </Link>
-
-          <div className="flex items-center gap-2">
-            {/* Browse Venues always visible */}
-            <Link
-              href="/venues"
-              className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10 cursor-pointer"
-              prefetch={pathname !== '/venues'}
-            >
-              <MapPin size={18} />
-              <span className="hidden sm:inline">Browse venues</span>
-            </Link>
-
-            {/* Optional: quick create for managers */}
-            {user?.venueManager && (
-              <Link
-                href="/venues/new"
-                className="inline-flex items-center gap-1 rounded-lg bg-emerald px-3 py-2 hover:opacity-90 cursor-pointer"
-              >
-                <PlusCircle size={18} />
-                <span className="hidden sm:inline">Create venue</span>
+        <nav className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Two rows on mobile; single row on md+ */}
+          <div className="flex flex-col gap-2 py-2 md:h-16 md:flex-row md:items-center md:justify-between">
+            {/* Row 1: Logo */}
+            <div className="flex items-center justify-between md:justify-start">
+              <Link href="/" className="flex items-center gap-2 shrink-0">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Holidaze"
+                  width={120}
+                  height={32}
+                />
+                <span className="sr-only">Holidaze</span>
               </Link>
-            )}
+            </div>
 
-            {!token ? (
-              <>
-                <button
-                  onClick={() => setOpenRegister(true)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10 cursor-pointer"
-                >
-                  Register
-                </button>
-                <button
-                  onClick={() => setOpenLogin(true)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10 cursor-pointer"
-                >
-                  <LogIn size={18} />
-                  <span className="hidden sm:inline">Log in</span>
-                </button>
-              </>
-            ) : (
-              <>
+            {/* Row 2: Actions */}
+            <div className="ms-auto flex min-w-0 flex-wrap items-center gap-2 max-[430px]:gap-1">
+              {/* Browse Venues */}
+              <IconHint label="Browse venues">
                 <Link
-                  href="/profile"
-                  className="inline-flex items-center gap-1 rounded-lg border bg-terracotta/90 border-white/20 px-3 py-2 hover:bg-terracotta/60 cursor-pointer"
+                  href="/venues"
+                  prefetch={pathname !== '/venues'}
+                  aria-label="Browse venues"
+                  title="Browse venues"
+                  className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2"
                 >
-                  <User2 size={18} />
-                  <span className="hidden sm:inline">
-                    {user?.name ?? 'Profile'}
+                  <MapPin size={18} aria-hidden="true" />
+                  <span className="hidden sm:inline max-[430px]:hidden">
+                    Browse venues
                   </span>
+                  <span className="sm:hidden max-[430px]:hidden">Venues</span>
                 </Link>
-                <button
-                  onClick={() => {
-                    logout()
-                    router.push('/') // go to home after logout
-                  }}
-                  className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-2 hover:bg-white/10 cursor-pointer"
-                >
-                  <LogOut size={18} />
-                  <span className="hidden sm:inline">Log out</span>
-                </button>
-              </>
-            )}
+              </IconHint>
+
+              {/* Create (managers) */}
+              {user?.venueManager && (
+                <IconHint label="Create venue">
+                  <Link
+                    href="/venues/new"
+                    aria-label="Create venue"
+                    title="Create venue"
+                    className="inline-flex h-9 items-center gap-1 rounded-lg bg-emerald px-3 text-sm text-white hover:opacity-90 max-[430px]:px-2 cursor-pointer"
+                  >
+                    <PlusCircle size={18} aria-hidden="true" />
+                    <span className="hidden sm:inline max-[430px]:hidden">
+                      Create venue
+                    </span>
+                    <span className="sm:hidden max-[430px]:hidden">Create</span>
+                  </Link>
+                </IconHint>
+              )}
+
+              {!token ? (
+                <>
+                  {/* Register */}
+                  <IconHint label="Register">
+                    <button
+                      onClick={() => setOpenRegister(true)}
+                      aria-label="Register"
+                      title="Register"
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+                    >
+                      <UserPlus size={18} aria-hidden="true" />
+                      <span className="hidden sm:inline max-[430px]:hidden">
+                        Register
+                      </span>
+                    </button>
+                  </IconHint>
+
+                  {/* Log in */}
+                  <IconHint label="Log in">
+                    <button
+                      onClick={() => setOpenLogin(true)}
+                      aria-label="Log in"
+                      title="Log in"
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+                    >
+                      <LogIn size={18} aria-hidden="true" />
+                      <span className="hidden sm:inline max-[430px]:hidden">
+                        Log in
+                      </span>
+                      <span className="sm:hidden max-[430px]:hidden">
+                        Login
+                      </span>
+                    </button>
+                  </IconHint>
+                </>
+              ) : (
+                <>
+                  {/* Profile */}
+                  <IconHint label="Profile">
+                    <Link
+                      href="/profile"
+                      aria-label="Profile"
+                      title={user?.name ?? 'Profile'}
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 bg-terracotta/90 px-3 text-sm hover:bg-terracotta/70 max-[430px]:px-2 cursor-pointer"
+                    >
+                      <User2 size={18} aria-hidden="true" />
+                      <span className="hidden sm:inline max-[430px]:hidden">
+                        {user?.name ?? 'Profile'}
+                      </span>
+                      <span className="sm:hidden max-[430px]:hidden">
+                        Profile
+                      </span>
+                    </Link>
+                  </IconHint>
+
+                  {/* Log out */}
+                  <IconHint label="Log out">
+                    <button
+                      onClick={() => {
+                        logout()
+                        router.push('/')
+                      }}
+                      aria-label="Log out"
+                      title="Log out"
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+                    >
+                      <LogOut size={18} aria-hidden="true" />
+                      <span className="hidden sm:inline max-[430px]:hidden">
+                        Log out
+                      </span>
+                      <span className="sm:hidden max-[430px]:hidden">
+                        Logout
+                      </span>
+                    </button>
+                  </IconHint>
+                </>
+              )}
+            </div>
           </div>
         </nav>
       </header>

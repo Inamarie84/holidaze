@@ -1,7 +1,6 @@
-// src/components/profile/AvatarEditorModal.tsx
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { updateMyAvatarAndSync } from '@/services/profiles'
 import toast from 'react-hot-toast'
 import { errMsg } from '@/utils/errors'
@@ -13,10 +12,15 @@ type Props = {
   onSaved?: (p: TProfile) => void
 }
 
+/**
+ * Accessible modal for updating avatar.
+ */
 export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
   const [url, setUrl] = useState('')
   const [alt, setAlt] = useState('')
   const [loading, setLoading] = useState(false)
+  const titleId = 'avatar-editor-title'
+  const closeRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     if (!open) {
@@ -25,6 +29,12 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
       setLoading(false)
     }
   }, [open])
+
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    if (open) document.addEventListener('keydown', onEsc)
+    return () => document.removeEventListener('keydown', onEsc)
+  }, [open, onClose])
 
   const previewUrl = useMemo(() => {
     if (!url) return ''
@@ -50,7 +60,7 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
         url.trim(),
         alt.trim() || undefined
       )
-      onSaved?.(updated) // 👈 inform parent so it can patch local state
+      onSaved?.(updated)
       toast.success('Avatar updated!')
       onClose()
     } catch (err) {
@@ -61,10 +71,22 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
-        <h3 className="h3 mb-3">Update avatar</h3>
-        <form onSubmit={onSave} className="space-y-4">
+    <div
+      className="fixed inset-0 z-[60] grid place-items-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 id={titleId} className="h3 mb-3">
+          Update avatar
+        </h3>
+
+        <form onSubmit={onSave} className="space-y-4" aria-live="polite">
           <div>
             <label htmlFor="avatar-url" className="body mb-1 block">
               Image URL
@@ -107,9 +129,10 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
 
           <div className="mt-2 flex items-center justify-end gap-2">
             <button
+              ref={closeRef}
               type="button"
               onClick={onClose}
-              className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5 cursor-pointer"
+              className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5"
             >
               Cancel
             </button>
@@ -117,7 +140,7 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
+              className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60"
             >
               {loading ? 'Saving…' : 'Save'}
             </button>

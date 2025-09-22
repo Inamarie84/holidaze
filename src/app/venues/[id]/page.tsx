@@ -1,4 +1,3 @@
-// src/app/venues/[id]/page.tsx
 'use client'
 
 import Link from 'next/link'
@@ -12,9 +11,19 @@ import { createBooking } from '@/services/bookings'
 import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
 import SmartBackButton from '@/components/ui/SmartBackButton'
 import VenueDetailSkeleton from '@/components/venue/VenueDetailSkeleton'
+import Gallery from '@/components/venue/Gallery'
+import BookingForm from '@/components/venue/BookingForm'
 
 // When we fetch with _bookings=true&_owner=true, we’ll get bookings and owner
 type VenueWithExtras = TVenueWithBookings & { owner?: { name?: string } }
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-black/10 px-3 py-1 text-sm">
+      {children}
+    </span>
+  )
+}
 
 export default function VenueDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,6 +33,9 @@ export default function VenueDetailsPage() {
   const [venue, setVenue] = useState<VenueWithExtras | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Gallery state
+  const [activeIndex, setActiveIndex] = useState(0)
 
   // Booking form state
   const [dateFrom, setDateFrom] = useState('')
@@ -43,6 +55,7 @@ export default function VenueDetailsPage() {
         })) as VenueWithExtras
         if (!mounted) return
         setVenue(v)
+        setActiveIndex(0)
       } catch (err) {
         if (!mounted) return
         setError(err instanceof Error ? err.message : 'Failed to load venue')
@@ -64,7 +77,7 @@ export default function VenueDetailsPage() {
     const list = venue?.bookings ?? []
     return list.map((b: TBooking) => ({
       from: new Date(b.dateFrom),
-      to: new Date(b.dateTo), // exclusive
+      to: new Date(b.dateTo),
       guests: b.guests,
     }))
   }, [venue])
@@ -137,7 +150,7 @@ export default function VenueDetailsPage() {
     )
   }
 
-  const mainImage = venue.media?.[0]?.url || '/images/placeholder.jpg'
+  const images = (venue.media ?? []).filter((m) => m?.url)
 
   return (
     <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
@@ -179,19 +192,17 @@ export default function VenueDetailsPage() {
         </div>
       </header>
 
-      {/* Main image */}
-      <div className="mb-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={mainImage}
-          alt={venue.media?.[0]?.alt || venue.name}
-          className="aspect-[16/9] w-full rounded-xl object-cover border border-black/10 bg-white"
-        />
-      </div>
+      {/* Gallery */}
+      <Gallery
+        images={images}
+        venueName={venue.name}
+        activeIndex={activeIndex}
+        onChange={setActiveIndex}
+        className="mb-8"
+      />
 
       {/* Availability + Booking */}
       <section className="grid gap-6 md:grid-cols-2">
-        {/* Calendar is public: always visible */}
         <div className="rounded-xl border border-black/10 bg-white p-4">
           <h3 className="h3 mb-3">Availability</h3>
           <AvailabilityCalendar bookings={venue.bookings ?? []} />
@@ -200,79 +211,17 @@ export default function VenueDetailsPage() {
           </p>
         </div>
 
-        {/* Booking panel */}
         <div className="rounded-xl border border-black/10 bg-white p-4">
           <h3 className="h3 mb-4">Book this venue</h3>
-
-          {/* Compact login prompt */}
-          {!token && (
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald/30 bg-sand px-3 py-2">
-              <p className="body text-sm">Please log in to book this venue.</p>
-              <Link
-                href="/login?role=customer"
-                className="inline-flex items-center rounded-md bg-emerald px-3 py-1.5 text-white hover:opacity-90"
-              >
-                Log in
-              </Link>
-            </div>
-          )}
-
-          {token && isManager && (
-            <p className="muted text-sm">
-              Managers can’t book venues. Switch to a customer account to book.
-            </p>
-          )}
-
-          {canBook && (
-            <form onSubmit={onBook} className="mt-2 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="body mb-1 block">Check-in</label>
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    className="w-full rounded-lg border border-black/15 px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="body mb-1 block">Check-out</label>
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    className="w-full rounded-lg border border-black/15 px-3 py-2"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="body mb-1 block">Guests</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={venue.maxGuests}
-                  value={guests}
-                  onChange={(e) =>
-                    setGuests(
-                      e.target.value === '' ? '' : Number(e.target.value)
-                    )
-                  }
-                  className="w-full rounded-lg border border-black/15 px-3 py-2"
-                  placeholder="2"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={bookingLoading}
-                aria-busy={bookingLoading}
-                className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60"
-              >
-                {bookingLoading ? 'Booking…' : 'Book now'}
-              </button>
-            </form>
-          )}
+          <BookingForm
+            venue={{
+              id: venue.id,
+              name: venue.name,
+              price: venue.price,
+              maxGuests: venue.maxGuests,
+              bookings: venue.bookings,
+            }}
+          />
         </div>
       </section>
 
@@ -295,13 +244,5 @@ export default function VenueDetailsPage() {
         </div>
       </section>
     </main>
-  )
-}
-
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-black/10 px-3 py-1 text-sm">
-      {children}
-    </span>
   )
 }
