@@ -1,5 +1,6 @@
 'use client'
 
+import GuestsInput from '@/components/ui/GuestsInput'
 import FormError from '@/components/ui/FormError'
 
 type Props = {
@@ -9,7 +10,7 @@ type Props = {
   error: string | null
 }
 
-export default function GuestsField({
+export default function BookingGuestsField({
   maxGuests,
   value,
   onChange,
@@ -17,17 +18,13 @@ export default function GuestsField({
 }: Props) {
   return (
     <div>
-      <label className="body mb-1 block" htmlFor="guests">
-        {`Guests (max ${maxGuests})`}
-      </label>
-      <input
+      <GuestsInput
         id="guests"
-        type="number"
+        label={`Guests (max ${maxGuests})`}
+        value={value}
+        onChange={(v) => onChange((v as number) || 0)}
         min={1}
         max={maxGuests}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full rounded-lg border border-black/15 px-3 py-2"
         required
         aria-invalid={!!error}
         aria-describedby={error ? 'guest-error' : undefined}
