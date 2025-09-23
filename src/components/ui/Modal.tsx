@@ -44,7 +44,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
         {children}
         <button
           onClick={onClose}
-          className="mt-4 inline-flex rounded-lg border border-black/10 px-3 py-2 hover:bg-sand"
+          className="mt-4 inline-flex rounded-lg border border-black/10 px-3 py-2 hover:bg-sand cursor-pointer"
         >
           Close
         </button>

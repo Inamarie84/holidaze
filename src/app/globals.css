@@ -152,6 +152,11 @@ h3 {
     line-height: var(--leading-body);
     color: #ffffff;
   }
+
+  /* Muted heading helper */
+  .h2--muted {
+    @apply text-grey;
+  }
 }
 
 /* ------------------------------

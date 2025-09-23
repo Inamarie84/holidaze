@@ -107,7 +107,7 @@ export default function ManagerVenues({ venues }: Props) {
                   type="button"
                   onClick={() => onDelete(v.id)}
                   aria-label={`Delete venue ${v.name}`}
-                  className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-white hover:opacity-90"
+                  className="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-white hover:opacity-90 cursor-pointer"
                 >
                   Delete
                 </button>

@@ -2,27 +2,43 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 
 export default function AuthGate({
-  redirectTo = '/', // default to home,
+  redirectTo = '/',
+  loading, // 👈 optional custom loading UI
   children,
 }: {
   redirectTo?: string
+  loading?: React.ReactNode
   children?: React.ReactNode
 }) {
-  const { token } = useSession()
+  const token = useSession((s) => s.token)
+  const hydrated = useSession((s) => s._hasHydrated)
   const router = useRouter()
-  const sp = useSearchParams()
-  const role = sp.get('role') // optional: keep if you want to pass through
 
   useEffect(() => {
-    if (!token) {
-      router.replace(redirectTo)
-    }
-  }, [token, redirectTo, router])
+    if (!hydrated) return
+    if (!token) router.replace(redirectTo)
+  }, [hydrated, token, redirectTo, router])
 
-  // Render children; if not authed, the client will redirect immediately
+  if (!hydrated) {
+    // Default tiny spinner if nothing is passed in
+    return (
+      <>
+        {loading ?? (
+          <div className="py-16 flex items-center justify-center">
+            <div
+              className="h-5 w-5 animate-spin rounded-full border-2 border-black/20 border-t-emerald"
+              role="status"
+              aria-label="Loading"
+            />
+          </div>
+        )}
+      </>
+    )
+  }
+
   return <>{children}</>
 }

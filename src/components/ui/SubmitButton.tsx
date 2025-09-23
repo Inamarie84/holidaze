@@ -17,7 +17,7 @@ export function SubmitButton({
       disabled={busy}
       aria-busy={busy}
       className={cn(
-        'inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60',
+        'inline-flex items-center justify-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer',
         className
       )}
     >

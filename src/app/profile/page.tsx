@@ -172,10 +172,11 @@ export default function ProfilePage() {
                 </section>
 
                 <section className="mt-10">
-                  <h2 className="h2 mb-4">Previous Bookings</h2>
+                  <h2 className="h2 h2--muted mb-4">Previous Bookings</h2>
                   <MyBookings
                     bookings={customer.past}
                     emptyText="No previous bookings."
+                    tone="muted" // 👈 softer look
                   />
                 </section>
               </>

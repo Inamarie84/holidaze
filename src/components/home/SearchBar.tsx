@@ -246,7 +246,7 @@ export default function SearchBar() {
             {/* Search button */}
             <button
               type="submit"
-              className="mt-auto inline-flex items-center justify-center gap-2 rounded-lg bg-emerald px-5 py-2.5 text-white transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-emerald/30"
+              className="mt-auto inline-flex items-center justify-center gap-2 rounded-lg bg-emerald px-5 py-2.5 text-white transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-emerald/30 cursor-pointer"
               aria-label="Search venues"
             >
               <Search size={18} aria-hidden="true" />

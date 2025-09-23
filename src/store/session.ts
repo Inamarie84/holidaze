@@ -2,6 +2,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 const STORAGE_KEY = 'holidaze_session'
 
@@ -9,48 +10,56 @@ export type SessionUser = {
   name: string
   email: string
   venueManager?: boolean
-  avatar?: { url: string; alt?: string }
+  avatar?: { url?: string; alt?: string }
 }
 
 type SessionState = {
   token: string | null
   user: SessionUser | null
+
+  // existing API (kept for compatibility)
   login: (payload: { token: string; user: SessionUser }) => void
   logout: () => void
+  setUser: (user: SessionUser | Partial<SessionUser>) => void
+
+  // legacy: manual hydrate (noop now, persist handles it)
   hydrate: () => void
-  setUser: (user: SessionUser) => void // ✅ added for avatar updates
+
+  // hydration flag so components can avoid flashing "logged out"
+  _hasHydrated: boolean
+  _setHasHydrated: (v: boolean) => void
 }
 
-export const useSession = create<SessionState>((set) => ({
-  token: null,
-  user: null,
+export const useSession = create<SessionState>()(
+  persist(
+    (set, get) => ({
+      token: null,
+      user: null,
 
-  login: ({ token, user }) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }))
-    set({ token, user })
-  },
+      login: ({ token, user }) => set({ token, user }),
+      logout: () => set({ token: null, user: null }),
 
-  logout: () => {
-    localStorage.removeItem(STORAGE_KEY)
-    set({ token: null, user: null })
-  },
+      setUser: (patch) =>
+        set((s) => ({
+          user: s.user
+            ? { ...s.user, ...(patch as Partial<SessionUser>) }
+            : ((patch as SessionUser) ?? null),
+        })),
 
-  hydrate: () => {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return
-    try {
-      const parsed = JSON.parse(raw) as { token: string; user: SessionUser }
-      if (parsed?.token && parsed?.user) {
-        set({ token: parsed.token, user: parsed.user })
-      }
-    } catch {
-      localStorage.removeItem(STORAGE_KEY)
+      // noop; left for backward compatibility
+      hydrate: () => {},
+
+      _hasHydrated: false,
+      _setHasHydrated: (v) => set({ _hasHydrated: v }),
+    }),
+    {
+      name: STORAGE_KEY,
+      storage: createJSONStorage(() => localStorage),
+      // when state is rehydrated from localStorage, flip the flag
+      onRehydrateStorage: () => (state) => {
+        state?._setHasHydrated(true)
+      },
+      // (optional) version/migrate here later if needed
     }
-  },
-
-  setUser: (user) => {
-    const token = useSession.getState().token
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }))
-    set({ user })
-  },
-}))
+  )
+)
