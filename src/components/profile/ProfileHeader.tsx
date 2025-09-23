@@ -88,7 +88,7 @@ export default function ProfileHeader({
         {onEditAvatar && (
           <button
             onClick={onEditAvatar}
-            className="ml-2 inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 text-sm hover:bg-black/5 cursor-pointer"
+            className="ml-2 inline-flex items-center bg-sand rounded-lg border border-black/15 px-3 py-1.5 text-sm hover:bg-sand/20 cursor-pointer"
           >
             Edit avatar
           </button>

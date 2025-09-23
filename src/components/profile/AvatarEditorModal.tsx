@@ -132,7 +132,7 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
               ref={closeRef}
               type="button"
               onClick={onClose}
-              className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5"
+              className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5 cursor-pointer"
             >
               Cancel
             </button>
@@ -140,7 +140,7 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60"
+              className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
             >
               {loading ? 'Saving…' : 'Save'}
             </button>
