@@ -6,7 +6,7 @@ import { useRef } from 'react'
 import { Search } from 'lucide-react'
 import DateField from '@/components/ui/DateField'
 import DestinationField from './search/DestinationField'
-import GuestsField from './search/GuestsField'
+import GuestsField from './search/SearchGuestsField'
 import { useSearchQuery } from './search/useSearchQuery'
 
 export default function SearchBar() {

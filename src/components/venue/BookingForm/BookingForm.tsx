@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 import BookingDates from './BookingDates'
-import GuestsField from './GuestsField'
+import GuestsField from './BookingGuestsField'
 import PriceSummary from './PriceSummary'
 import JustBookedPanel from './JustBookedPanel'
 import DateError from './DateError'
