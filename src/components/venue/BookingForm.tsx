@@ -148,7 +148,7 @@ export default function BookingForm({ venue }: Props) {
           <button
             type="button"
             onClick={() => router.push('/login?role=customer')}
-            className="inline-flex items-center rounded-md bg-emerald px-3 py-1.5 text-white hover:opacity-90"
+            className="inline-flex items-center rounded-md bg-emerald px-3 py-1.5 text-white hover:opacity-90 cursor-pointer"
           >
             Log in
           </button>
@@ -231,7 +231,7 @@ export default function BookingForm({ venue }: Props) {
             type="submit"
             disabled={loading}
             aria-busy={loading}
-            className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60"
+            className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
           >
             {loading ? 'Booking…' : 'Book now'}
           </button>

@@ -33,7 +33,7 @@ export default function SmartBackButton({
       onClick={goBack}
       className={[
         'inline-flex items-center gap-2 rounded-lg border border-black/15',
-        'px-3 py-1.5 hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-emerald',
+        'px-3 py-1.5 hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-emerald cursor-pointer',
         className,
       ].join(' ')}
     >
