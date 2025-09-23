@@ -6,6 +6,8 @@
 :root {
   --background: #ffffff;
   --foreground: #1c1c1c; /* brand text color for body by default */
+
+  --nav-height: 72px; /* default so SSR doesn't hide the hero */
 }
 
 /* If you enable dark mode later, you can restore this:
@@ -37,6 +39,12 @@ html {
 html,
 body {
   height: 100%;
+}
+
+/* globals.css */
+html,
+body {
+  overflow-x: hidden;
 }
 
 body {

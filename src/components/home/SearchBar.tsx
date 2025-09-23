@@ -53,7 +53,12 @@ export default function SearchBar() {
           <DestinationField value={destination} onChange={setDestination} />
 
           {/* Line 2: Check-in | Check-out | Guests | Search */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_0.6fr_auto]">
+          <div
+            className="
+    grid grid-cols-1 gap-3
+    sm:[grid-template-columns:1fr_1fr_minmax(8rem,.7fr)_auto] sm:gap-2
+  "
+          >
             <DateField
               label="Check-in"
               id="from"
@@ -78,7 +83,12 @@ export default function SearchBar() {
 
             <button
               type="submit"
-              className="mt-auto inline-flex items-center justify-center gap-2 rounded-lg bg-emerald px-5 py-2.5 text-white transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-emerald/30 cursor-pointer"
+              className="
+              min-w-0 mt-auto inline-flex items-center justify-center gap-2
+              rounded-lg bg-emerald px-4 py-2.5 text-white
+              transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-emerald/30
+              justify-self-stretch sm:justify-self-end
+            "
               aria-label="Search venues"
             >
               <Search size={18} aria-hidden={true} />

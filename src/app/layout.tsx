@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import type { Metadata } from 'next'
 import { Inter, DM_Serif_Display } from 'next/font/google'
 import './globals.css'
@@ -33,10 +32,14 @@ export default function RootLayout({
         <SessionHydrator />
         <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
         <Navbar />
-        {/* Offset for sticky navbar */}
-        <main id="content" className="flex-1 pt-[var(--nav-height,4rem)]">
+
+        {/* ⬇️ remove the spacer div entirely */}
+
+        {/* ⬇️ and remove the padding-top; just render normally */}
+        <main id="content" className="flex-1">
           {children}
         </main>
+
         <Footer />
         <BackToTop />
       </body>

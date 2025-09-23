@@ -7,6 +7,7 @@ type Props = React.ComponentProps<'input'> & {
   id: string
   onOpen?: () => void
 }
+
 const DateField = forwardRef<HTMLInputElement, Props>(
   ({ label, id, onOpen, className = '', ...rest }, ref) => (
     <div
@@ -14,7 +15,7 @@ const DateField = forwardRef<HTMLInputElement, Props>(
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen?.()}
-      className="cursor-pointer rounded-lg border border-black/15 bg-white p-2 transition hover:bg-black/5 focus-within:ring-2 focus-within:ring-emerald"
+      className="min-w-0 cursor-pointer rounded-lg border border-black/15 bg-white p-2 transition hover:bg-black/5 focus-within:ring-2 focus-within:ring-emerald"
     >
       <label htmlFor={id} className="body mb-1 block cursor-pointer">
         {label}
@@ -29,5 +30,6 @@ const DateField = forwardRef<HTMLInputElement, Props>(
     </div>
   )
 )
+
 DateField.displayName = 'DateField'
 export default DateField

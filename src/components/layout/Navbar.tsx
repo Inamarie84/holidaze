@@ -51,11 +51,10 @@ export default function Navbar() {
       <header
         ref={headerRef}
         className={[
-          'fixed inset-x-0 top-0 z-50',
-          scrolled
-            ? 'border-b border-black/10 shadow-md shadow-black/10'
-            : 'border-b-0',
+          'sticky top-0 z-50', // ⬅️ was: 'fixed inset-x-0 top-0 z-50'
+          scrolled ? 'border-b border-black/10' : 'border-b-0',
           'text-white bg-[var(--color-foreground)] supports-[backdrop-filter]:bg-[var(--color-foreground)]/90 backdrop-blur',
+          scrolled ? 'shadow-md shadow-black/10' : '',
           'transition-[box-shadow,border-color]',
         ].join(' ')}
       >
