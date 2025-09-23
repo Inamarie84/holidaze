@@ -14,7 +14,7 @@ import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
 import SmartBackButton from '@/components/ui/SmartBackButton'
 import VenueDetailSkeleton from '@/components/venue/VenueDetailSkeleton'
 import Gallery from '@/components/venue/Gallery'
-import BookingForm from '@/components/venue/BookingForm'
+import BookingForm from '@/components/venue/BookingForm/BookingForm'
 
 // When we fetch with _bookings=true&_owner=true, we’ll get bookings and owner
 type VenueWithExtras = TVenueWithBookings & { owner?: { name?: string } }

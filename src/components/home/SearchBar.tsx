@@ -1,10 +1,10 @@
-// src/components/home/SearchBar.tsx
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 import { Search, MapPin, Users } from 'lucide-react'
+import DateField from '@/components/ui/DateField'
 
 /**
  * SearchBar
@@ -142,7 +142,7 @@ export default function SearchBar() {
           >
             <label htmlFor="destination" className="body mb-1 block">
               <span className="inline-flex items-center gap-2">
-                <MapPin size={16} aria-hidden="true" />
+                <MapPin size={16} aria-hidden={true} />
                 Destination
               </span>
             </label>
@@ -160,54 +160,26 @@ export default function SearchBar() {
           {/* Line 2: Check-in | Check-out | Guests | Search */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_0.6fr_auto]">
             {/* Check-in */}
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => clickToFocus(fromRef, true)}
-              onKeyDown={(e) =>
-                (e.key === 'Enter' || e.key === ' ') &&
-                clickToFocus(fromRef, true)
-              }
-              className="cursor-pointer rounded-lg border border-black/15 bg-white p-2 transition hover:bg-black/5 focus-within:ring-2 focus-within:ring-emerald"
-            >
-              <label htmlFor="from" className="body mb-1 block">
-                Check-in
-              </label>
-              <input
-                ref={fromRef}
-                id="from"
-                type="date"
-                min={todayYMD}
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                className="w-full rounded-md border border-black/10 px-3 py-2 focus:outline-none"
-              />
-            </div>
+            <DateField
+              label="Check-in"
+              id="from"
+              ref={fromRef}
+              min={todayYMD}
+              value={from}
+              onChange={(e) => setFrom((e.target as HTMLInputElement).value)}
+              onOpen={() => clickToFocus(fromRef, true)}
+            />
 
             {/* Check-out */}
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => clickToFocus(toRef, true)}
-              onKeyDown={(e) =>
-                (e.key === 'Enter' || e.key === ' ') &&
-                clickToFocus(toRef, true)
-              }
-              className="cursor-pointer rounded-lg border border-black/15 bg-white p-2 transition hover:bg-black/5 focus-within:ring-2 focus-within:ring-emerald"
-            >
-              <label htmlFor="to" className="body mb-1 block">
-                Check-out
-              </label>
-              <input
-                ref={toRef}
-                id="to"
-                type="date"
-                min={from || todayYMD}
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                className="w-full rounded-md border border-black/10 px-3 py-2 focus:outline-none"
-              />
-            </div>
+            <DateField
+              label="Check-out"
+              id="to"
+              ref={toRef}
+              min={from || todayYMD}
+              value={to}
+              onChange={(e) => setTo((e.target as HTMLInputElement).value)}
+              onOpen={() => clickToFocus(toRef, true)}
+            />
 
             {/* Guests */}
             <div
@@ -221,7 +193,7 @@ export default function SearchBar() {
             >
               <label htmlFor="guests" className="body mb-1 block">
                 <span className="inline-flex items-center gap-2">
-                  <Users size={16} aria-hidden="true" />
+                  <Users size={16} aria-hidden={true} />
                   Guests
                 </span>
               </label>
@@ -249,7 +221,7 @@ export default function SearchBar() {
               className="mt-auto inline-flex items-center justify-center gap-2 rounded-lg bg-emerald px-5 py-2.5 text-white transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-emerald/30 cursor-pointer"
               aria-label="Search venues"
             >
-              <Search size={18} aria-hidden="true" />
+              <Search size={18} aria-hidden={true} />
               <span>Search</span>
             </button>
           </div>

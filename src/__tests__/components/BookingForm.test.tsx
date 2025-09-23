@@ -1,6 +1,6 @@
 // src/__tests__/components/BookingForm.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react'
-import BookingForm from '@/components/venue/BookingForm'
+import BookingForm from '@/components/venue/BookingForm/BookingForm'
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), refresh: jest.fn() }),

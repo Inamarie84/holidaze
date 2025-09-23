@@ -52,6 +52,14 @@ h3 {
   font-family: var(--font-serif);
 }
 
+/* Make the whole date input + its native calendar icon show a pointer */
+.input-date {
+  cursor: pointer;
+}
+.input-date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
 /* ------------------------------
    Brand Palette + Type Scale
 ------------------------------ */
