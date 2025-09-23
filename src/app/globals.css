@@ -7,7 +7,7 @@
   --background: #ffffff;
   --foreground: #1c1c1c; /* brand text color for body by default */
 
-  --nav-height: 72px; /* default so SSR doesn't hide the hero */
+  /* default so SSR doesn't hide the hero */
 }
 
 /* If you enable dark mode later, you can restore this:
@@ -33,18 +33,13 @@
    Body Defaults
 ------------------------------ */
 html {
-  scroll-padding-top: 5rem; /* offset for sticky navbar */
+  /* was: scroll-padding-top: 5rem; */
+  scroll-padding-top: var(--nav-height, 4rem);
 }
 
 html,
 body {
   height: 100%;
-}
-
-/* globals.css */
-html,
-body {
-  overflow-x: hidden;
 }
 
 body {

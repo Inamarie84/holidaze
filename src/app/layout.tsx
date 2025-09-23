@@ -1,10 +1,11 @@
+// src/app/layout.tsx
 import type { Metadata } from 'next'
 import { Inter, DM_Serif_Display } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import SessionHydrator from '@/components/SessionHydrator'
-import { Toaster } from 'react-hot-toast'
+import ToastHost from '@/components/ui/ToastHost'
 import BackToTop from '@/components/ui/BackToTop'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
@@ -26,20 +27,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} ${dmSerif.variable} antialiased flex min-h-screen flex-col`}
-      >
-        <SessionHydrator />
-        <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
+      <body className="antialiased flex min-h-screen flex-col">
+        {/* ... */}
+        <ToastHost />
         <Navbar />
-
-        {/* ⬇️ remove the spacer div entirely */}
-
-        {/* ⬇️ and remove the padding-top; just render normally */}
-        <main id="content" className="flex-1">
+        <main id="content" className="flex-1 pt-[var(--nav-height,4rem)]">
           {children}
         </main>
-
         <Footer />
         <BackToTop />
       </body>

@@ -3,12 +3,16 @@ import VenueList, { VenueSearchParams } from '@/components/venue/VenueList'
 
 export const dynamic = 'force-dynamic'
 
+type SP = Record<string, string | string[] | undefined>
+
 export default async function VenuesPage({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  // Next’s generated types for your app expect a Promise here
+  searchParams: Promise<SP>
 }) {
   const spIn = await searchParams
+
   const toStr = (v: unknown) => (typeof v === 'string' ? v : undefined)
 
   const sp: VenueSearchParams = {
@@ -22,7 +26,7 @@ export default async function VenuesPage({
 
   return (
     <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      {/* @ts-expect-error Async Server Component */}
+      {/* @ts-ignore: Async Server Component is valid in RSC, TS complains */}
       <VenueList sp={sp} title="All venues" />
     </main>
   )
