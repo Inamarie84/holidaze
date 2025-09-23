@@ -7,7 +7,8 @@ type Opts = {
   body?: unknown
   token?: string | null
   useApiKey?: boolean
-  // You can pass additional fetch options if needed (optional)
+  /** NEW: when false, return full parsed JSON (don’t auto-unwrap .data) */
+  unwrapData?: boolean
   // next?: RequestInit['next']
   // cache?: RequestInit['cache']
 }
@@ -81,6 +82,18 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
   if (res.status === 204 || (!rawText && parsed == null)) {
     return undefined as unknown as T
   }
+
+  // 🔧 Only unwrap when requested (default true to keep old behavior)
+  const shouldUnwrap = opts.unwrapData !== false
+  if (
+    shouldUnwrap &&
+    parsed &&
+    typeof parsed === 'object' &&
+    'data' in parsed
+  ) {
+    return parsed.data as T
+  }
+  return parsed as T
 
   // Prefer `data` envelope if present, otherwise the whole JSON
   return (parsed && parsed.data ? parsed.data : parsed) as T

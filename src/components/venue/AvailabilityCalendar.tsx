@@ -1,3 +1,4 @@
+// src/components/venue/AvailabilityCalendar.tsx
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -36,13 +37,16 @@ function buildBookedSet(bookings: TBooking[]) {
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+/**
+ * AvailabilityCalendar
+ * Non-interactive month view highlighting booked days.
+ */
 export default function AvailabilityCalendar({
   bookings,
   initialMonth,
 }: Props) {
   const [month, setMonth] = useState<Date>(() => {
     const base = initialMonth ? new Date(initialMonth) : new Date()
-    // pin to first day of month
     return new Date(base.getFullYear(), base.getMonth(), 1)
   })
 
@@ -58,7 +62,6 @@ export default function AvailabilityCalendar({
 
   const daysInMonth = new Date(year, mIdx + 1, 0).getDate()
 
-  // Build cells (leading blanks + days)
   const cells: Array<{
     key: string
     label?: number
@@ -74,7 +77,6 @@ export default function AvailabilityCalendar({
 
   const todayId = ymd(new Date())
 
-  // Days
   for (let d = 1; d <= daysInMonth; d++) {
     const cur = new Date(year, mIdx, d)
     const id = ymd(cur)
@@ -92,13 +94,6 @@ export default function AvailabilityCalendar({
     cells.push({ key: `t-${cells.length}`, inMonth: false })
   }
 
-  function prevMonth() {
-    setMonth(new Date(year, mIdx - 1, 1))
-  }
-  function nextMonth() {
-    setMonth(new Date(year, mIdx + 1, 1))
-  }
-
   const monthName = month.toLocaleString(undefined, {
     month: 'long',
     year: 'numeric',
@@ -110,16 +105,18 @@ export default function AvailabilityCalendar({
       <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
-          onClick={prevMonth}
+          onClick={() => setMonth(new Date(year, mIdx - 1, 1))}
           className="rounded-lg border border-black/15 px-3 py-1.5 hover:bg-sand"
           aria-label="Previous month"
         >
           ‹
         </button>
-        <div className="h3">{monthName}</div>
+        <div className="h3" aria-live="polite">
+          {monthName}
+        </div>
         <button
           type="button"
-          onClick={nextMonth}
+          onClick={() => setMonth(new Date(year, mIdx + 1, 1))}
           className="rounded-lg border border-black/15 px-3 py-1.5 hover:bg-sand"
           aria-label="Next month"
         >
@@ -143,8 +140,7 @@ export default function AvailabilityCalendar({
             <div
               key={c.key}
               className={[
-                'aspect-square rounded-lg border text-center leading-[2.25rem] sm:leading-[2.5rem]',
-                'select-none',
+                'aspect-square select-none rounded-lg border text-center leading-[2.25rem] sm:leading-[2.5rem]',
                 c.booked
                   ? 'bg-[#e07a5f] text-white border-transparent'
                   : 'border-black/15',

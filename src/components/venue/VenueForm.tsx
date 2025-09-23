@@ -1,9 +1,14 @@
+// src/components/venue/VenueForm.tsx
 'use client'
 
 import { useMemo, useState } from 'react'
 import FormError from '@/components/ui/FormError'
 import type { VenueFormValues, MediaField } from '@/types/forms'
 
+/**
+ * VenueForm
+ * Used for both create and edit flows.
+ */
 type Props = {
   mode: 'create' | 'edit'
   initialValues?: Partial<VenueFormValues>
@@ -108,16 +113,16 @@ export default function VenueForm({
     if (submitting || hasBlockingErrors) return
     onSubmit({
       name: name.trim(),
-      description: description,
+      description: description.trim(),
       price,
       maxGuests,
       media,
       meta,
       location: {
-        address: location.address,
-        city: location.city,
-        zip: location.zip,
-        country: location.country,
+        address: location.address.trim(),
+        city: location.city.trim(),
+        zip: location.zip.trim(),
+        country: location.country.trim(),
       },
     })
   }
@@ -139,8 +144,10 @@ export default function VenueForm({
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded-lg border border-black/15 px-3 py-2"
             placeholder="Cozy Mountain Cabin"
+            aria-invalid={!!nameError}
+            aria-describedby={nameError ? 'name-error' : undefined}
           />
-          <FormError message={nameError} />
+          <FormError id="name-error" message={nameError} />
         </div>
 
         <div>
@@ -157,7 +164,7 @@ export default function VenueForm({
           />
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="price" className="body mb-1 block">
               Price per night <span className="text-red-600">*</span>
@@ -174,8 +181,10 @@ export default function VenueForm({
               }
               className="w-full rounded-lg border border-black/15 px-3 py-2"
               placeholder="120"
+              aria-invalid={!!priceError}
+              aria-describedby={priceError ? 'price-error' : undefined}
             />
-            <FormError message={priceError} />
+            <FormError id="price-error" message={priceError} />
           </div>
 
           <div>
@@ -195,8 +204,10 @@ export default function VenueForm({
               }
               className="w-full rounded-lg border border-black/15 px-3 py-2"
               placeholder="4"
+              aria-invalid={!!maxGuestsError}
+              aria-describedby={maxGuestsError ? 'guests-error' : undefined}
             />
-            <FormError message={maxGuestsError} />
+            <FormError id="guests-error" message={maxGuestsError} />
           </div>
         </div>
       </section>
@@ -208,7 +219,7 @@ export default function VenueForm({
           <button
             type="button"
             onClick={addMediaRow}
-            className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5 cursor-pointer"
+            className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5"
           >
             Add image
           </button>
@@ -218,7 +229,7 @@ export default function VenueForm({
           {media.map((m, idx) => (
             <div key={m.id} className="grid gap-3 sm:grid-cols-12">
               <div className="sm:col-span-7">
-                <label className="body mb-1 block">Image URL {idx + 1}</label>
+                <label className="body mb-1 block">{`Image URL ${idx + 1}`}</label>
                 <input
                   type="url"
                   value={m.url}
@@ -240,7 +251,7 @@ export default function VenueForm({
                 <button
                   type="button"
                   onClick={() => removeMediaRow(m.id)}
-                  className="w-full rounded-lg border border-black/15 px-3 py-2 hover:bg-black/5 cursor-pointer disabled:opacity-50"
+                  className="w-full rounded-lg border border-black/15 px-3 py-2 hover:bg-black/5 disabled:opacity-50"
                   aria-label={`Remove image ${idx + 1}`}
                   disabled={media.length === 1}
                 >
@@ -255,7 +266,7 @@ export default function VenueForm({
       {/* Amenities */}
       <section className="space-y-4 rounded-xl border border-black/10 bg-white p-5">
         <h2 className="h3">Amenities</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {(['wifi', 'parking', 'breakfast', 'pets'] as const).map((key) => (
             <label key={key} className="inline-flex items-center gap-2">
               <input
@@ -273,7 +284,7 @@ export default function VenueForm({
       <section className="space-y-4 rounded-xl border border-black/10 bg-white p-5">
         <h2 className="h3">Location</h2>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="body mb-1 block">Address</label>
             <input
@@ -326,7 +337,7 @@ export default function VenueForm({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5 cursor-pointer"
+            className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5"
           >
             Cancel
           </button>
@@ -344,7 +355,7 @@ export default function VenueForm({
           type="submit"
           disabled={submitting || hasBlockingErrors}
           aria-busy={submitting}
-          className="inline-flex items-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
+          className="inline-flex items-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60"
         >
           {submitting
             ? mode === 'create'

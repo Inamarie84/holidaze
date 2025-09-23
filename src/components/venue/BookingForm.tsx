@@ -1,3 +1,4 @@
+// src/components/venue/BookingForm.tsx
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -41,6 +42,10 @@ function isRangeAvailable(
   )
 }
 
+/**
+ * BookingForm
+ * Client component for creating a booking for a venue.
+ */
 export default function BookingForm({ venue }: Props) {
   const router = useRouter()
   const { token, user } = useSession()
@@ -89,7 +94,7 @@ export default function BookingForm({ venue }: Props) {
       toast.error('Please log in to book.')
       const back =
         typeof window !== 'undefined' ? window.location.pathname : '/'
-      router.push(`/login?redirect=${encodeURIComponent(back)}`)
+      router.push(`/login?role=customer&redirect=${encodeURIComponent(back)}`)
       return
     }
     if (isManager) {
@@ -191,7 +196,7 @@ export default function BookingForm({ venue }: Props) {
 
           <div>
             <label className="body mb-1 block" htmlFor="guests">
-              Guests (max {venue.maxGuests})
+              {`Guests (max ${venue.maxGuests})`}
             </label>
             <input
               id="guests"
@@ -202,16 +207,19 @@ export default function BookingForm({ venue }: Props) {
               onChange={(e) => setGuests(Number(e.target.value))}
               className="w-full rounded-lg border border-black/15 px-3 py-2"
               required
+              aria-invalid={!!guestError}
+              aria-describedby={guestError ? 'guest-error' : undefined}
             />
-            <FormError message={guestError} />
+            <FormError id="guest-error" message={guestError} />
           </div>
 
           <div className="rounded-lg border border-black/10 bg-white/60 px-3 py-2">
             <div className="text-sm">
-              {venue.price} NOK / night
+              {`${venue.price} NOK / night`}
               {nights > 0 && (
                 <span className="ml-2 opacity-80">
-                  × {nights} = <b>{total} NOK</b>
+                  {`× ${nights} = `}
+                  <b>{`${total} NOK`}</b>
                 </span>
               )}
             </div>

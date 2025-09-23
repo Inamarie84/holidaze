@@ -1,5 +1,5 @@
 // src/app/(with-search)/venues/loading.tsx
-import VenueGridSkeleton from '@/components/venues/VenueGridSkeleton'
+import VenueGridSkeleton from '@/components/venue/VenueGridSkeleton'
 
 export default function Loading() {
   return (

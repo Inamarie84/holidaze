@@ -8,14 +8,16 @@ export default async function VenuesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const spRaw = await searchParams
+  const spIn = await searchParams
+  const toStr = (v: unknown) => (typeof v === 'string' ? v : undefined)
+
   const sp: VenueSearchParams = {
-    q: typeof spRaw.q === 'string' ? spRaw.q : undefined,
-    dateFrom: typeof spRaw.dateFrom === 'string' ? spRaw.dateFrom : undefined,
-    dateTo: typeof spRaw.dateTo === 'string' ? spRaw.dateTo : undefined,
-    guests: typeof spRaw.guests === 'string' ? spRaw.guests : undefined,
-    page: typeof spRaw.page === 'string' ? spRaw.page : '1',
-    limit: typeof spRaw.limit === 'string' ? spRaw.limit : '12',
+    q: toStr(spIn.q),
+    dateFrom: toStr(spIn.dateFrom),
+    dateTo: toStr(spIn.dateTo),
+    guests: toStr(spIn.guests),
+    page: toStr(spIn.page) ?? '1',
+    limit: toStr(spIn.limit) ?? '12',
   }
 
   return (

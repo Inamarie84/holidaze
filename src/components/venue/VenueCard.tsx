@@ -12,25 +12,34 @@ type Props = {
   dateTo?: string
 }
 
+function hasBookings(
+  v: TVenue | TVenueWithBookings
+): v is TVenueWithBookings & Required<Pick<TVenueWithBookings, 'bookings'>> {
+  return Array.isArray((v as any).bookings)
+}
+
 function isAvailable(
   venue: TVenue | TVenueWithBookings,
   from?: string,
   to?: string
 ) {
   if (!from || !to) return null
-  const v = venue as TVenueWithBookings
-  if (!v.bookings) return null
+  if (!hasBookings(venue)) return null
 
   const fromD = new Date(from)
   const toD = new Date(to)
   const overlaps = (bFrom: Date, bTo: Date) => !(toD <= bFrom || fromD >= bTo)
 
-  const hasOverlap = (v.bookings ?? []).some((b) =>
+  const hasOverlap = venue.bookings.some((b) =>
     overlaps(new Date(b.dateFrom), new Date(b.dateTo))
   )
   return hasOverlap ? 'booked' : 'available'
 }
 
+/**
+ * VenueCard
+ * Lightweight card showing hero image, name, description, price, and capacity.
+ */
 export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
   const image = venue.media?.[0]?.url || '/images/placeholder.jpg'
   const alt = venue.media?.[0]?.alt || venue.name
@@ -39,7 +48,8 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
   return (
     <Link
       href={`/venues/${venue.id}`}
-      className="group cursor-pointer rounded-lg border border-black/10 overflow-hidden hover:shadow-lg transition"
+      aria-label={`View ${venue.name}`}
+      className="group cursor-pointer overflow-hidden rounded-lg border border-black/10 transition hover:shadow-lg"
     >
       <div className="relative aspect-[4/3] w-full">
         <Image
@@ -48,7 +58,6 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
           fill
           className="object-cover"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          priority
         />
 
         {badge && (
@@ -69,12 +78,12 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
           {venue.name}
         </h3>
         <p className="body text-sm text-grey line-clamp-2">
-          {venue.description}
+          {venue.description || 'No description provided.'}
         </p>
 
         <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="font-semibold">{venue.price} NOK</span>
-          <span className="text-grey">Max {venue.maxGuests} guests</span>
+          <span className="font-semibold">{`${venue.price} NOK`}</span>
+          <span className="text-grey">{`Max ${venue.maxGuests} guests`}</span>
         </div>
       </div>
     </Link>
