@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { createBooking } from '@/services/bookings'
 import { errMsg } from '@/utils/errors'
-import { isRangeAvailable, toDay } from './dateUtils'
+import { toDay, isRangeAvailable } from '@/utils/dates'
 
 type VenueCtx = {
   id: string
