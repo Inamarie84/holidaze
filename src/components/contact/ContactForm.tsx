@@ -13,7 +13,7 @@ export default function ContactForm() {
         const body = encodeURIComponent(
           `Name: ${data.get('name')}\nEmail: ${data.get('email')}\n\n${data.get('message')}`
         )
-        window.location.href = `mailto:support@holidaze.example?subject=${subject}&body=${body}`
+        window.location.href = `mailto:support@holidaze.com?subject=${subject}&body=${body}`
       }}
     >
       <div>

@@ -8,7 +8,7 @@ export default function ContactPage() {
       <h1 className="h1 mb-4">Contact</h1>
       <p className="body mb-4">
         Got a question about a booking or your venue? Reach us at{' '}
-        <a href="mailto:support@holidaze.example" className="underline">
+        <a href="mailto:support@holidaze.com" className="underline">
           support@holidaze.example
         </a>{' '}
         or call{' '}

@@ -69,11 +69,8 @@ export default function Footer() {
             </p>
             <p className="text-sm">
               Email:{' '}
-              <a
-                href="mailto:support@holidaze.example"
-                className="hover:underline"
-              >
-                support@holidaze.example
+              <a href="mailto:support@holidaze.com" className="hover:underline">
+                support@holidaze.com
               </a>
             </p>
           </div>
