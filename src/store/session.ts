@@ -7,65 +7,23 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 /** LocalStorage key for persisted session blob. */
 const STORAGE_KEY = 'holidaze_session'
 
-/**
- * Minimal user payload we keep in the session store.
- * Mirrors the Noroff auth/profile fields your UI needs.
- */
 export type SessionUser = {
-  /** Profile name (acts as username). */
   name: string
-  /** Primary email for the user. */
   email: string
-  /** True when the user is a venue manager. */
   venueManager?: boolean
-  /** Optional avatar media for quick header/UI rendering. */
   avatar?: { url: string; alt?: string }
 }
 
-/**
- * Zustand store state & actions for the authenticated session.
- * - `token` + `user` are persisted between reloads (via `zustand/persist`)
- * - `hasHydrated` flips to true after rehydration so you can avoid flicker
- */
 type SessionState = {
-  /** JWT access token (null when logged out). */
   token: string | null
-  /** Minimal user info (null when logged out). */
   user: SessionUser | null
-  /** Becomes true once the persisted state has been read from storage. */
   hasHydrated: boolean
-
-  /**
-   * Set the current session (persisted).
-   * @example useSession.getState().login({ token, user })
-   */
   login: (payload: { token: string; user: SessionUser }) => void
-
-  /**
-   * Clear the current session (persisted).
-   * @example useSession.getState().logout()
-   */
   logout: () => void
-
-  /**
-   * Replace the stored `user` object (e.g., after profile update).
-   * @example useSession.getState().setUser(updatedUser)
-   */
   setUser: (user: SessionUser) => void
-
-  /**
-   * Convenience mutator for avatar updates (keeps object stable).
-   * @example useSession.getState().updateAvatar(url, alt)
-   */
   updateAvatar: (url: string, alt?: string) => void
 }
 
-/**
- * Session store (Zustand + Persist).
- * - Persists to localStorage
- * - Includes a no-op migration so future version bumps won’t warn
- * - Exposes `hasHydrated` for flicker-free auth-gated UIs
- */
 export const useSession = create<SessionState>()(
   persist(
     (set, get) => ({
@@ -79,7 +37,9 @@ export const useSession = create<SessionState>()(
       updateAvatar: (url, alt) => {
         const current = get().user
         if (!current) return
-        set({ user: { ...current, avatar: { url, ...(alt ? { alt } : {}) } } })
+        set({
+          user: { ...current, avatar: { url, ...(alt ? { alt } : {}) } },
+        })
       },
     }),
     {
@@ -88,22 +48,37 @@ export const useSession = create<SessionState>()(
       version: 1,
 
       /**
-       * Identity migration: ensures required keys exist and suppresses
-       * "couldn't be migrated" warnings when versions change.
+       * Identity migration: ensure required keys exist when versions change.
+       * We only return the persisted slice (token, user, hasHydrated),
+       * then cast to SessionState to satisfy the persist typings.
        */
-      migrate: async (persisted: any /* previous shape */, _from: number) => {
-        return {
-          token: persisted?.token ?? null,
-          user: persisted?.user ?? null,
+      migrate: async (persisted: unknown) => {
+        type PersistedShape = Partial<Pick<SessionState, 'token' | 'user'>>
+        const obj =
+          persisted && typeof persisted === 'object'
+            ? (persisted as PersistedShape)
+            : {}
+
+        const token =
+          typeof obj.token === 'string' || obj.token === null ? obj.token : null
+        const user =
+          obj.user && typeof obj.user === 'object'
+            ? (obj.user as SessionUser)
+            : null
+
+        const next = {
+          token: token ?? null,
+          user: user ?? null,
           hasHydrated: false,
-        } as SessionState
+        } as const
+
+        return next as unknown as SessionState
       },
 
       /**
-       * Flip `hasHydrated` once rehydration finishes (success or error),
-       * so components can render the correct auth UI after reloads.
+       * Flip hasHydrated after rehydration completes.
        */
-      onRehydrateStorage: () => (_state, _error) => {
+      onRehydrateStorage: () => () => {
         useSession.setState({ hasHydrated: true })
       },
     }
@@ -111,13 +86,10 @@ export const useSession = create<SessionState>()(
 )
 
 /**
- * Optional tiny helper hook:
- * Returns `[session, hydrated]` so you can gate rendering until hydrated.
+ * Tiny helper hook to gate UI until hydration.
  *
  * @example
  * const [{ token, user }, hydrated] = useSessionHydrated()
- * if (!hydrated) return <Spinner />
- * return token ? <Dashboard/> : <Login/>
  */
 export function useSessionHydrated() {
   const token = useSession((s) => s.token)

@@ -1,3 +1,4 @@
+// src/components/home/search/useSearchQuery.ts
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -35,7 +36,6 @@ export function useSearchQuery(opts: {
     setFrom(sp.get('dateFrom') ?? '')
     setTo(sp.get('dateTo') ?? '')
     setGuests(sp.get('guests') ? Number(sp.get('guests')) : '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sp])
 
   // today (yyyy-mm-dd) for nicer UX default min
@@ -88,16 +88,14 @@ export function useSearchQuery(opts: {
     if (!onVenuesIndex) return
     const qs = buildQuery(debouncedDestination, from, to, guests)
     router.replace(`/venues${qs}`)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedDestination, onVenuesIndex])
+  }, [debouncedDestination, onVenuesIndex, from, to, guests, router])
 
   // Immediate updates for date/guests
   useEffect(() => {
     if (!onVenuesIndex) return
     const qs = buildQuery(destination, from, to, guests)
     router.replace(`/venues${qs}`)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to, guests, onVenuesIndex])
+  }, [destination, from, to, guests, onVenuesIndex, router])
 
   function submit() {
     const qs = buildQuery(destination, from, to, guests)
@@ -105,7 +103,6 @@ export function useSearchQuery(opts: {
   }
 
   return {
-    // state
     destination,
     setDestination,
     from,
@@ -114,9 +111,7 @@ export function useSearchQuery(opts: {
     setTo,
     guests,
     setGuests,
-    // helpers
     todayYMD,
-    // actions
     submit,
   }
 }

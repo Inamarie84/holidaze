@@ -27,13 +27,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased flex min-h-screen flex-col">
-        {/* ... */}
+      <body
+        className={`${inter.variable} ${dmSerif.variable} antialiased flex min-h-screen flex-col`}
+      >
+        {/* Hydrate session from localStorage before auth-gated UI renders */}
+        <SessionHydrator />
+
         <ToastHost />
         <Navbar />
-        <main id="content" className="flex-1 pt-[var(--nav-height,4rem)]">
+
+        {/* Offset for sticky navbar (relies on --nav-height set by Navbar) */}
+        <main id="content" className="flex-1">
           {children}
         </main>
+
         <Footer />
         <BackToTop />
       </body>

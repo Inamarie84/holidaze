@@ -3,11 +3,7 @@
 
 import Link from 'next/link'
 
-export default function ProfileActions({
-  role,
-}: {
-  role: 'manager' | 'customer'
-}) {
+export default function ProfileActions() {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
       <Link
@@ -16,7 +12,7 @@ export default function ProfileActions({
       >
         Browse venues
       </Link>
-      {/* Intentionally no "Create venue" here to prevent duplicate CTA on profile */}
+      {/* Keep this lean to avoid duplicating CTAs already in the navbar/profile header */}
     </div>
   )
 }

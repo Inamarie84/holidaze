@@ -9,6 +9,9 @@ import DestinationField from './search/DestinationField'
 import GuestsField from './search/SearchGuestsField'
 import { useSearchQuery } from './search/useSearchQuery'
 
+/** HTML input that *may* expose the native date picker API */
+type InputWithPicker = HTMLInputElement & { showPicker?: () => void }
+
 export default function SearchBar() {
   const router = useRouter()
   const sp = useSearchParams()
@@ -32,9 +35,9 @@ export default function SearchBar() {
   const toRef = useRef<HTMLInputElement | null>(null)
 
   function openPicker(ref: React.RefObject<HTMLInputElement | null>) {
-    const el = ref.current
+    const el = ref.current as InputWithPicker | null
     if (!el) return
-    if (typeof (el as any).showPicker === 'function') (el as any).showPicker()
+    if (typeof el.showPicker === 'function') el.showPicker()
     else el.focus()
   }
 
@@ -55,9 +58,9 @@ export default function SearchBar() {
           {/* Line 2: Check-in | Check-out | Guests | Search */}
           <div
             className="
-    grid grid-cols-1 gap-3
-    sm:[grid-template-columns:1fr_1fr_minmax(8rem,.7fr)_auto] sm:gap-2
-  "
+            grid grid-cols-1 gap-3
+            sm:[grid-template-columns:1fr_1fr_minmax(8rem,.7fr)_auto] sm:gap-2
+          "
           >
             <DateField
               label="Check-in"
@@ -65,7 +68,9 @@ export default function SearchBar() {
               ref={fromRef}
               min={todayYMD}
               value={from}
-              onChange={(e) => setFrom((e.target as HTMLInputElement).value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setFrom(e.target.value)
+              }
               onOpen={() => openPicker(fromRef)}
             />
 
@@ -75,7 +80,9 @@ export default function SearchBar() {
               ref={toRef}
               min={from || todayYMD}
               value={to}
-              onChange={(e) => setTo((e.target as HTMLInputElement).value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setTo(e.target.value)
+              }
               onOpen={() => openPicker(toRef)}
             />
 
@@ -84,11 +91,11 @@ export default function SearchBar() {
             <button
               type="submit"
               className="
-              min-w-0 mt-auto inline-flex items-center justify-center gap-2
-              rounded-lg bg-emerald px-4 py-2.5 text-white
-              transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-emerald/30
-              justify-self-stretch sm:justify-self-end
-            "
+                min-w-0 mt-auto inline-flex items-center justify-center gap-2
+                rounded-lg bg-emerald px-4 py-2.5 text-white
+                transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-emerald/30
+                justify-self-stretch sm:justify-self-end cursor-pointer
+              "
               aria-label="Search venues"
             >
               <Search size={18} aria-hidden={true} />

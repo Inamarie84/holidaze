@@ -7,10 +7,17 @@ type Opts = {
   body?: unknown
   token?: string | null
   useApiKey?: boolean
-  /** NEW: when false, return full parsed JSON (don’t auto-unwrap .data) */
+  /** When false, return full parsed JSON (don’t auto-unwrap .data). Defaults to true. */
   unwrapData?: boolean
   // next?: RequestInit['next']
   // cache?: RequestInit['cache']
+}
+
+type ApiError = Error & {
+  status: number
+  body: unknown
+  url: string
+  method: string
 }
 
 /**
@@ -44,7 +51,7 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
 
   // Read body once; try JSON, fall back to text
   const rawText = await res.text()
-  let parsed: any = null
+  let parsed: unknown = null
   try {
     parsed = rawText ? JSON.parse(rawText) : null
   } catch {
@@ -61,16 +68,22 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
       })
     }
 
-    const firstErrorMsg =
-      parsed?.errors?.[0]?.message ||
-      parsed?.errors?.[0] || // sometimes APIs put strings here
-      parsed?.message ||
-      parsed?.status ||
-      `${res.status} ${res.statusText}`
+    const p = parsed as {
+      errors?: Array<{ message?: string } | string>
+      message?: string
+      status?: string
+    } | null
 
-    const err: any = new Error(
+    const firstErrorMsg =
+      p?.errors?.[0] && typeof p.errors[0] === 'object'
+        ? p.errors[0]?.message
+        : typeof p?.errors?.[0] === 'string'
+          ? p.errors[0]
+          : p?.message || p?.status || `${res.status} ${res.statusText}`
+
+    const err = new Error(
       typeof firstErrorMsg === 'string' ? firstErrorMsg : 'Request failed'
-    )
+    ) as ApiError
     err.status = res.status
     err.body = parsed ?? rawText
     err.url = url
@@ -80,21 +93,19 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
 
   // No content (204) or truly empty
   if (res.status === 204 || (!rawText && parsed == null)) {
+    // We must return something of type T; undefined is a reasonable sentinel.
     return undefined as unknown as T
   }
 
-  // 🔧 Only unwrap when requested (default true to keep old behavior)
   const shouldUnwrap = opts.unwrapData !== false
   if (
     shouldUnwrap &&
     parsed &&
     typeof parsed === 'object' &&
-    'data' in parsed
+    'data' in (parsed as Record<string, unknown>)
   ) {
-    return parsed.data as T
+    return (parsed as { data: T }).data
   }
-  return parsed as T
 
-  // Prefer `data` envelope if present, otherwise the whole JSON
-  return (parsed && parsed.data ? parsed.data : parsed) as T
+  return parsed as T
 }

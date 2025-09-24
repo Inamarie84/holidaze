@@ -1,3 +1,4 @@
+// src/components/venue/BookingForm/BookingDates.tsx
 'use client'
 
 import { useRef } from 'react'
@@ -10,6 +11,8 @@ type Props = {
   onFromChange: (v: string) => void
   onToChange: (v: string) => void
 }
+
+type WithShowPicker = HTMLInputElement & { showPicker?: () => void }
 
 /** Two date inputs (Check-in / Check-out) with native-picker open on container click. */
 export default function BookingDates({
@@ -25,8 +28,12 @@ export default function BookingDates({
   function openPicker(ref: React.RefObject<HTMLInputElement | null>) {
     const el = ref.current
     if (!el) return
-    if (typeof (el as any).showPicker === 'function') (el as any).showPicker()
-    else el.focus()
+    const maybe = el as WithShowPicker
+    if ('showPicker' in maybe && typeof maybe.showPicker === 'function') {
+      maybe.showPicker()
+    } else {
+      el.focus()
+    }
   }
 
   return (
@@ -37,7 +44,9 @@ export default function BookingDates({
         ref={checkInRef}
         min={minDate}
         value={dateFrom}
-        onChange={(e) => onFromChange((e.target as HTMLInputElement).value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onFromChange(e.target.value)
+        }
         onOpen={() => openPicker(checkInRef)}
       />
       <DateField
@@ -46,7 +55,9 @@ export default function BookingDates({
         ref={checkOutRef}
         min={dateFrom || minDate}
         value={dateTo}
-        onChange={(e) => onToChange((e.target as HTMLInputElement).value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onToChange(e.target.value)
+        }
         onOpen={() => openPicker(checkOutRef)}
       />
     </div>

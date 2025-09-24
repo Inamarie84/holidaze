@@ -16,11 +16,13 @@ export type VenueSearchParams = {
   limit?: string
 }
 
-/**
- * VenueList
- * - Unfiltered: uses Holidaze API directly (real meta)
- * - Filtered: uses our server route `/api/venues/search` (real meta)
- */
+type Meta = {
+  pageCount?: number
+  totalCount?: number
+  isFirstPage?: boolean
+  isLastPage?: boolean
+}
+
 export default async function VenueList({
   sp,
   title = 'Explore venues',
@@ -40,7 +42,7 @@ export default async function VenueList({
 
   const page = Math.max(1, Number(sp.page ?? '1'))
 
-  // 👇 clamp limit to [1, 100]
+  // clamp limit to [1, 100]
   const limitRaw = Number(sp.limit ?? String(DEFAULT_LIMIT))
   const limit = Math.max(
     1,
@@ -56,24 +58,30 @@ export default async function VenueList({
   let hasNext = false
 
   if (hasFilters) {
-    // ✅ server-side filtered search with real meta
-    const res = await searchVenuesServer({
+    // Filtered search (server route)
+    const res = (await searchVenuesServer({
       q,
       dateFrom,
       dateTo,
       guests,
       page,
       limit,
-    })
-    venues = (res.data ?? []) as TVenue[]
+    })) as { data: TVenue[]; meta?: Meta }
+
+    venues = res.data ?? []
     pageCount = res.meta?.pageCount ?? 1
     totalCount = res.meta?.totalCount ?? venues.length
     hasPrev = res.meta?.isFirstPage === false || page > 1
     hasNext = res.meta?.isLastPage === false || page < pageCount
   } else {
-    // Unfiltered: API meta from Holidaze
-    const res = await getVenues({ _bookings: true, page, limit })
-    venues = (res.data ?? []) as TVenue[]
+    // Unfiltered (direct API)
+    const res = (await getVenues({
+      _bookings: true,
+      page,
+      limit,
+    })) as { data: TVenue[]; meta?: Meta }
+
+    venues = res.data ?? []
     pageCount = res.meta?.pageCount ?? 1
     totalCount = res.meta?.totalCount ?? venues.length
     hasPrev = res.meta?.isFirstPage === false || page > 1
@@ -105,7 +113,7 @@ export default async function VenueList({
               {venues.map((v) => (
                 <VenueCard
                   key={v.id}
-                  venue={v as any}
+                  venue={v}
                   dateFrom={dateFrom}
                   dateTo={dateTo}
                 />

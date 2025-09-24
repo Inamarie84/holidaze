@@ -12,10 +12,13 @@ type Props = {
   dateTo?: string
 }
 
+// Narrow to “has a concrete bookings array”
 function hasBookings(
   v: TVenue | TVenueWithBookings
-): v is TVenueWithBookings & Required<Pick<TVenueWithBookings, 'bookings'>> {
-  return Array.isArray((v as any).bookings)
+): v is TVenueWithBookings & {
+  bookings: NonNullable<TVenueWithBookings['bookings']>
+} {
+  return Array.isArray((v as TVenueWithBookings).bookings)
 }
 
 function isAvailable(

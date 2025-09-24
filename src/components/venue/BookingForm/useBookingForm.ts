@@ -1,3 +1,4 @@
+// src/components/venue/BookingForm/useBookingForm.ts
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -48,7 +49,8 @@ export function useBookingForm(venue: VenueCtx, ext: ExternalCtx) {
     if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()))
       return 'Invalid dates.'
     if (to <= from) return 'Check-out must be after check-in.'
-    if (!isRangeAvailable(venue.bookings as any, toDay(from), toDay(to))) {
+    // ✅ no `any` needed here
+    if (!isRangeAvailable(venue.bookings, toDay(from), toDay(to))) {
       return 'Selected dates overlap an existing booking.'
     }
     return null

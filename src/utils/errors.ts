@@ -1,5 +1,17 @@
 // src/utils/errors.ts
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null
+}
+
+function getString(v: unknown): string | undefined {
+  return typeof v === 'string' ? v : undefined
+}
+
+function getNumber(v: unknown): number | undefined {
+  return typeof v === 'number' ? v : undefined
+}
+
 /**
  * Extract a human-friendly message from Noroff v2 API errors, our api() throws,
  * fetch/Response shapes, or generic JS errors. Safe to use everywhere.
@@ -8,30 +20,46 @@ export function errMsg(e: unknown): string {
   // Standard JS Error
   if (e instanceof Error && e.message) return e.message
 
-  const anyE = e as any
-  const body = anyE?.body
+  // Many of our thrown errors attach a 'body' object
+  const body =
+    isRecord(e) && 'body' in e && isRecord((e as Record<string, unknown>).body)
+      ? ((e as Record<string, unknown>).body as Record<string, unknown>)
+      : undefined
 
   // Noroff { body: { errors: [{ message }] } }
-  const noroffErrs = body?.errors
-  if (Array.isArray(noroffErrs) && noroffErrs.length > 0) {
-    const messages = noroffErrs
-      .map((it: any) => (typeof it === 'string' ? it : it?.message))
+  const maybeErrors = body?.errors
+  if (Array.isArray(maybeErrors) && maybeErrors.length > 0) {
+    const messages = maybeErrors
+      .map((it) => {
+        if (typeof it === 'string') return it
+        if (isRecord(it) && typeof it.message === 'string') return it.message
+        return undefined
+      })
       .filter(Boolean)
       .join(', ')
-    if (messages) return humanize(messages, body?.statusCode)
+    if (messages) {
+      const statusCode = getNumber(body?.statusCode)
+      return humanize(messages, statusCode)
+    }
   }
 
   // Noroff { body: { message, status, statusCode } }
-  if (body?.message || body?.status) {
-    return humanize(String(body.message ?? body.status), body?.statusCode)
+  if (
+    body &&
+    (typeof body.message === 'string' || typeof body.status === 'string')
+  ) {
+    const msg = getString(body.message) ?? getString(body.status) ?? 'Error'
+    const statusCode = getNumber(body.statusCode)
+    return humanize(msg, statusCode)
   }
 
   // Flat error shapes { message, statusCode }
-  if (
-    typeof anyE?.message === 'string' ||
-    typeof anyE?.statusCode === 'number'
-  ) {
-    return humanize(String(anyE.message ?? 'Error'), anyE?.statusCode)
+  if (isRecord(e)) {
+    const flatMsg = getString(e.message)
+    const flatCode = getNumber(e.statusCode)
+    if (flatMsg || typeof flatCode === 'number') {
+      return humanize(flatMsg ?? 'Error', flatCode)
+    }
   }
 
   // Plain string

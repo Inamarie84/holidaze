@@ -1,8 +1,6 @@
-//src/app/venues/[id]/edit/page.tsx
-
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import VenueForm from '@/components/venue/VenueForm'
@@ -28,26 +26,30 @@ export default function EditVenuePage() {
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+  // ✅ safe mounted ref
+  const mounted = useRef(true)
+  useEffect(() => {
+    return () => {
+      mounted.current = false
+    }
+  }, [])
+
   // Load venue with owner so we can verify
   useEffect(() => {
-    let mounted = true
     ;(async () => {
       try {
         setLoading(true)
         setLoadError(null)
         const v = (await getVenueById(id, { _owner: true })) as VenueWithOwner
-        if (!mounted) return
+        if (!mounted.current) return
         setVenue(v)
       } catch (err) {
-        if (!mounted) return
+        if (!mounted.current) return
         setLoadError(errMsg(err))
       } finally {
-        mounted && setLoading(false)
+        if (mounted.current) setLoading(false) // ✅
       }
     })()
-    return () => {
-      mounted = false
-    }
   }, [id])
 
   useEffect(() => {
@@ -64,8 +66,6 @@ export default function EditVenuePage() {
     if (!venue || !user?.name) return false
     return venue.owner?.name === user.name
   }, [venue, user?.name])
-
-  const canRender = isAuthed && isManager && !loading && !!venue && isOwner
 
   async function handleSubmit(values: VenueFormValues) {
     if (!venue) return

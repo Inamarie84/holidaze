@@ -1,8 +1,7 @@
-// src/components/auth/SessionHydrator.tsx
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useSession } from '@/store/session'
+import { useSession, type SessionUser } from '@/store/session'
 import { getMyProfile } from '@/services/auth'
 
 export default function SessionHydrator() {
@@ -16,17 +15,19 @@ export default function SessionHydrator() {
 
     const missingRole = typeof user.venueManager !== 'boolean'
     const missingAvatar = !user.avatar
-
     if (!missingRole && !missingAvatar) return
     ;(async () => {
       try {
         const p = await getMyProfile()
-        setUser({
+        const nextUser: SessionUser = {
           name: p.name,
           email: p.email,
           venueManager: p.venueManager,
-          avatar: p.avatar,
-        } as any)
+          avatar: p.avatar
+            ? { url: p.avatar.url, alt: p.avatar.alt }
+            : undefined,
+        }
+        setUser(nextUser) // ✅ no `any`
       } finally {
         didSyncRef.current = true
       }

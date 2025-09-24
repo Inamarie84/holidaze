@@ -15,7 +15,7 @@ import type {
  * @throws {Error} When no token or username is present in the session.
  * @returns {{ token: string; username: string }} The auth token and username.
  */
-function requireAuth() {
+function requireAuth(): { token: string; username: string } {
   const { token, user } = useSession.getState()
   const username = user?.name
   if (!token || !username) throw new Error('Not authenticated')
@@ -89,7 +89,18 @@ export async function updateMyAvatarAndSync(
 ): Promise<TProfile> {
   const updated = await updateMyAvatar(url, alt)
 
-  const store = useSession.getState() as any
+  type SessionSync = {
+    updateAvatar?: (u: string, a?: string) => void
+    setUser?: (u: {
+      name: string
+      email: string
+      venueManager?: boolean
+      avatar?: { url: string; alt?: string }
+    }) => void
+  }
+
+  const store = useSession.getState() as SessionSync
+
   if (typeof store.updateAvatar === 'function') {
     store.updateAvatar(updated.avatar?.url ?? url, updated.avatar?.alt ?? alt)
   } else if (typeof store.setUser === 'function') {

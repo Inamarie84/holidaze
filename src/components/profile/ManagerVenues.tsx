@@ -1,3 +1,4 @@
+// src/components/profile/ManagerVenues.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -30,9 +31,10 @@ export default function ManagerVenues({ venues }: Props) {
     try {
       await deleteVenue(id)
       toast.success('Venue deleted')
-    } catch (err: any) {
+    } catch (err: unknown) {
       setItems(prev)
-      toast.error(err?.message || 'Failed to delete venue')
+      const msg = err instanceof Error ? err.message : 'Failed to delete venue'
+      toast.error(msg)
     }
   }
 

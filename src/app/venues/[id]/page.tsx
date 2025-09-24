@@ -1,22 +1,19 @@
-//src/app/venues/[id]/page.tsx
-
+// src/app/venues/[id]/page.tsx
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 import { getVenueById, deleteVenue } from '@/services/venues'
 import type { TVenueWithBookings, TBooking } from '@/types/api'
 import toast from 'react-hot-toast'
-import { createBooking } from '@/services/bookings'
 import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
 import SmartBackButton from '@/components/ui/SmartBackButton'
 import VenueDetailSkeleton from '@/components/venue/VenueDetailSkeleton'
 import Gallery from '@/components/venue/Gallery'
 import BookingForm from '@/components/venue/BookingForm/BookingForm'
 
-// When we fetch with _bookings=true&_owner=true, we’ll get bookings and owner
 type VenueWithExtras = TVenueWithBookings & { owner?: { name?: string } }
 
 function Chip({ children }: { children: React.ReactNode }) {
@@ -35,18 +32,20 @@ export default function VenueDetailsPage() {
   const [venue, setVenue] = useState<VenueWithExtras | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // Gallery state
   const [activeIndex, setActiveIndex] = useState(0)
 
-  // Booking form state
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
-  const [guests, setGuests] = useState<number | ''>('')
-  const [bookingLoading, setBookingLoading] = useState(false)
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   useEffect(() => {
-    let mounted = true
+    if (!id) return
+    let cancelled = false
+
     ;(async () => {
       try {
         setLoading(true)
@@ -55,25 +54,26 @@ export default function VenueDetailsPage() {
           _bookings: true,
           _owner: true,
         })) as VenueWithExtras
-        if (!mounted) return
+        if (cancelled || !mountedRef.current) return
         setVenue(v)
         setActiveIndex(0)
       } catch (err) {
-        if (!mounted) return
+        if (cancelled || !mountedRef.current) return
         setError(err instanceof Error ? err.message : 'Failed to load venue')
       } finally {
-        mounted && setLoading(false)
+        if (!cancelled && mountedRef.current) setLoading(false)
       }
     })()
+
     return () => {
-      mounted = false
+      cancelled = true
     }
   }, [id])
 
   const isManager = !!user?.venueManager
   const isOwner = isManager && venue?.owner?.name === user?.name
-  const canBook = !!token && !isManager
 
+  // Derive booked intervals for the calendar
   type Interval = { from: Date; to: Date; guests: number }
   const bookedIntervals = useMemo<Interval[]>(() => {
     const list = venue?.bookings ?? []
@@ -83,51 +83,6 @@ export default function VenueDetailsPage() {
       guests: b.guests,
     }))
   }, [venue])
-
-  function overlapsDesired(fromISO: string, toISO: string) {
-    if (!fromISO || !toISO) return false
-    const from = new Date(fromISO)
-    const to = new Date(toISO)
-    return bookedIntervals.some((bi) => !(to <= bi.from || from >= bi.to))
-  }
-
-  async function onBook(e: React.FormEvent) {
-    e.preventDefault()
-    if (!venue) return
-    if (!canBook) {
-      toast.error('Please log in to book this venue.')
-      router.push('/login?role=customer')
-      return
-    }
-    const guestsNum = typeof guests === 'string' ? Number(guests) : guests
-    if (!dateFrom || !dateTo) return toast.error('Please pick your dates.')
-    if (!guestsNum || guestsNum < 1)
-      return toast.error('Guests must be at least 1.')
-    if (guestsNum > venue.maxGuests)
-      return toast.error(`Max guests for this venue is ${venue.maxGuests}.`)
-    if (new Date(dateTo) <= new Date(dateFrom))
-      return toast.error('Check-out must be after check-in.')
-    if (overlapsDesired(dateFrom, dateTo))
-      return toast.error('Selected dates overlap an existing booking.')
-
-    try {
-      setBookingLoading(true)
-      await createBooking({
-        dateFrom: new Date(dateFrom).toISOString(),
-        dateTo: new Date(dateTo).toISOString(),
-        guests: guestsNum,
-        venueId: venue.id,
-      })
-      toast.success('Booking created!')
-      router.push('/profile')
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : 'Failed to create booking'
-      )
-    } finally {
-      setBookingLoading(false)
-    }
-  }
 
   async function onDeleteVenue() {
     if (!venue || !isOwner) return

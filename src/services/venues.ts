@@ -64,19 +64,53 @@ export async function getVenues(
   return (await res.json()) as TListResponse<TVenue>
 }
 
+/**
+ * Read one venue (optionally including bookings/owner).
+ * Uses a direct fetch (like getVenues) to keep response shape consistent
+ * during client-side navigation.
+ */
 export async function getVenueById(
   id: string,
   params?: TVenueInclude
 ): Promise<TVenue | (TVenueWithBookings & { owner?: { name?: string } })> {
   const query = toQuery(params)
-  return holidazeApi<
-    TVenue | (TVenueWithBookings & { owner?: { name?: string } })
-  >(`/venues/${id}${query}`, { method: 'GET' })
+  const url = `${ENV.API_URL}/holidaze/venues/${encodeURIComponent(id)}${query}`
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-Noroff-API-Key': process.env.NEXT_PUBLIC_API_KEY ?? '',
+    },
+    cache: 'no-store',
+  })
+
+  const rawText = await res.text()
+  if (!res.ok) {
+    throw new Error(rawText || `Failed to fetch venue (${res.status})`)
+  }
+
+  // Holidaze can return { data, meta? } or the raw venue object—handle both.
+  try {
+    const parsed = rawText ? (JSON.parse(rawText) as unknown) : null
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'data' in parsed
+    ) {
+      return (parsed as TItemResponse<TVenue | TVenueWithBookings>).data
+    }
+    return parsed as TVenue | TVenueWithBookings
+  } catch {
+    throw new Error('Invalid venue response')
+  }
 }
 
 /* ------------------ MANAGER CRUD ------------------ */
 
-function requireManagerAuth() {
+function requireManagerAuth(): { token: string } {
   const { token, user } = useSession.getState()
   if (!token) throw new Error('Not authenticated')
   if (!user?.venueManager)
@@ -86,12 +120,14 @@ function requireManagerAuth() {
 
 export async function createVenue(input: UpsertVenueInput): Promise<TVenue> {
   const { token } = requireManagerAuth()
+  // Ask for the full envelope and unwrap locally
   const res = await holidazeApi<TItemResponse<TVenue>>('/venues', {
     method: 'POST',
     body: input,
     token,
+    unwrapData: false,
   })
-  return (res as any).data ?? (res as unknown as TVenue)
+  return res.data
 }
 
 export async function updateVenue(
@@ -103,8 +139,9 @@ export async function updateVenue(
     method: 'PUT',
     body: input,
     token,
+    unwrapData: false,
   })
-  return (res as any).data ?? (res as unknown as TVenue)
+  return res.data
 }
 
 export async function deleteVenue(id: string): Promise<void> {
