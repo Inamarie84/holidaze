@@ -22,6 +22,8 @@ import { partitionBookings } from '@/utils/dates'
 import { useSession } from '@/store/session'
 
 export default function ProfilePage() {
+  const { token, user, hasHydrated } = useSession()
+
   const [profile, setProfile] = useState<TProfile | null>(null)
   const [bookings, setBookings] = useState<TBooking[]>([])
   const [venues, setVenues] = useState<TVenueWithBookings[]>([])
@@ -30,51 +32,66 @@ export default function ProfilePage() {
   const [avatarOpen, setAvatarOpen] = useState(false)
 
   // If the session already knows the role, we can hide manager skeletons for customers
-  const likelyManager = !!useSession((s) => s.user?.venueManager)
+  const likelyManager = !!user?.venueManager
 
-  // ✅ robust mounted ref to avoid stuck loading
-  const mountedRef = useRef(true)
+  const mounted = useRef(false)
   useEffect(() => {
-    mountedRef.current = true
+    mounted.current = true
     return () => {
-      mountedRef.current = false
+      mounted.current = false
     }
   }, [])
 
   useEffect(() => {
+    // Reset when logged out or before hydration
+    if (!hasHydrated || !token || !user?.name) {
+      setProfile(null)
+      setBookings([])
+      setVenues([])
+      setError(null)
+      setLoading(true) // show skeletons while hydrating / waiting for token
+      return
+    }
+
+    let cancelled = false
     async function load() {
       try {
         setLoading(true)
         setError(null)
 
+        // 1) Profile
         const me = await getMyProfile()
-        if (!mountedRef.current) return
+        if (cancelled || !mounted.current) return
         setProfile(me)
 
+        // 2) Role-specific data
         if (me.venueManager) {
           const vs = await getMyVenuesWithBookings()
-          if (!mountedRef.current) return
+          if (cancelled || !mounted.current) return
           setVenues(Array.isArray(vs) ? vs : [])
           setBookings([])
         } else {
           const bs = await getMyBookings()
-          if (!mountedRef.current) return
+          if (cancelled || !mounted.current) return
           setBookings(Array.isArray(bs) ? bs : [])
           setVenues([])
         }
-      } catch (err) {
-        if (!mountedRef.current) return
+      } catch (err: unknown) {
+        if (!mounted.current) return
         const msg =
           err instanceof Error ? err.message : 'Failed to load profile'
         setError(msg)
       } finally {
-        // ✅ always clear loading when still mounted
-        if (mountedRef.current) setLoading(false)
+        if (!mounted.current) return
+        setLoading(false)
       }
     }
 
     load()
-  }, [])
+    return () => {
+      cancelled = true
+    }
+  }, [hasHydrated, token, user?.name])
 
   const customer = useMemo(() => partitionBookings(bookings), [bookings])
 
@@ -93,7 +110,31 @@ export default function ProfilePage() {
   )
 
   return (
-    <AuthGate>
+    <AuthGate
+      redirectTo="/login"
+      // Show your real skeletons while hydrating / before token is ready
+      fallback={
+        <main className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <ProfileHeaderSkeleton />
+          <section aria-hidden className="mt-6">
+            <div className="flex flex-wrap gap-3">
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-10 w-28" />
+            </div>
+          </section>
+          {likelyManager && (
+            <section aria-hidden className="mt-10">
+              <ManagerVenuesSkeleton />
+            </section>
+          )}
+          <section aria-hidden className="mt-10">
+            <h2 className="h2 mb-4">Upcoming Bookings</h2>
+            <BookingListSkeleton />
+          </section>
+        </main>
+      }
+    >
       <main
         id="main-content"
         className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8"
@@ -116,14 +157,11 @@ export default function ProfilePage() {
                 <Skeleton className="h-10 w-28" />
               </div>
             </section>
-
-            {/* 👇 Only show manager skeletons if we *know* user is a manager */}
             {likelyManager && (
               <section aria-hidden className="mt-10">
                 <ManagerVenuesSkeleton />
               </section>
             )}
-
             <section aria-hidden className="mt-10">
               <h2 className="h2 mb-4">Upcoming Bookings</h2>
               <BookingListSkeleton />
