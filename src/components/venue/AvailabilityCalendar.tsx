@@ -9,6 +9,8 @@ type Props = {
   bookings: TBooking[]
   /** Optional: start the calendar on a specific month */
   initialMonth?: Date
+  /** Grey out days before today (local). Default: true */
+  disablePast?: boolean
 }
 
 /** Normalize to local midnight (prevents off-by-one issues). */
@@ -39,11 +41,12 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 /**
  * AvailabilityCalendar
- * Non-interactive month view highlighting booked days.
+ * Non-interactive month view highlighting booked & past days.
  */
 export default function AvailabilityCalendar({
   bookings,
   initialMonth,
+  disablePast = true,
 }: Props) {
   const [month, setMonth] = useState<Date>(() => {
     const base = initialMonth ? new Date(initialMonth) : new Date()
@@ -62,12 +65,18 @@ export default function AvailabilityCalendar({
 
   const daysInMonth = new Date(year, mIdx + 1, 0).getDate()
 
+  // Today at local midnight for accurate comparisons
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayId = ymd(today)
+
   const cells: Array<{
     key: string
     label?: number
     inMonth: boolean
     booked?: boolean
     isToday?: boolean
+    isPast?: boolean
   }> = []
 
   // Leading blanks (for Monday-first grid)
@@ -75,17 +84,20 @@ export default function AvailabilityCalendar({
     cells.push({ key: `b-${i}`, inMonth: false })
   }
 
-  const todayId = ymd(new Date())
-
   for (let d = 1; d <= daysInMonth; d++) {
     const cur = new Date(year, mIdx, d)
+    cur.setHours(0, 0, 0, 0)
     const id = ymd(cur)
+    const bookedFlag = booked.has(id)
+    const pastFlag = disablePast && cur < today
+
     cells.push({
       key: id,
       label: d,
       inMonth: true,
-      booked: booked.has(id),
+      booked: bookedFlag,
       isToday: id === todayId,
+      isPast: pastFlag,
     })
   }
 
@@ -144,10 +156,15 @@ export default function AvailabilityCalendar({
                 c.booked
                   ? 'bg-[#e07a5f] text-white border-transparent'
                   : 'border-black/15',
-                c.isToday && !c.booked ? 'ring-2 ring-emerald' : '',
+                c.isPast && !c.booked ? 'opacity-40' : '',
+                c.isToday && !c.booked && !c.isPast
+                  ? 'ring-2 ring-emerald'
+                  : '',
               ].join(' ')}
-              aria-label={`${c.label} ${c.booked ? '(booked)' : '(available)'}`}
-              title={c.booked ? 'Booked' : 'Available'}
+              aria-label={`${c.label} ${
+                c.booked ? '(booked)' : c.isPast ? '(past)' : '(available)'
+              }`}
+              title={c.booked ? 'Booked' : c.isPast ? 'Past' : 'Available'}
             >
               {c.label}
             </div>
@@ -158,7 +175,7 @@ export default function AvailabilityCalendar({
       </div>
 
       {/* Legend */}
-      <div className="mt-3 flex items-center gap-4 text-sm">
+      <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <span className="inline-block h-3 w-3 rounded bg-[#e07a5f]" />
           <span className="text-grey">Booked</span>
@@ -167,6 +184,12 @@ export default function AvailabilityCalendar({
           <span className="inline-block h-3 w-3 rounded border border-black/15" />
           <span className="text-grey">Available</span>
         </div>
+        {disablePast && (
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-3 w-3 rounded bg-black/10" />
+            <span className="text-grey">Past</span>
+          </div>
+        )}
       </div>
     </div>
   )
