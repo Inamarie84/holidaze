@@ -43,7 +43,6 @@ export default function ProfilePageClient() {
   }, [])
 
   useEffect(() => {
-    // Reset while hydrating or when logged out
     if (!hasHydrated || !token || !user?.name) {
       setProfile(null)
       setBookings([])
@@ -136,14 +135,12 @@ export default function ProfilePageClient() {
           id="main-content"
           className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8"
         >
-          {/* errors */}
           {error && !loading && (
             <p role="alert" className="body text-red-600">
               {error}
             </p>
           )}
 
-          {/* loading */}
           {loading && (
             <>
               <ProfileHeaderSkeleton />
@@ -166,7 +163,6 @@ export default function ProfilePageClient() {
             </>
           )}
 
-          {/* loaded */}
           {profile && !loading && !error && (
             <>
               <TitleSync title={`${profile.name} • Holidaze`} />
@@ -232,7 +228,6 @@ export default function ProfilePageClient() {
             </>
           )}
 
-          {/* fallback if somehow no data and no error */}
           {!loading && !error && !profile && (
             <p className="body muted" aria-live="polite">
               You’re not logged in. (If this persists, try refreshing.)

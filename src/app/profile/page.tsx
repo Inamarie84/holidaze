@@ -10,6 +10,5 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-  // You could also pass searchParams here if needed later.
   return <ProfilePageClient />
 }
