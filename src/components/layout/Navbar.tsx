@@ -49,10 +49,9 @@ export default function Navbar() {
         className={[
           'sticky top-0 z-50',
           'min-h-[var(--nav-height)]',
-          // Base: solid #1c1c1c, Scrolled: slightly more transparent + blur
           scrolled
-            ? 'bg-[#1c1c1cd9] supports-[backdrop-filter]:bg-[#1c1c1ccc] backdrop-blur-md'
-            : 'bg-[#1c1c1c] supports-[backdrop-filter]:bg-[#1c1c1cf0] backdrop-blur',
+            ? 'bg-[#1c1c1cee] supports-[backdrop-filter]:bg-[#1c1c1ce6] backdrop-blur-md'
+            : 'bg-[#1c1c1c]  supports-[backdrop-filter]:bg-[#1c1c1cf5] backdrop-blur',
           scrolled
             ? 'border-b border-black/10 shadow-md shadow-black/10'
             : 'border-b-0',
@@ -60,11 +59,10 @@ export default function Navbar() {
         ].join(' ')}
       >
         <nav className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Desktop: single row of exact height; Mobile: stacks gracefully */}
-          <div className="flex flex-col gap-2 py-2 md:py-0 md:h-[var(--nav-height)] md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2 py-2 md:flex-row md:items-center md:justify-between">
             <NavbarLogo />
             <NavbarLinks
-              hasHydrated
+              hasHydrated={hasHydrated}
               isAuthed={isAuthed}
               isManager={isManager}
               userName={user?.name}
