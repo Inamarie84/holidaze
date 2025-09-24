@@ -12,15 +12,13 @@ import type {
 
 /**
  * Register a new user.
- * For venue managers, a Noroff student email is required.
+ * a Noroff student email is required.
  */
 export async function registerUser(
   input: TRegisterInput & { venueManager?: boolean }
 ): Promise<TAuthResponse> {
   if (input.venueManager && !isNoroffStudentEmail(input.email)) {
-    throw new Error(
-      `Registration as manager requires a ${NOROFF_DOMAIN} email.`
-    )
+    throw new Error(`Registration requires a ${NOROFF_DOMAIN} email.`)
   }
 
   return api<TAuthResponse>('/auth/register', {
@@ -29,11 +27,10 @@ export async function registerUser(
   })
 }
 
-/**
- * Log a user in and persist the session.
- */
+/** Log a user in and persist the session. */
 export async function loginUser(input: TLoginInput): Promise<TAuthResponse> {
-  const res = await api<TAuthResponse>('/auth/login', {
+  // Add _holidaze=true so we always get venueManager/avatar/banner in response
+  const res = await api<TAuthResponse>('/auth/login?_holidaze=true', {
     method: 'POST',
     body: input,
   })
@@ -44,15 +41,13 @@ export async function loginUser(input: TLoginInput): Promise<TAuthResponse> {
       name: res.name,
       email: res.email,
       venueManager: !!res.venueManager,
+      avatar: res.avatar,
     },
   })
-
   return res
 }
 
-/**
- * Fetch a specific profile by name. Supports include/pagination flags.
- */
+/** Fetch a specific profile by name (needs API key; token optional for private fields). */
 export async function getProfile(
   name: string,
   params?: Record<string, string | number | boolean | undefined>,
@@ -63,24 +58,19 @@ export async function getProfile(
     if (v !== undefined && v !== null && v !== '') usp.set(k, String(v))
   })
   const qs = usp.toString() ? `?${usp}` : ''
-
-  // Use Holidaze helper so API key is always included
   return holidazeApi<TProfile>(`/profiles/${encodeURIComponent(name)}${qs}`, {
     method: 'GET',
-    token: token ?? null,
+    token: token ?? undefined,
   })
-} // ← this closing brace was missing
+}
 
-/**
- * Convenience: fetch the current user's profile (from stored session).
- */
+/** Convenience: fetch current user's profile (requires token). */
 export async function getMyProfile(): Promise<TProfile> {
   const { token, user } = useSession.getState()
   if (!token || !user?.name) throw new Error('Not authenticated')
   return getProfile(user.name, undefined, token)
 }
 
-/** Clear stored session. */
 export function logoutUser() {
   useSession.getState().logout()
 }

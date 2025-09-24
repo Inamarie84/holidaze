@@ -1,3 +1,5 @@
+//src/app/(auth)/register/RegisterPageClient.tsx
+
 'use client'
 
 import { useRouter } from 'next/navigation'
@@ -55,10 +57,7 @@ export default function RegisterPageClient({
       <h1 className="h1 mb-4">Create account</h1>
       <p className="muted mb-6">
         Use your <b>{NOROFF_DOMAIN}</b> email{' '}
-        {role === 'manager'
-          ? '(required for managers)'
-          : '(optional for customers)'}
-        .
+        {role === 'manager' ? '(required)' : '(required)'}.
       </p>
 
       <form

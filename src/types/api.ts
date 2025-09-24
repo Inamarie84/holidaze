@@ -104,19 +104,28 @@ export type TItemResponse<T> = {
   meta: Record<string, never> | object
 }
 
+/** Auth responses unwrap to this shape (your api() returns .data). */
 export type TAuthResponse = {
   accessToken: string
   name: string
   email: string
   venueManager?: boolean
+  avatar?: TMedia
+  banner?: TMedia
 }
 
+/** Register payload (matches docs). */
 export type TRegisterInput = {
   name: string
   email: string
   password: string
+  bio?: string
+  avatar?: TMedia
+  banner?: TMedia
+  venueManager?: boolean
 }
 
+/** Login payload. */
 export type TLoginInput = {
   email: string
   password: string
