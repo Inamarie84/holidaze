@@ -1,6 +1,8 @@
 // src/app/(with-search)/venues/page.tsx
 import VenueList, { VenueSearchParams } from '@/components/venue/VenueList'
 
+export const metadata = { title: 'Venues', description: 'Browse all venues' }
+
 export const dynamic = 'force-dynamic'
 
 export default async function VenuesPage({

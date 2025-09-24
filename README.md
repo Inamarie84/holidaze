@@ -1,65 +1,75 @@
 # Holidaze
 
 A modern accommodation booking site built with **Next.js**, **TypeScript**, and **Tailwind CSS**.  
-This project is part of my final exam assignment. It implements both customer and venue manager flows against the Noroff v2 API (Holidaze).
+Implements both customer and venue manager flows against the Noroff v2 **Holidaze** API.
+
+**Live:** https://holidaze-ten.vercel.app  
+**Repo:** https://github.com/Inamarie84/holidaze
+
+---
 
 ## ✨ Features
 
 ### For everyone
 
-- Browse a paginated grid of venues
-- Powerful search: destination, dates, guests
-- Venue details page with image gallery, amenities, availability calendar (booked vs available days)
-- Mobile-first, responsive layout
+- Browse venues (paginated grid)
+- Search by destination, dates, guests
+- Venue details with gallery, amenities, and availability calendar
+- Mobile-first, responsive UI
 
 ### Customers
 
-- Register / Login / Logout (requires @stud.noroff.no email)
+- Register / Login / Logout (Noroff `@stud.noroff.no` email)
 - Create bookings
-- See upcoming and previous bookings in profile
-- Update avatar / profile picture
+- See upcoming & previous bookings in profile
+- Update avatar
 
 ### Venue Managers
 
-- Register / Login / Logout (requires @stud.noroff.no email)
+- Register / Login / Logout (Noroff `@stud.noroff.no` email)
 - Create, edit, and delete venues
 - See upcoming bookings for their venues
-- Update avatar / profile picture
+- Update avatar
 
-## 🧭 User roles & terminology
+### DX & Quality
 
-- Visitor: not logged in
-- Customer: logged-in user who books venues
-- Venue Manager: logged-in user who manages venues (can CRUD venues)
+- App Router (Next.js)
+- Type-safe API helpers
+- Persisted session with Zustand
+- Toasts for feedback
+- Accessible tooltips & skeleton UIs
+
+---
 
 ## 🧱 Tech Stack
 
 - **Framework:** Next.js (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
-- **State:** Zustand (persisted session)
-- **Icons & UI:** lucide-react, react-hot-toast
-- **Linting/Format:** ESLint (flat config) + Prettier
+- **State:** Zustand (persisted)
+- **UI / Icons:** lucide-react, react-hot-toast
+- **Testing:** Jest + React Testing Library
+- **Linting / Format:** ESLint + Prettier
 - **Node:** ≥ 18
-- **Hosting:** Vercel
-- **Jest** / Testing Library (project includes tests scaffolding)
+- **Deploy:** Vercel
 
-## 🚀 Getting Started
+---
 
-To run this project locally, follow these steps:
+## 🧭 Roles & Terminology
 
-1. Clone the repository:
+- **Visitor:** not logged in
+- **Customer:** logged-in user who books venues
+- **Venue Manager:** logged-in user who manages venues (CRUD venues)
 
-   ```bash
-   git clone https://github.com/Inamarie84/holidaze.git
+---
 
-   ```
+## 🚀 Getting Started (Local)
 
-2. Navigate to the project directory:
+1. **Clone**
 
 ```bash
+git clone https://github.com/Inamarie84/holidaze.git
 cd holidaze
-
 ```
 
 3. Install dependencies:
@@ -69,20 +79,33 @@ npm install
 
 ```
 
-4. Run the development server: (http://localhost:3000)
+4. Environment Variables – create .env.local:
+
+```bash
+# Base Noroff v2 API (no trailing slash)
+NEXT_PUBLIC_API_URL=https://v2.api.noroff.dev
+
+
+# Required for /holidaze/* endpoints (you can get your own key from https://api.noroff.dev)
+NEXT_PUBLIC_API_KEY=YOUR_API_KEY_HERE
+
+```
+
+5. Run the development server: (http://localhost:3000)
 
 ```bash
 npm run dev
 
 ```
 
-## Environment
-
-Create a `.env.local` in the project root:
+6. Other scripts:
 
 ```bash
-# Base Noroff v2 API (no trailing slash)
-NEXT_PUBLIC_API_URL=https://v2.api.noroff.dev
+npm run build      # Create an optimized production build
+npm run start      # Start the production server
+npm run lint       # Run ESLint
+npm run test       # Run tests with Jest
+npm run prettier    # Run Prettier to format code
 
 ```
 
@@ -99,29 +122,16 @@ Common calls:
 
 The app uses a small helper wrapper to:
 
-- Hydrate Authorization from session when needed
-- Optionally include X-Noroff-API-Key
-- Parse and normalize errors into friendly messages
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+- Adds Authorization: Bearer <token> when available
+- Adds X-Noroff-API-Key for Holidaze routes
+- PNormalizes API errors into friendly messages
 
 ## 🔐 Auth & session
 
-- Login/register calls save { token, user } to the Zustand store.
-- The store is persisted in localStorage so you stay logged in across reloads.
-- AuthGate and SessionHydrator ensure the UI doesn’t flicker before the session is rehydrated.
+- Successful login/register stores { token, user } in a persisted Zustand store (localStorage).
+- AuthGate guards protected pages; SessionHydrator prevents hydration flicker.
+- After login, users are redirected back to their intended page.
 
-## Learn More
+## 🧑‍🎨 Screenshots
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+![Home](public/readme/home.png)

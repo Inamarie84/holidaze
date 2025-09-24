@@ -1,5 +1,5 @@
 // src/app/layout.tsx
-import type { Metadata } from 'next'
+
 import { Inter, DM_Serif_Display } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
@@ -17,12 +17,13 @@ const dmSerif = DM_Serif_Display({
   variable: '--font-serif',
 })
 
-export const metadata: Metadata = {
-  title: 'Holidaze',
-  description: 'Modern accommodation booking site',
-  icons: {
-    icon: '/icon.png',
+export const metadata = {
+  title: {
+    default: 'Holidaze',
+    template: '%s • Holidaze',
   },
+  description: 'Modern accommodation booking site',
+  icons: { icon: '/icon.png' },
 }
 
 export default function RootLayout({

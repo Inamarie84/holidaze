@@ -20,6 +20,9 @@ import {
 } from '@/services/profiles'
 import { partitionBookings } from '@/utils/dates'
 import { useSession } from '@/store/session'
+import TitleSync from '@/components/TitleSync'
+
+export const metadata = { title: 'Profile', description: 'Your account' }
 
 // Never statically prerender this page
 export const dynamic = 'force-dynamic'
@@ -172,6 +175,7 @@ export default function ProfilePage() {
           {/* loaded */}
           {profile && !loading && !error && (
             <>
+              <TitleSync title={`${profile.name} • Holidaze`} />
               <ProfileHeader
                 profile={profile}
                 onEditAvatar={() => setAvatarOpen(true)}
