@@ -33,7 +33,7 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 
 ### DX & Quality
 
-- App Router (Next.js)
+- Next.js App Router
 - Type-safe API helpers
 - Persisted session with Zustand
 - Toasts for feedback
@@ -49,7 +49,7 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 - **State:** Zustand (persisted)
 - **UI / Icons:** lucide-react, react-hot-toast
 - **Testing:** Jest + React Testing Library
-- **Linting / Format:** ESLint + Prettier
+- **Lint/Format:** ESLint + Prettier
 - **Node:** ≥ 18
 - **Deploy:** Vercel
 
@@ -62,6 +62,27 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 - **Venue Manager:** logged-in user who manages venues (CRUD venues)
 
 ---
+
+## 📁 Project Structure (high-level)
+
+src/
+app/
+(with-search)/
+venues/ # /venues listing (server entry + client components)
+profile/ # /profile (server wrapper + client page)
+login/ # auth page
+register/ # auth page
+api/ # route handlers (if any)
+layout.tsx # global layout
+components/ # UI and feature components
+lib/ # api.ts, holidaze.ts, env helpers
+services/ # API calls (auth, profiles, venues, bookings)
+store/ # Zustand session store
+types/ # shared TypeScript types
+public/
+readme/ # screenshots for README
+icon.png # app icon (Next auto-uses /icon.png)
+images/ # placeholder assets
 
 ## 🚀 Getting Started (Local)
 
@@ -109,6 +130,19 @@ npm run prettier    # Run Prettier to format code
 
 ```
 
+## 🌍 Deployment (Vercel)
+
+1. Connect the repo on Vercel.
+2. In **Project → Settings → Environment Variables**, add for **all environments**
+   (Production / Preview / Development):
+
+- NEXT_PUBLIC_API_URL=https://v2.api.noroff.dev
+- NEXT_PUBLIC_API_KEY=YOUR_API_KEY_HERE
+
+3. Trigger a deploy (push to `main`).
+
+````
+
 ## 🌐 API usage
 
 All data comes from the Noroff v2 API (Holidaze).
@@ -132,6 +166,55 @@ The app uses a small helper wrapper to:
 - AuthGate guards protected pages; SessionHydrator prevents hydration flicker.
 - After login, users are redirected back to their intended page.
 
+## 🧪 Testing
+
+- Unit / component tests with **Jest** + **React Testing Library**
+
+**Run:**
+```bash
+npm test
+
+
+````
+
+## 🌍 Deployment (Vercel)
+
+1. Connect the repo on Vercel.
+2. In **Project → Settings → Environment Variables**, add for **all environments**
+   (Production / Preview / Development):
+
+- NEXT_PUBLIC_API_URL=https://v2.api.noroff.dev
+- NEXT_PUBLIC_API_KEY=YOUR_API_KEY_HERE
+
+3. Trigger a deploy (push to `main`).
+
+```
+
 ## 🧑‍🎨 Screenshots
 
 ![Home](public/readme/home.png)
+
+## ♿ Accessibility & UX
+
+- Keyboard-focusable controls
+- Tooltip hints on icon-only buttons (hidden on larger screens where text is visible)
+- Semantic headings and ARIA `role="status"` for async feedback
+- Color contrast checked for navbar/hero overlays
+
+## 🛠 Troubleshooting
+
+
+- **Images via `<Image />` 502/403**: Ensure external domains are allowed in `next.config.js` (`images.remotePatterns` or `images.domains`).
+- **404 favicon**: Keep `src/app/icon.png` (Next generates `/icon.png`).
+- **“Missing NEXT_PUBLIC_API_URL”**: Add required env vars in Vercel and redeploy.
+- **Auth works locally but not on Vercel**: Confirm both `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_API_KEY` exist for Production & Preview.
+```
+
+## 📝 Notes
+
+- **Home vs Venues**: The home route redirects to `/venues`. This is fine and common when the listing is the main experience.
+- **Titles/Metadata**: The app uses a layout title template and per-page metadata (or a client `TitleSync` for dynamic titles like the profile username). This is the standard Next.js approach (rather than editing static HTML).
+
+## 📄 License
+
+MIT © 2025 Inamarie Forseth
