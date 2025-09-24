@@ -1,3 +1,4 @@
+// src/components/layout/NavbarSkeleton.tsx
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -14,7 +15,7 @@ const NavbarSkeleton = forwardRef<HTMLElement, HeaderProps>(
         className={[
           'sticky top-0 z-50',
           'min-h-[var(--nav-height)]',
-          'bg-[rgba(var(--foreground-rgb),0.85)] supports-[backdrop-filter]:bg-[rgba(var(--foreground-rgb),0.72)] backdrop-blur-md',
+          'bg-[#1c1c1c] supports-[backdrop-filter]:bg-[#1c1c1cf0] backdrop-blur',
           'border-b border-transparent',
           'text-white',
           className,

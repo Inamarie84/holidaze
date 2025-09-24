@@ -1,28 +1,36 @@
+// src/components/layout/useNavHeight.tsx
 'use client'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
-export default function useNavHeight(
-  headerRef: React.RefObject<HTMLElement | null>
-) {
-  useEffect(() => {
-    const el = headerRef.current
+export default function useNavHeight() {
+  const elRef = useRef<HTMLElement | null>(null)
+  const roRef = useRef<ResizeObserver | null>(null)
+
+  const setVar = useCallback(() => {
+    const el = elRef.current
     if (!el) return
+    document.documentElement.style.setProperty(
+      '--nav-height',
+      `${el.offsetHeight}px`
+    )
+  }, [])
 
-    const setVar = () =>
-      document.documentElement.style.setProperty(
-        '--nav-height',
-        `${el.offsetHeight}px`
-      )
+  const ref = useCallback(
+    (node: HTMLElement | null) => {
+      // detach old
+      roRef.current?.disconnect()
+      elRef.current = node
+      if (!node) return
+      // attach new
+      const ro = new ResizeObserver(setVar)
+      ro.observe(node)
+      roRef.current = ro
+      setVar()
+    },
+    [setVar]
+  )
 
-    setVar()
+  useEffect(() => () => roRef.current?.disconnect(), [])
 
-    const ro = new ResizeObserver(setVar)
-    ro.observe(el)
-    window.addEventListener('resize', setVar, { passive: true })
-
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', setVar)
-    }
-  }, [headerRef])
+  return ref
 }

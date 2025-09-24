@@ -1,3 +1,4 @@
+// src/components/layout/NavbarLinks.tsx
 'use client'
 import Link from 'next/link'
 import IconHint from '@/components/ui/IconHint'
@@ -40,7 +41,7 @@ export default function NavbarLinks({
           prefetch={pathname !== '/venues'}
           aria-label="Browse venues"
           title="Browse venues"
-          className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2"
+          className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2"
         >
           <MapPin size={18} aria-hidden="true" />
           <span className="hidden sm:inline max-[430px]:hidden">
@@ -56,7 +57,7 @@ export default function NavbarLinks({
             href="/venues/new"
             aria-label="Create venue"
             title="Create venue"
-            className="inline-flex h-9 items-center gap-1 rounded-lg bg-emerald px-3 text-sm text-white hover:opacity-90 max-[430px]:px-2 cursor-pointer"
+            className="inline-flex h-9 items-center leading-none gap-1 rounded-lg bg-emerald px-3 text-sm text-white hover:opacity-90 max-[430px]:px-2 cursor-pointer"
           >
             <PlusCircle size={18} aria-hidden="true" />
             <span className="hidden sm:inline max-[430px]:hidden">
@@ -74,7 +75,7 @@ export default function NavbarLinks({
               href="/profile"
               aria-label="Profile"
               title={userName ?? 'Profile'}
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 bg-terracotta/90 px-3 text-sm hover:bg-terracotta/70 max-[430px]:px-2 cursor-pointer"
+              className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 bg-terracotta/90 px-3 text-sm hover:bg-terracotta/70 max-[430px]:px-2 cursor-pointer"
             >
               <User2 size={18} aria-hidden="true" />
               <span className="hidden sm:inline max-[430px]:hidden">
@@ -89,7 +90,7 @@ export default function NavbarLinks({
               onClick={onLogout}
               aria-label="Log out"
               title="Log out"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+              className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
             >
               <LogOut size={18} aria-hidden="true" />
               <span className="hidden sm:inline max-[430px]:hidden">
@@ -106,7 +107,7 @@ export default function NavbarLinks({
               onClick={onOpenRegister}
               aria-label="Register"
               title="Register"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+              className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
             >
               <UserPlus size={18} aria-hidden="true" />
               <span className="hidden sm:inline max-[430px]:hidden">
@@ -120,7 +121,7 @@ export default function NavbarLinks({
               onClick={onOpenLogin}
               aria-label="Log in"
               title="Log in"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+              className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
             >
               <LogIn size={18} aria-hidden="true" />
               <span className="hidden sm:inline max-[430px]:hidden">
