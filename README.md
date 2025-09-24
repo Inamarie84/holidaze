@@ -46,15 +46,34 @@ This project is part of my final exam assignment. It implements both customer an
 
 ## 🚀 Getting Started
 
+To run this project locally, follow these steps:
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Inamarie84/holidaze.git
+
+   ```
+
+2. Navigate to the project directory:
+
 ```bash
-## 1) Install dependencies & run locally
+cd holidaze
+
+```
+
+3. Install dependencies:
+
+```bash
 npm install
-## 2) Start development server (http://localhost:3000)
+
+```
+
+4. Run the development server: (http://localhost:3000)
+
+```bash
 npm run dev
-## 3) Build for production
-npm run build
-## 4) Start production server
-npm start
+
 ```
 
 ## Environment
