@@ -1,3 +1,4 @@
+// src/components/layout/Navbar.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -40,9 +41,9 @@ export default function Navbar() {
   return (
     <>
       <header
+        ref={headerRef} // ⬅️ attach the ref so --nav-height updates
         className={[
           'sticky top-0 z-50',
-          // solid at top; more transparent when scrolled
           scrolled
             ? 'bg-[#1c1c1cCC] supports-[backdrop-filter]:bg-[#1c1c1cB8] backdrop-blur-md'
             : 'bg-[#1c1c1c]    supports-[backdrop-filter]:bg-[#1c1c1cF2] backdrop-blur',
