@@ -20,6 +20,10 @@ const dmSerif = DM_Serif_Display({
 export const metadata: Metadata = {
   title: 'Holidaze',
   description: 'Modern accommodation booking site',
+  icons: {
+    icon: '/icon.png', // you already have src/app/icon.png
+    // apple: '/apple-icon.png', // if you have one
+  },
 }
 
 export default function RootLayout({
