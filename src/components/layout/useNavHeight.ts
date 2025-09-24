@@ -17,11 +17,9 @@ export default function useNavHeight() {
 
   const ref = useCallback(
     (node: HTMLElement | null) => {
-      // detach old
       roRef.current?.disconnect()
       elRef.current = node
       if (!node) return
-      // attach new
       const ro = new ResizeObserver(setVar)
       ro.observe(node)
       roRef.current = ro
@@ -31,6 +29,5 @@ export default function useNavHeight() {
   )
 
   useEffect(() => () => roRef.current?.disconnect(), [])
-
   return ref
 }

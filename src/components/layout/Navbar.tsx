@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -6,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 import NavbarLogo from './NavbarLogo'
 import NavbarLinks from './NavbarLinks'
-import NavbarSkeleton from './NavbarSkeleton'
 import useNavHeight from './useNavHeight'
 import { RegisterModal, LoginModal } from './AuthModals'
 
@@ -18,9 +16,9 @@ export default function Navbar() {
   const [openRegister, setOpenRegister] = useState(false)
   const [openLogin, setOpenLogin] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const router = useRouter()
 
-  const headerRef = useNavHeight() // callback ref
+  const router = useRouter()
+  const headerRef = useNavHeight() // callback ref (updates --nav-height)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4)
@@ -39,19 +37,15 @@ export default function Navbar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, openLogin, openRegister])
 
-  // ✨ Avoid double: render either skeleton OR header
-  if (!hasHydrated) return <NavbarSkeleton ref={headerRef} />
-
   return (
     <>
       <header
-        ref={headerRef}
         className={[
           'sticky top-0 z-50',
-          'min-h-[var(--nav-height)]',
+          // solid at top; more transparent when scrolled
           scrolled
-            ? 'bg-[#1c1c1cee] supports-[backdrop-filter]:bg-[#1c1c1ce6] backdrop-blur-md'
-            : 'bg-[#1c1c1c]  supports-[backdrop-filter]:bg-[#1c1c1cf5] backdrop-blur',
+            ? 'bg-[#1c1c1cCC] supports-[backdrop-filter]:bg-[#1c1c1cB8] backdrop-blur-md'
+            : 'bg-[#1c1c1c]    supports-[backdrop-filter]:bg-[#1c1c1cF2] backdrop-blur',
           scrolled
             ? 'border-b border-black/10 shadow-md shadow-black/10'
             : 'border-b-0',
@@ -59,6 +53,7 @@ export default function Navbar() {
         ].join(' ')}
       >
         <nav className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Mobile stacks; Desktop one row; NO fixed heights anywhere */}
           <div className="flex flex-col gap-2 py-2 md:flex-row md:items-center md:justify-between">
             <NavbarLogo />
             <NavbarLinks
@@ -77,7 +72,6 @@ export default function Navbar() {
         </nav>
       </header>
 
-      {/* auth modals */}
       <RegisterModal
         open={openRegister}
         onClose={() => setOpenRegister(false)}

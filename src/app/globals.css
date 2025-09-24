@@ -7,13 +7,6 @@
   --background: #ffffff;
   --foreground: #1c1c1c; /* your dark base */
   --foreground-rgb: 28, 28, 28; /* same color as RGB for opacity */
-
-  --nav-height: 64px; /* desktop-ish */
-}
-@media (max-width: 768px) {
-  :root {
-    --nav-height: 80px;
-  } /* taller on mobile if it wraps */
 }
 
 /* Expose Next font variables from layout.tsx to Tailwind tokens */
