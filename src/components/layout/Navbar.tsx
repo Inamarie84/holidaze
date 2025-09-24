@@ -20,11 +20,9 @@ export default function Navbar() {
 
   const router = useRouter()
 
-  // publish --nav-height
   const headerRef = useRef<HTMLElement>(null)
   useNavHeight(headerRef)
 
-  // shadow on scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4)
     onScroll()
@@ -32,7 +30,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // redirect to profile after modal auth
   useEffect(() => {
     if (!token) return
     if (openLogin || openRegister) {
@@ -43,25 +40,29 @@ export default function Navbar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, openLogin, openRegister])
 
-  // don’t render auth-dependent UI before hydration
-  if (!hasHydrated) return <NavbarSkeleton ref={headerRef} />
-
   return (
     <>
+      {!hasHydrated && <NavbarSkeleton ref={headerRef} />}
+
       <header
         ref={headerRef}
         className={[
-          'sticky top-0 z-50', // ⬅️ was: 'fixed inset-x-0 top-0 z-50'
-          scrolled ? 'border-b border-black/10' : 'border-b-0',
-          'text-white bg-[var(--color-foreground)] supports-[backdrop-filter]:bg-[var(--color-foreground)]/90 backdrop-blur',
-          scrolled ? 'shadow-md shadow-black/10' : '',
-          'transition-[box-shadow,border-color]',
+          'sticky top-0 z-50',
+          'min-h-[var(--nav-height)]',
+          // Glassy dark using your --foreground
+          'bg-[rgba(var(--foreground-rgb),0.85)] supports-[backdrop-filter]:bg-[rgba(var(--foreground-rgb),0.72)] backdrop-blur-md',
+          scrolled
+            ? 'border-b border-black/10 shadow-md shadow-black/10'
+            : 'border-b-0',
+          'text-white transition-[box-shadow,border-color]',
         ].join(' ')}
       >
         <nav className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-2 py-2 md:h-16 md:flex-row md:items-center md:justify-between">
+          {/* Mobile: stacked; Desktop: single row, perfectly centered */}
+          <div className="flex flex-col gap-2 py-2 md:py-0 md:h-[var(--nav-height)] md:flex-row md:items-center md:justify-between">
             <NavbarLogo />
             <NavbarLinks
+              hasHydrated={hasHydrated}
               isAuthed={isAuthed}
               isManager={isManager}
               userName={user?.name}
@@ -76,7 +77,6 @@ export default function Navbar() {
         </nav>
       </header>
 
-      {/* auth modals */}
       <RegisterModal
         open={openRegister}
         onClose={() => setOpenRegister(false)}

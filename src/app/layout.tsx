@@ -45,7 +45,7 @@ export default function RootLayout({
           <RouteHistoryTracker />
         </Suspense>
         {/* Offset for sticky navbar (relies on --nav-height set by Navbar) */}
-        <main id="content" className="flex-1 pt-[var(--nav-height)]">
+        <main id="content" className="flex-1">
           {children}
         </main>
 

@@ -5,18 +5,15 @@
 ------------------------------ */
 :root {
   --background: #ffffff;
-  --foreground: #1c1c1c; /* brand text color for body by default */
+  --foreground: #1c1c1c; /* your dark base */
+  --foreground-rgb: 28, 28, 28; /* same color as RGB for opacity */
 
-  /* default so SSR doesn't hide the hero */
+  --nav-height: 64px; /* desktop-ish */
 }
-
-:root {
-  --nav-height: 64px;
-} /* desktop-ish */
 @media (max-width: 768px) {
   :root {
     --nav-height: 80px;
-  } /* mobile taller */
+  } /* taller on mobile if it wraps */
 }
 
 /* Expose Next font variables from layout.tsx to Tailwind tokens */

@@ -12,6 +12,7 @@ import {
 import { usePathname } from 'next/navigation'
 
 type Props = {
+  hasHydrated: boolean
   isAuthed: boolean
   isManager: boolean
   userName?: string
@@ -21,6 +22,7 @@ type Props = {
 }
 
 export default function NavbarLinks({
+  hasHydrated,
   isAuthed,
   isManager,
   userName,
@@ -32,7 +34,6 @@ export default function NavbarLinks({
 
   return (
     <div className="ms-auto flex min-w-0 flex-wrap items-center gap-2 max-[430px]:gap-1">
-      {/* Browse Venues */}
       <IconHint label="Browse venues">
         <Link
           href="/venues"
@@ -49,8 +50,7 @@ export default function NavbarLinks({
         </Link>
       </IconHint>
 
-      {/* Create (managers only) */}
-      {isAuthed && isManager && (
+      {hasHydrated && isAuthed && isManager && (
         <IconHint label="Create venue">
           <Link
             href="/venues/new"
@@ -67,42 +67,8 @@ export default function NavbarLinks({
         </IconHint>
       )}
 
-      {!isAuthed ? (
+      {hasHydrated && isAuthed ? (
         <>
-          {/* Register */}
-          <IconHint label="Register">
-            <button
-              onClick={onOpenRegister}
-              aria-label="Register"
-              title="Register"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
-            >
-              <UserPlus size={18} aria-hidden="true" />
-              <span className="hidden sm:inline max-[430px]:hidden">
-                Register
-              </span>
-            </button>
-          </IconHint>
-
-          {/* Log in */}
-          <IconHint label="Log in">
-            <button
-              onClick={onOpenLogin}
-              aria-label="Log in"
-              title="Log in"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
-            >
-              <LogIn size={18} aria-hidden="true" />
-              <span className="hidden sm:inline max-[430px]:hidden">
-                Log in
-              </span>
-              <span className="sm:hidden max-[430px]:hidden">Login</span>
-            </button>
-          </IconHint>
-        </>
-      ) : (
-        <>
-          {/* Profile */}
           <IconHint label="Profile">
             <Link
               href="/profile"
@@ -118,7 +84,6 @@ export default function NavbarLinks({
             </Link>
           </IconHint>
 
-          {/* Log out */}
           <IconHint label="Log out">
             <button
               onClick={onLogout}
@@ -131,6 +96,37 @@ export default function NavbarLinks({
                 Log out
               </span>
               <span className="sm:hidden max-[430px]:hidden">Logout</span>
+            </button>
+          </IconHint>
+        </>
+      ) : (
+        <>
+          <IconHint label="Register">
+            <button
+              onClick={onOpenRegister}
+              aria-label="Register"
+              title="Register"
+              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+            >
+              <UserPlus size={18} aria-hidden="true" />
+              <span className="hidden sm:inline max-[430px]:hidden">
+                Register
+              </span>
+            </button>
+          </IconHint>
+
+          <IconHint label="Log in">
+            <button
+              onClick={onOpenLogin}
+              aria-label="Log in"
+              title="Log in"
+              className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
+            >
+              <LogIn size={18} aria-hidden="true" />
+              <span className="hidden sm:inline max-[430px]:hidden">
+                Log in
+              </span>
+              <span className="sm:hidden max-[430px]:hidden">Login</span>
             </button>
           </IconHint>
         </>
