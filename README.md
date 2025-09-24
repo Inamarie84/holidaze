@@ -5,11 +5,23 @@ This project is part of my final exam assignment.
 
 ## ✨ Features
 
-- Browse and search venues
+- Browse and search venues (destination, date range, guests)
 - View venue details with availability calendar
 - Register/login as customer or venue manager
-- Create bookings and manage venues
+- Create bookings (customer) and manage venues (manager)
 - Update avatar/profile
+- Optimistic UI, skeleton loaders, toast notifications
+- Fully typed codebase with strict ESLint rules
+
+## Tech Stack
+
+- Framework: Next.js (App Router)
+- Language: TypeScript
+- Styling: Tailwind CSS
+- State: Zustand (persisted session)
+- UI bits: lucide-react, react-hot-toast
+- Linting/Format: ESLint (flat config) + Prettier
+- Build: Node ≥ 18
 
 ## 🚀 Getting Started
 
