@@ -1,3 +1,4 @@
+// src/components/ui/SmartBackButton.tsx
 'use client'
 
 import { useRouter } from 'next/navigation'
@@ -17,14 +18,23 @@ export default function SmartBackButton({
   const router = useRouter()
 
   function goBack() {
-    try {
-      const ref = document.referrer
-      const sameOrigin = !!ref && new URL(ref).origin === window.location.origin
-      if (sameOrigin) router.back()
-      else router.push(fallback)
-    } catch {
-      router.push(fallback)
+    // 1) Real history back if there is at least one previous entry
+    const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
+    if (idx > 0) {
+      router.back()
+      return
     }
+
+    // 2) Our tracked previous in-app route
+    const prev = sessionStorage.getItem('prevPath')
+    const here = `${location.pathname}${location.search}`
+    if (prev && prev !== here) {
+      router.push(prev)
+      return
+    }
+
+    // 3) Fallback
+    router.push(fallback)
   }
 
   return (

@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 export default async function VenuesPage({
   searchParams,
 }: {
+  // match Next’s generated types
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const spIn = await searchParams
@@ -22,7 +23,6 @@ export default async function VenuesPage({
 
   return (
     <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      {/* @ts-expect-error Async Server Component is valid in RSC runtime */}
       <VenueList sp={sp} title="All venues" />
     </main>
   )

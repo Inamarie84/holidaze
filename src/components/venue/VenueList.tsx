@@ -1,9 +1,10 @@
 // src/components/venue/VenueList.tsx
-import VenueCard from '@/components/venue/VenueCard'
 import Pagination from '@/components/ui/Pagination'
+import VenueCard from '@/components/venue/VenueCard'
 import { getVenues } from '@/services/venues'
 import { searchVenuesServer } from '@/services/venues.server'
 import type { TVenue } from '@/types/api'
+import type { ReactElement } from 'react' // ⬅️ add this
 
 const DEFAULT_LIMIT = 12
 
@@ -16,20 +17,10 @@ export type VenueSearchParams = {
   limit?: string
 }
 
-type Meta = {
-  pageCount?: number
-  totalCount?: number
-  isFirstPage?: boolean
-  isLastPage?: boolean
-}
+type Props = { sp: VenueSearchParams; title?: string }
 
-export default async function VenueList({
-  sp,
-  title = 'Explore venues',
-}: {
-  sp: VenueSearchParams
-  title?: string
-}) {
+// --- Async implementation (not exported as default) ---
+async function VenueListImpl({ sp, title = 'Explore venues' }: Props) {
   const q = sp.q?.trim() || undefined
   const dateFrom = sp.dateFrom || undefined
   const dateTo = sp.dateTo || undefined
@@ -42,7 +33,6 @@ export default async function VenueList({
 
   const page = Math.max(1, Number(sp.page ?? '1'))
 
-  // clamp limit to [1, 100]
   const limitRaw = Number(sp.limit ?? String(DEFAULT_LIMIT))
   const limit = Math.max(
     1,
@@ -58,30 +48,22 @@ export default async function VenueList({
   let hasNext = false
 
   if (hasFilters) {
-    // Filtered search (server route)
-    const res = (await searchVenuesServer({
+    const res = await searchVenuesServer({
       q,
       dateFrom,
       dateTo,
       guests,
       page,
       limit,
-    })) as { data: TVenue[]; meta?: Meta }
-
-    venues = res.data ?? []
+    })
+    venues = (res.data ?? []) as TVenue[]
     pageCount = res.meta?.pageCount ?? 1
     totalCount = res.meta?.totalCount ?? venues.length
     hasPrev = res.meta?.isFirstPage === false || page > 1
     hasNext = res.meta?.isLastPage === false || page < pageCount
   } else {
-    // Unfiltered (direct API)
-    const res = (await getVenues({
-      _bookings: true,
-      page,
-      limit,
-    })) as { data: TVenue[]; meta?: Meta }
-
-    venues = res.data ?? []
+    const res = await getVenues({ _bookings: true, page, limit })
+    venues = (res.data ?? []) as TVenue[]
     pageCount = res.meta?.pageCount ?? 1
     totalCount = res.meta?.totalCount ?? venues.length
     hasPrev = res.meta?.isFirstPage === false || page > 1
@@ -135,4 +117,10 @@ export default async function VenueList({
       </div>
     </section>
   )
+}
+
+// Export a sync-typed wrapper so call-sites don’t trip over async JSX
+export default function VenueList(props: Props): ReactElement {
+  const SyncImpl = VenueListImpl as unknown as (p: Props) => ReactElement
+  return <SyncImpl {...props} />
 }
