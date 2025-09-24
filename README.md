@@ -1,56 +1,96 @@
 # Holidaze
 
 A modern accommodation booking site built with **Next.js**, **TypeScript**, and **Tailwind CSS**.  
-This project is part of my final exam assignment.
+This project is part of my final exam assignment. It implements both customer and venue manager flows against the Noroff v2 API (Holidaze).
 
 ## ✨ Features
 
-- Browse and search venues (destination, date range, guests)
-- View venue details with availability calendar
-- Register/login as customer or venue manager
-- Create bookings (customer) and manage venues (manager)
-- Update avatar/profile
-- Optimistic UI, skeleton loaders, toast notifications
-- Fully typed codebase with strict ESLint rules
+### For everyone
 
-## Tech Stack
+- Browse a paginated grid of venues
+- Powerful search: destination, dates, guests
+- Venue details page with image gallery, amenities, availability calendar (booked vs available days)
+- Mobile-first, responsive layout
 
-- Framework: Next.js (App Router)
-- Language: TypeScript
-- Styling: Tailwind CSS
-- State: Zustand (persisted session)
-- UI bits: lucide-react, react-hot-toast
-- Linting/Format: ESLint (flat config) + Prettier
-- Build: Node ≥ 18
+### Customers
+
+- Register / Login / Logout (requires @stud.noroff.no email)
+- Create bookings
+- See upcoming and previous bookings in profile
+- Update avatar / profile picture
+
+### Venue Managers
+
+- Register / Login / Logout (requires @stud.noroff.no email)
+- Create, edit, and delete venues
+- See upcoming bookings for their venues
+- Update avatar / profile picture
+
+## 🧭 User roles & terminology
+
+- Visitor: not logged in
+- Customer: logged-in user who books venues
+- Venue Manager: logged-in user who manages venues (can CRUD venues)
+
+## 🧱 Tech Stack
+
+- **Framework:** Next.js (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **State:** Zustand (persisted session)
+- **Icons & UI:** lucide-react, react-hot-toast
+- **Linting/Format:** ESLint (flat config) + Prettier
+- **Node:** ≥ 18
+- **Hosting:** Vercel
+- **Jest** / Testing Library (project includes tests scaffolding)
 
 ## 🚀 Getting Started
 
-````bash
+```bash
+## 1) Install dependencies & run locally
 npm install
+## 2) Start development server (http://localhost:3000)
 npm run dev
+## 3) Build for production
+npm run build
+## 4) Start production server
+npm start
+```
 
+## Environment
+
+Create a `.env.local` in the project root:
+
+```bash
+# Base Noroff v2 API (no trailing slash)
+NEXT_PUBLIC_API_URL=https://v2.api.noroff.dev
+
+```
+
+## 🌐 API usage
+
+All data comes from the Noroff v2 API (Holidaze).
+Common calls:
+
+- Venues (list): /holidaze/venues?page=&limit=&\_bookings=true
+- Venue (by id): /holidaze/venues/:id?\_bookings=true&\_owner=true
+- Profiles (self): /holidaze/profiles/:username
+- Bookings (self): /holidaze/profiles/:username/bookings?\_venue=true
+- Manager CRUD: /holidaze/venues (requires auth + venueManager)
+
+The app uses a small helper wrapper to:
+
+- Hydrate Authorization from session when needed
+- Optionally include X-Noroff-API-Key
+- Parse and normalize errors into friendly messages
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## 🔐 Auth & session
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-````
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Login/register calls save { token, user } to the Zustand store.
+- The store is persisted in localStorage so you stay logged in across reloads.
+- AuthGate and SessionHydrator ensure the UI doesn’t flicker before the session is rehydrated.
 
 ## Learn More
 
