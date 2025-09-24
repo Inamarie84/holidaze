@@ -21,8 +21,7 @@ export const metadata: Metadata = {
   title: 'Holidaze',
   description: 'Modern accommodation booking site',
   icons: {
-    icon: '/icon.png', // you already have src/app/icon.png
-    // apple: '/apple-icon.png', // if you have one
+    icon: '/icon.png',
   },
 }
 
@@ -36,7 +35,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${dmSerif.variable} antialiased flex min-h-screen flex-col`}
       >
-        {/* Hydrate session from localStorage before auth-gated UI renders */}
+        {/* Make the session available to all client components immediately */}
         <SessionHydrator />
 
         <ToastHost />
@@ -44,7 +43,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <RouteHistoryTracker />
         </Suspense>
-        {/* Offset for sticky navbar (relies on --nav-height set by Navbar) */}
+
         <main id="content" className="flex-1">
           {children}
         </main>

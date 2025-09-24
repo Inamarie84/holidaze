@@ -43,7 +43,7 @@ export default function ProfilePage() {
   }, [])
 
   useEffect(() => {
-    // Reset when logged out or before hydration
+    // Reset while hydrating or when logged out
     if (!hasHydrated || !token || !user?.name) {
       setProfile(null)
       setBookings([])
@@ -112,7 +112,6 @@ export default function ProfilePage() {
   return (
     <AuthGate
       redirectTo="/login"
-      // Show your real skeletons while hydrating / before token is ready
       fallback={
         <main className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <ProfileHeaderSkeleton />
@@ -146,7 +145,7 @@ export default function ProfilePage() {
           </p>
         )}
 
-        {/* loading state */}
+        {/* loading */}
         {loading && (
           <>
             <ProfileHeaderSkeleton />
@@ -232,6 +231,7 @@ export default function ProfilePage() {
           </>
         )}
 
+        {/* fallback if somehow no data and no error */}
         {!loading && !error && !profile && (
           <p className="body muted" aria-live="polite">
             You’re not logged in. (If this persists, try refreshing.)
