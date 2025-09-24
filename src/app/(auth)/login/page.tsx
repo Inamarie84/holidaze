@@ -1,105 +1,14 @@
-'use client'
+import LoginPageClient from './LoginPageClient'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
-import { loginUser } from '@/services/auth'
-import { useSession } from '@/store/session'
-import { errMsg } from '@/utils/errors'
-import toast from 'react-hot-toast'
-import { FormField } from '@/components/ui/FormField'
-import { Input } from '@/components/ui/Input'
-import { SubmitButton } from '@/components/ui/SubmitButton'
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>
+}) {
+  const sp = await searchParams
+  const role = sp?.role
+  const redirect =
+    typeof sp?.redirect === 'string' && sp.redirect ? sp.redirect : '/profile'
 
-/**
- * LoginPage
- * Renders the login form for customers and venue managers.
- * Redirects to /profile (or ?redirect=...) on success.
- */
-export default function LoginPage() {
-  const router = useRouter()
-  const sp = useSearchParams()
-  const role = sp.get('role')
-  const redirect = sp.get('redirect') || '/profile'
-
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (loading) return
-
-    setLoading(true)
-    try {
-      await loginUser({ email: email.trim(), password })
-      const { user } = useSession.getState()
-      toast.success(`Welcome, ${user?.name ?? 'there'}!`)
-      router.push(`${redirect}`)
-    } catch (err) {
-      toast.error(errMsg(err))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <main
-      id="main-content"
-      className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12"
-    >
-      <h1 className="h1 mb-4">Log in</h1>
-      {role && (
-        <p className="muted mb-4">
-          You’re logging in as <b>{role}</b>.
-        </p>
-      )}
-
-      <form
-        onSubmit={onSubmit}
-        aria-describedby={loading ? 'login-status' : undefined}
-        className="space-y-4"
-      >
-        <FormField id="email" label="Email">
-          <Input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            inputMode="email"
-            aria-required="true"
-            disabled={loading}
-          />
-        </FormField>
-
-        <FormField id="password" label="Password">
-          <Input
-            id="password"
-            type="password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            aria-required="true"
-            disabled={loading}
-          />
-        </FormField>
-
-        <SubmitButton busy={loading}>
-          {loading ? 'Signing in…' : 'Log in'}
-        </SubmitButton>
-
-        <p
-          id="login-status"
-          className="sr-only"
-          role="status"
-          aria-live="polite"
-        >
-          {loading ? 'Signing in…' : ''}
-        </p>
-      </form>
-    </main>
-  )
+  return <LoginPageClient role={role} redirect={redirect} />
 }

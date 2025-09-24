@@ -8,6 +8,7 @@ import SessionHydrator from '@/components/SessionHydrator'
 import ToastHost from '@/components/ui/ToastHost'
 import BackToTop from '@/components/ui/BackToTop'
 import RouteHistoryTracker from '@/components/RouteHistoryTracker'
+import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const dmSerif = DM_Serif_Display({
@@ -36,7 +37,9 @@ export default function RootLayout({
 
         <ToastHost />
         <Navbar />
-        <RouteHistoryTracker />
+        <Suspense fallback={null}>
+          <RouteHistoryTracker />
+        </Suspense>
         {/* Offset for sticky navbar (relies on --nav-height set by Navbar) */}
         <main id="content" className="flex-1">
           {children}

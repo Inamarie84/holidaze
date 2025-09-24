@@ -1,6 +1,7 @@
 // src/app/(with-search)/layout.tsx
 import type { ReactNode } from 'react'
 import SearchBar from '@/components/home/SearchBar'
+import { Suspense } from 'react'
 
 export default function WithSearchLayout({
   children,
@@ -19,8 +20,9 @@ export default function WithSearchLayout({
         </div>
       </section>
 
-      {/* Global search bar (appears on all pages inside this group) */}
-      <SearchBar />
+      <Suspense fallback={null}>
+        <SearchBar />
+      </Suspense>
 
       {/* Page content */}
       {children}

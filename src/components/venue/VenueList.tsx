@@ -4,7 +4,8 @@ import VenueCard from '@/components/venue/VenueCard'
 import { getVenues } from '@/services/venues'
 import { searchVenuesServer } from '@/services/venues.server'
 import type { TVenue } from '@/types/api'
-import type { ReactElement } from 'react' // ⬅️ add this
+import type { ReactElement } from 'react'
+import { Suspense } from 'react'
 
 const DEFAULT_LIMIT = 12
 
@@ -103,14 +104,16 @@ async function VenueListImpl({ sp, title = 'Explore venues' }: Props) {
             </div>
 
             <div className="mt-8 flex justify-center">
-              <Pagination
-                page={page}
-                pageCount={pageCount}
-                hasPrev={hasPrev}
-                hasNext={hasNext}
-                basePath="/venues"
-                label="Venues pagination"
-              />
+              <Suspense fallback={null}>
+                <Pagination
+                  page={page}
+                  pageCount={pageCount}
+                  hasPrev={hasPrev}
+                  hasNext={hasNext}
+                  basePath="/venues"
+                  label="Venues pagination"
+                />
+              </Suspense>
             </div>
           </>
         )}
