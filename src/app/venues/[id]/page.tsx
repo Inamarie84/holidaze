@@ -2,11 +2,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 import { getVenueById, deleteVenue } from '@/services/venues'
-import type { TVenueWithBookings, TBooking } from '@/types/api'
+import type { TVenueWithBookings } from '@/types/api'
 import toast from 'react-hot-toast'
 import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
 import SmartBackButton from '@/components/ui/SmartBackButton'
@@ -27,25 +27,15 @@ function Chip({ children }: { children: React.ReactNode }) {
 export default function VenueDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const { token, user } = useSession()
+  const { user } = useSession()
 
   const [venue, setVenue] = useState<VenueWithExtras | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const mountedRef = useRef(true)
   useEffect(() => {
-    mountedRef.current = true
-    return () => {
-      mountedRef.current = false
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!id) return
-    let cancelled = false
-
+    let alive = true
     ;(async () => {
       try {
         setLoading(true)
@@ -54,35 +44,23 @@ export default function VenueDetailsPage() {
           _bookings: true,
           _owner: true,
         })) as VenueWithExtras
-        if (cancelled || !mountedRef.current) return
+        if (!alive) return
         setVenue(v)
         setActiveIndex(0)
       } catch (err) {
-        if (cancelled || !mountedRef.current) return
+        if (!alive) return
         setError(err instanceof Error ? err.message : 'Failed to load venue')
       } finally {
-        if (!cancelled && mountedRef.current) setLoading(false)
+        if (alive) setLoading(false)
       }
     })()
-
     return () => {
-      cancelled = true
+      alive = false
     }
   }, [id])
 
   const isManager = !!user?.venueManager
   const isOwner = isManager && venue?.owner?.name === user?.name
-
-  // Derive booked intervals for the calendar
-  type Interval = { from: Date; to: Date; guests: number }
-  const bookedIntervals = useMemo<Interval[]>(() => {
-    const list = venue?.bookings ?? []
-    return list.map((b: TBooking) => ({
-      from: new Date(b.dateFrom),
-      to: new Date(b.dateTo),
-      guests: b.guests,
-    }))
-  }, [venue])
 
   async function onDeleteVenue() {
     if (!venue || !isOwner) return
@@ -96,7 +74,6 @@ export default function VenueDetailsPage() {
     }
   }
 
-  // ----- RENDER STATES -----
   if (loading) return <VenueDetailSkeleton />
 
   if (error || !venue) {
@@ -115,7 +92,6 @@ export default function VenueDetailsPage() {
         <SmartBackButton className="mb-2" fallback="/venues" />
       </div>
 
-      {/* Title ABOVE the image */}
       <header className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="h1">{venue.name}</h1>
@@ -149,7 +125,6 @@ export default function VenueDetailsPage() {
         </div>
       </header>
 
-      {/* Gallery */}
       <Gallery
         images={images}
         venueName={venue.name}
@@ -158,7 +133,6 @@ export default function VenueDetailsPage() {
         className="mb-8"
       />
 
-      {/* Availability + Booking */}
       <section className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-black/10 bg-white p-4">
           <h3 className="h3 mb-3">Availability</h3>
@@ -182,7 +156,6 @@ export default function VenueDetailsPage() {
         </div>
       </section>
 
-      {/* About / Amenities */}
       <section className="mt-10">
         <h2 className="h3 mb-2">About</h2>
         <p className="body">

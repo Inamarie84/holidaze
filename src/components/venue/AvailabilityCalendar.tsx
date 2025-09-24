@@ -106,7 +106,7 @@ export default function AvailabilityCalendar({
         <button
           type="button"
           onClick={() => setMonth(new Date(year, mIdx - 1, 1))}
-          className="rounded-lg border border-black/15 px-3 py-1.5 hover:bg-sand"
+          className="rounded-lg border border-black/15 px-3 py-1.5 hover:bg-sand cursor-pointer"
           aria-label="Previous month"
         >
           ‹
@@ -117,7 +117,7 @@ export default function AvailabilityCalendar({
         <button
           type="button"
           onClick={() => setMonth(new Date(year, mIdx + 1, 1))}
-          className="rounded-lg border border-black/15 px-3 py-1.5 hover:bg-sand"
+          className="rounded-lg border border-black/15 px-3 py-1.5 hover:bg-sand cursor-pointer"
           aria-label="Next month"
         >
           ›
