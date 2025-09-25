@@ -68,15 +68,19 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 ```text
 src/
   app/
+   (auth)               # auth wrapper (login/register)
+     login/             # auth page
+     register/          # auth page
     (with-search)/
       venues/          # /venues listing (server entry + client components)
     profile/           # /profile (server wrapper + client page)
-    login/             # auth page
-    register/          # auth page
-    api/               # route handlers (if any)
+   about/              # about page
+   contact/           # contact page
+    api/               # route handlers
     layout.tsx         # global layout
   components/          # UI and feature components
   lib/                 # api.ts, holidaze.ts, env helpers
+  utils/               # date, form, text helpers
   services/            # API calls (auth, profiles, venues, bookings)
   store/               # Zustand session store
   types/               # shared TypeScript types
