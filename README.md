@@ -141,9 +141,8 @@ npm run prettier    # Run Prettier to format code
 
 3. Trigger a deploy (push to `main`).
 
-```
-
-```
+````
+---
 
 ## 🌐 API usage
 
@@ -223,6 +222,4 @@ npm test
 
 MIT © 2025 Inamarie Forseth
 
-```
-
-```
+````
