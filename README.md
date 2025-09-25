@@ -65,7 +65,7 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 
 ## 📁 Project Structure (high-level)
 
-````text
+```text
 src/
   app/
     (with-search)/
@@ -81,17 +81,18 @@ src/
   store/               # Zustand session store
   types/               # shared TypeScript types
 public/
-  readme/              # screenshots for README
+  readme/              # screenshots for README (e.g. public/readme/home.png)
   icon.png             # app icon (Next auto-uses /icon.png)
   images/              # placeholder assets
-## 🚀 Getting Started (Local)
+
+```
 
 1. **Clone**
 
 ```bash
 git clone https://github.com/Inamarie84/holidaze.git
 cd holidaze
-````
+```
 
 3. Install dependencies:
 
