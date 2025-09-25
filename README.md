@@ -215,6 +215,4 @@ npm test
 ## 📄 License
 
 MIT © 2025 Inamarie Forseth
-
-```
 ````
