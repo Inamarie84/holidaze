@@ -65,25 +65,25 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 
 ## 📁 Project Structure (high-level)
 
-- src/
-- app/
-- (with-search)/
-- venues/ # /venues listing (server entry + client components)
-- profile/ # /profile (server wrapper + client page)
-- login/ # auth page
-- register/ # auth page
-- api/ # route handlers (if any)
-- layout.tsx # global layout
-- components/ # UI and feature components
-- lib/ # api.ts, holidaze.ts, env helpers
-- services/ # API calls (auth, profiles, venues, bookings)
-- store/ # Zustand session store
-- types/ # shared TypeScript types
-- public/
-- readme/ # screenshots for README
-- icon.png # app icon (Next auto-uses /icon.png)
-- images/ # placeholder assets
-
+````text
+src/
+  app/
+    (with-search)/
+      venues/          # /venues listing (server entry + client components)
+    profile/           # /profile (server wrapper + client page)
+    login/             # auth page
+    register/          # auth page
+    api/               # route handlers (if any)
+    layout.tsx         # global layout
+  components/          # UI and feature components
+  lib/                 # api.ts, holidaze.ts, env helpers
+  services/            # API calls (auth, profiles, venues, bookings)
+  store/               # Zustand session store
+  types/               # shared TypeScript types
+public/
+  readme/              # screenshots for README
+  icon.png             # app icon (Next auto-uses /icon.png)
+  images/              # placeholder assets
 ## 🚀 Getting Started (Local)
 
 1. **Clone**
@@ -91,7 +91,7 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 ```bash
 git clone https://github.com/Inamarie84/holidaze.git
 cd holidaze
-```
+````
 
 3. Install dependencies:
 
@@ -141,7 +141,6 @@ npm run prettier    # Run Prettier to format code
 
 3. Trigger a deploy (push to `main`).
 
-````
 ---
 
 ## 🌐 API usage
@@ -149,6 +148,7 @@ npm run prettier    # Run Prettier to format code
 All data comes from the Noroff v2 API (Holidaze).
 
 **Common calls:**
+
 - Venues (list): `/holidaze/venues?page=&limit=&_bookings=true`
 - Venue (by id): `/holidaze/venues/:id?_bookings=true&_owner=true`
 - Profiles (self): `/holidaze/profiles/:username`
@@ -156,6 +156,7 @@ All data comes from the Noroff v2 API (Holidaze).
 - Manager CRUD: `/holidaze/venues` (requires auth + `venueManager`)
 
 **Helper behavior:**
+
 - Adds `Authorization: Bearer <token>` when available
 - Adds `X-Noroff-API-Key` for `/holidaze/*` routes
 - Normalizes API errors into friendly messages
@@ -171,6 +172,7 @@ All data comes from the Noroff v2 API (Holidaze).
 - Unit / component tests with **Jest** + **React Testing Library**
 
 **Run:**
+
 ```bash
 npm test
 
@@ -215,4 +217,4 @@ npm test
 ## 📄 License
 
 MIT © 2025 Inamarie Forseth
-````
+```
