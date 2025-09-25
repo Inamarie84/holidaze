@@ -192,7 +192,7 @@ npm test
 
 ## 🧑‍🎨 Screenshots
 
-![Home](public/readme/home.png)
+![Home](public/images/readme/home.png)
 
 ## ♿ Accessibility & UX
 
