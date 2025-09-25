@@ -76,7 +76,6 @@ h3 {
   --color-grey: #a0a0a0; /* muted text/borders */
   --color-emerald: #3da08d; /* primary action */
   --color-terracotta: #e07a5f; /* secondary/warm accent */
-  --color-gold: #d4a373; /* luxe accent */
 
   /* Base typography (mobile-first) */
   --text-display: 3rem;
