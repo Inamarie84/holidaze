@@ -159,11 +159,13 @@ All data comes from the Noroff v2 API (Holidaze).
 - Adds `X-Noroff-API-Key` for `/holidaze/*` routes
 - Normalizes API errors into friendly messages
 
+
 ## 🔐 Auth & session
 
 - Successful login/register stores `{ token, user }` in a persisted Zustand store (`localStorage`).
 - `AuthGate` guards protected pages; `SessionHydrator` prevents hydration flicker.
 - After login, users are redirected back to their intended page.
+
 
 
 ## 🧪 Testing
@@ -173,6 +175,7 @@ All data comes from the Noroff v2 API (Holidaze).
 **Run:**
 ```bash
 npm test
+
 
 
 ## 🌍 Deployment (Vercel)
@@ -191,8 +194,6 @@ npm test
 
 ---
 
-### ✅ Screenshots (ensure the path is correct and the file is committed)
-```markdown
 ## 🧑‍🎨 Screenshots
 
 ![Home](./public/readme/home.png)
@@ -204,6 +205,7 @@ npm test
 - Tooltip hints on icon-only buttons (hidden on larger screens where text is visible)
 - Semantic headings and ARIA `role="status"` for async feedback
 - Color contrast checked for navbar/hero overlays
+
 
 ## 🛠 Troubleshooting
 
@@ -219,7 +221,9 @@ npm test
 - **Home vs Venues**: The home route redirects to `/venues`. This is fine and common when the listing is the main experience.
 - **Titles/Metadata**: The app uses a layout title template and per-page metadata (or a client `TitleSync` for dynamic titles like the profile username). This is the standard Next.js approach (rather than editing static HTML).
 
+
 ## 📄 License
 
 MIT © 2025 Inamarie Forseth
+
 ````
