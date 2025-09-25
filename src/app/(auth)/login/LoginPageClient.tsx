@@ -1,5 +1,3 @@
-//src/app/(auth)/login/LoginPageClient.tsx
-
 'use client'
 
 import { useRouter } from 'next/navigation'
@@ -12,18 +10,10 @@ import { FormField } from '@/components/ui/FormField'
 import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 
-type Props = {
-  role?: string
-  redirect: string
-}
+type Props = { role?: string; redirect: string }
 
-/**
- * Client login form. Receives `role` and `redirect` via props from
- * the server page so we don't need useSearchParams() here.
- */
 export default function LoginPageClient({ role, redirect }: Props) {
   const router = useRouter()
-
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -31,7 +21,6 @@ export default function LoginPageClient({ role, redirect }: Props) {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (loading) return
-
     setLoading(true)
     try {
       await loginUser({ email: email.trim(), password })
@@ -46,11 +35,14 @@ export default function LoginPageClient({ role, redirect }: Props) {
   }
 
   return (
-    <main
-      id="main-content"
+    <section
+      aria-labelledby="login-heading"
       className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12"
     >
-      <h1 className="h1 mb-4">Log in</h1>
+      <h1 id="login-heading" className="h1 mb-4">
+        Log in
+      </h1>
+
       {role && (
         <p className="muted mb-4">
           You’re logging in as <b>{role}</b>.
@@ -103,6 +95,6 @@ export default function LoginPageClient({ role, redirect }: Props) {
           {loading ? 'Signing in…' : ''}
         </p>
       </form>
-    </main>
+    </section>
   )
 }

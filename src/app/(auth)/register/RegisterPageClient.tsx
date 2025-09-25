@@ -1,5 +1,3 @@
-//src/app/(auth)/register/RegisterPageClient.tsx
-
 'use client'
 
 import { useRouter } from 'next/navigation'
@@ -53,8 +51,13 @@ export default function RegisterPageClient({
   }
 
   return (
-    <main className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="h1 mb-4">Create account</h1>
+    <section
+      aria-labelledby="register-heading"
+      className="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-12"
+    >
+      <h1 id="register-heading" className="h1 mb-4">
+        Create account
+      </h1>
       <p className="muted mb-6">
         Use your <b>{NOROFF_DOMAIN}</b> email{' '}
         {role === 'manager' ? '(required)' : '(required)'}.
@@ -149,6 +152,6 @@ export default function RegisterPageClient({
           {loading ? 'Creating your account…' : ''}
         </p>
       </form>
-    </main>
+    </section>
   )
 }

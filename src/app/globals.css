@@ -85,8 +85,8 @@ h3 {
   --leading-h1: 2.75rem; /* 36 / 44 */
   --text-h2: 1.875rem;
   --leading-h2: 2.25rem; /* 30 / 36 */
-  --text-h3: 1.5rem;
-  --leading-h3: 2rem; /* 24 / 32 */
+  --text-h3: 1.25rem; /* 20px */
+  --leading-h3: 1.75rem; /* 28px */
   --text-body: 1rem;
   --leading-body: 1.625rem; /* 16 / 26 */
 
@@ -97,8 +97,8 @@ h3 {
   --leading-h1-sm: 3rem; /* 40 / 48 */
   --text-h2-sm: 2rem;
   --leading-h2-sm: 2.5rem; /* 32 / 40 */
-  --text-h3-sm: 1.625rem;
-  --leading-h3-sm: 2.125rem; /* 26 / 34 */
+  --text-h3-sm: 1.375rem; /* 22px */
+  --leading-h3-sm: 1.875rem; /* 30px */
 
   /* Responsive tokens (lg ≥ 1024px) */
   --text-display-lg: 4rem;
@@ -107,8 +107,8 @@ h3 {
   --leading-h1-lg: 3.5rem; /* 48 / 56 */
   --text-h2-lg: 2.25rem;
   --leading-h2-lg: 2.75rem; /* 36 / 44 */
-  --text-h3-lg: 1.875rem;
-  --leading-h3-lg: 2.25rem; /* 30 / 36 */
+  --text-h3-lg: 1.5rem; /* 24px */
+  --leading-h3-lg: 2rem; /* 32px */
 }
 
 /* ------------------------------

@@ -1,14 +1,11 @@
-// src/app/(with-search)/venues/page.tsx
 import VenueList, { VenueSearchParams } from '@/components/venue/VenueList'
 
 export const metadata = { title: 'Venues', description: 'Browse all venues' }
-
 export const dynamic = 'force-dynamic'
 
 export default async function VenuesPage({
   searchParams,
 }: {
-  // match Next’s generated types
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const spIn = await searchParams
@@ -24,8 +21,14 @@ export default async function VenuesPage({
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section
+      aria-labelledby="venues-heading"
+      className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+    >
+      <h2 id="venues-heading" className="sr-only">
+        All venues
+      </h2>
       <VenueList sp={sp} title="All venues" />
-    </main>
+    </section>
   )
 }

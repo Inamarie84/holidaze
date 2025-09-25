@@ -70,14 +70,14 @@ export default function CreateVenuePage() {
 
   if (!canRender) {
     return (
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         <p className="body muted">Checking permissions…</p>
-      </main>
+      </section>
     )
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="h1 mb-2">Create Venue</h1>
       <p className="muted mb-8">
         Fill out the details below to publish a new venue.
@@ -89,6 +89,6 @@ export default function CreateVenuePage() {
         onSubmit={handleSubmit}
         onCancel={() => router.back()}
       />
-    </main>
+    </section>
   )
 }

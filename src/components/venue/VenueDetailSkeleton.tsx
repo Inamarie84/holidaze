@@ -1,18 +1,14 @@
-// src/components/venue/VenueDetailSkeleton.tsx
 'use client'
 
 import Skeleton from '@/components/ui/Skeleton'
 
-/**
- * VenueDetailSkeleton
- * Loading skeleton for the venue detail page: title, hero, calendar + booking, about.
- */
 export default function VenueDetailSkeleton() {
   return (
-    <main
+    <section
       className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12"
       aria-busy="true"
       aria-live="polite"
+      aria-label="Loading venue details"
     >
       {/* Title row */}
       <div className="mb-3">
@@ -61,6 +57,6 @@ export default function VenueDetailSkeleton() {
         <Skeleton className="mb-2 h-4 w-full" />
         <Skeleton className="h-4 w-3/4" />
       </section>
-    </main>
+    </section>
   )
 }

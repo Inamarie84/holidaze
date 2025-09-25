@@ -76,16 +76,16 @@ export default function VenueDetailsPageClient({ id }: { id: string }) {
 
   if (error || !venue) {
     return (
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
         <p className="body text-red-600">{error ?? 'Venue not found'}</p>
-      </main>
+      </section>
     )
   }
 
   const images = (venue.media ?? []).filter((m) => m?.url)
 
   return (
-    <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
+    <section className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-3">
         <SmartBackButton className="mb-2" fallback="/venues" />
       </div>
@@ -171,6 +171,6 @@ export default function VenueDetailsPageClient({ id }: { id: string }) {
           {!venue.meta && <p className="muted">No amenities listed.</p>}
         </div>
       </section>
-    </main>
+    </section>
   )
 }

@@ -1,11 +1,10 @@
-// src/app/not-found.tsx
 import Link from 'next/link'
 
 export const metadata = { title: 'Page not found — Holidaze' }
 
 export default function NotFound() {
   return (
-    <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
       <h1 className="h1 mb-3">Page not found</h1>
       <p className="body mb-6">
         Sorry, we couldn’t find that page. It might have been moved or deleted.
@@ -25,6 +24,6 @@ export default function NotFound() {
           Go home
         </Link>
       </div>
-    </main>
+    </section>
   )
 }

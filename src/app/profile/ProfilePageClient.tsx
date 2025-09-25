@@ -1,4 +1,3 @@
-// src/app/profile/ProfilePageClient.tsx
 'use client'
 
 import { useEffect, useMemo, useRef, useState, Suspense } from 'react'
@@ -107,7 +106,13 @@ export default function ProfilePageClient() {
   )
 
   const SkeletonPage = (
-    <main className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+    <section
+      aria-labelledby="profile-loading-heading"
+      className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8"
+    >
+      <h2 id="profile-loading-heading" className="sr-only">
+        Loading profile
+      </h2>
       <ProfileHeaderSkeleton />
       <section aria-hidden className="mt-6">
         <div className="flex flex-wrap gap-3">
@@ -125,16 +130,20 @@ export default function ProfilePageClient() {
         <h2 className="h2 mb-4">Upcoming Bookings</h2>
         <BookingListSkeleton />
       </section>
-    </main>
+    </section>
   )
 
   return (
     <Suspense fallback={SkeletonPage}>
       <AuthGate redirectTo="/login" fallback={SkeletonPage}>
-        <main
-          id="main-content"
+        <section
+          aria-labelledby="profile-heading"
           className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8"
         >
+          <h1 id="profile-heading" className="sr-only">
+            Profile
+          </h1>
+
           {error && !loading && (
             <p role="alert" className="body text-red-600">
               {error}
@@ -233,7 +242,7 @@ export default function ProfilePageClient() {
               You’re not logged in. (If this persists, try refreshing.)
             </p>
           )}
-        </main>
+        </section>
       </AuthGate>
     </Suspense>
   )

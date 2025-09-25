@@ -1,12 +1,14 @@
-// src/app/contact/page.tsx
 import { Suspense } from 'react'
+import SmartBackButton from '@/components/ui/SmartBackButton'
 import ContactForm from '@/components/contact/ContactForm'
 
 export const metadata = { title: 'Contact — Holidaze' }
 
 export default function ContactPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <SmartBackButton className="mb-4" fallback="/venues" />
+
       <h1 className="h1 mb-4">Contact</h1>
       <p className="body mb-4">
         Got a question about a booking or your venue? Reach us at{' '}
@@ -24,6 +26,6 @@ export default function ContactPage() {
       <Suspense fallback={null}>
         <ContactForm />
       </Suspense>
-    </main>
+    </section>
   )
 }

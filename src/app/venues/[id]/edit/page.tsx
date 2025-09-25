@@ -26,7 +26,6 @@ export default function EditVenuePage() {
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  // ✅ safe mounted ref
   const mounted = useRef(true)
   useEffect(() => {
     return () => {
@@ -34,7 +33,6 @@ export default function EditVenuePage() {
     }
   }, [])
 
-  // Load venue with owner so we can verify
   useEffect(() => {
     ;(async () => {
       try {
@@ -47,7 +45,7 @@ export default function EditVenuePage() {
         if (!mounted.current) return
         setLoadError(errMsg(err))
       } finally {
-        if (mounted.current) setLoading(false) // ✅
+        if (mounted.current) setLoading(false)
       }
     })()
   }, [id])
@@ -124,31 +122,30 @@ export default function EditVenuePage() {
   // Render states
   if (loading) {
     return (
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         <p className="body muted">Loading venue…</p>
-      </main>
+      </section>
     )
   }
 
   if (loadError || !venue) {
     return (
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         <p className="body text-red-600">{loadError ?? 'Venue not found'}</p>
-      </main>
+      </section>
     )
   }
 
   if (!isOwner) {
     return (
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         <p className="body text-red-600">
           You’re not allowed to edit this venue.
         </p>
-      </main>
+      </section>
     )
   }
 
-  // Map API venue -> form initial values
   const initialValues: VenueFormValues = {
     name: venue.name ?? '',
     description: venue.description ?? '',
@@ -175,7 +172,7 @@ export default function EditVenuePage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-2 flex items-center justify-between">
         <h1 className="h1">Edit Venue</h1>
         <button
@@ -197,6 +194,6 @@ export default function EditVenuePage() {
         onCancel={() => router.back()}
         onDelete={handleDelete}
       />
-    </main>
+    </section>
   )
 }
