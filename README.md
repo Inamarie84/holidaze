@@ -149,7 +149,6 @@ npm run prettier    # Run Prettier to format code
 All data comes from the Noroff v2 API (Holidaze).
 
 **Common calls:**
-
 - Venues (list): `/holidaze/venues?page=&limit=&_bookings=true`
 - Venue (by id): `/holidaze/venues/:id?_bookings=true&_owner=true`
 - Profiles (self): `/holidaze/profiles/:username`
@@ -157,7 +156,6 @@ All data comes from the Noroff v2 API (Holidaze).
 - Manager CRUD: `/holidaze/venues` (requires auth + `venueManager`)
 
 **Helper behavior:**
-
 - Adds `Authorization: Bearer <token>` when available
 - Adds `X-Noroff-API-Key` for `/holidaze/*` routes
 - Normalizes API errors into friendly messages
@@ -173,11 +171,8 @@ All data comes from the Noroff v2 API (Holidaze).
 - Unit / component tests with **Jest** + **React Testing Library**
 
 **Run:**
-
 ```bash
 npm test
-
-
 
 ## 🌍 Deployment (Vercel)
 
@@ -190,7 +185,6 @@ npm test
 
 3. Trigger a deploy (push to `main`).
 
-```
 
 ---
 
@@ -221,9 +215,6 @@ npm test
 ## 📄 License
 
 MIT © 2025 Inamarie Forseth
-
-```
-
 
 ```
 ````
