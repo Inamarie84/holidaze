@@ -65,24 +65,24 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 
 ## 📁 Project Structure (high-level)
 
-src/
-app/
-(with-search)/
-venues/ # /venues listing (server entry + client components)
-profile/ # /profile (server wrapper + client page)
-login/ # auth page
-register/ # auth page
-api/ # route handlers (if any)
-layout.tsx # global layout
-components/ # UI and feature components
-lib/ # api.ts, holidaze.ts, env helpers
-services/ # API calls (auth, profiles, venues, bookings)
-store/ # Zustand session store
-types/ # shared TypeScript types
-public/
-readme/ # screenshots for README
-icon.png # app icon (Next auto-uses /icon.png)
-images/ # placeholder assets
+- src/
+- app/
+- (with-search)/
+- venues/ # /venues listing (server entry + client components)
+- profile/ # /profile (server wrapper + client page)
+- login/ # auth page
+- register/ # auth page
+- api/ # route handlers (if any)
+- layout.tsx # global layout
+- components/ # UI and feature components
+- lib/ # api.ts, holidaze.ts, env helpers
+- services/ # API calls (auth, profiles, venues, bookings)
+- store/ # Zustand session store
+- types/ # shared TypeScript types
+- public/
+- readme/ # screenshots for README
+- icon.png # app icon (Next auto-uses /icon.png)
+- images/ # placeholder assets
 
 ## 🚀 Getting Started (Local)
 
@@ -143,6 +143,7 @@ npm run prettier    # Run Prettier to format code
 
 ````
 
+```
 ## 🌐 API usage
 
 All data comes from the Noroff v2 API (Holidaze).
