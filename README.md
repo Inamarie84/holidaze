@@ -146,25 +146,25 @@ npm run prettier    # Run Prettier to format code
 ## 🌐 API usage
 
 All data comes from the Noroff v2 API (Holidaze).
-Common calls:
 
-- Venues (list): /holidaze/venues?page=&limit=&\_bookings=true
-- Venue (by id): /holidaze/venues/:id?\_bookings=true&\_owner=true
-- Profiles (self): /holidaze/profiles/:username
-- Bookings (self): /holidaze/profiles/:username/bookings?\_venue=true
-- Manager CRUD: /holidaze/venues (requires auth + venueManager)
+**Common calls:**
+- Venues (list): `/holidaze/venues?page=&limit=&_bookings=true`
+- Venue (by id): `/holidaze/venues/:id?_bookings=true&_owner=true`
+- Profiles (self): `/holidaze/profiles/:username`
+- Bookings (self): `/holidaze/profiles/:username/bookings?_venue=true`
+- Manager CRUD: `/holidaze/venues` (requires auth + `venueManager`)
 
-The app uses a small helper wrapper to:
-
-- Adds Authorization: Bearer <token> when available
-- Adds X-Noroff-API-Key for Holidaze routes
-- PNormalizes API errors into friendly messages
+**Helper behavior:**
+- Adds `Authorization: Bearer <token>` when available
+- Adds `X-Noroff-API-Key` for `/holidaze/*` routes
+- Normalizes API errors into friendly messages
 
 ## 🔐 Auth & session
 
-- Successful login/register stores { token, user } in a persisted Zustand store (localStorage).
-- AuthGate guards protected pages; SessionHydrator prevents hydration flicker.
+- Successful login/register stores `{ token, user }` in a persisted Zustand store (`localStorage`).
+- `AuthGate` guards protected pages; `SessionHydrator` prevents hydration flicker.
 - After login, users are redirected back to their intended page.
+
 
 ## 🧪 Testing
 
@@ -174,8 +174,6 @@ The app uses a small helper wrapper to:
 ```bash
 npm test
 
-
-````
 
 ## 🌍 Deployment (Vercel)
 
@@ -190,10 +188,14 @@ npm test
 
 ```
 
+
+---
+
+### ✅ Screenshots (ensure the path is correct and the file is committed)
+```markdown
 ## 🧑‍🎨 Screenshots
 
 ![Home](./public/readme/home.png)
-
 
 
 ## ♿ Accessibility & UX
@@ -205,12 +207,12 @@ npm test
 
 ## 🛠 Troubleshooting
 
-
+- **Looks tiny or “zoomed out”**: Reset browser zoom to 100% (`Cmd/Ctrl + 0`).
 - **Images via `<Image />` 502/403**: Ensure external domains are allowed in `next.config.js` (`images.remotePatterns` or `images.domains`).
 - **404 favicon**: Keep `src/app/icon.png` (Next generates `/icon.png`).
 - **“Missing NEXT_PUBLIC_API_URL”**: Add required env vars in Vercel and redeploy.
 - **Auth works locally but not on Vercel**: Confirm both `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_API_KEY` exist for Production & Preview.
-```
+
 
 ## 📝 Notes
 
@@ -220,3 +222,4 @@ npm test
 ## 📄 License
 
 MIT © 2025 Inamarie Forseth
+````
