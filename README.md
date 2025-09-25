@@ -176,6 +176,7 @@ All data comes from the Noroff v2 API (Holidaze).
 
 ```bash
 npm test
+```
 
 ## 🌍 Deployment (Vercel)
 
@@ -187,7 +188,6 @@ npm test
 - NEXT_PUBLIC_API_KEY=YOUR_API_KEY_HERE
 
 3. Trigger a deploy (push to `main`).
-
 
 ---
 
@@ -218,4 +218,7 @@ npm test
 ## 📄 License
 
 MIT © 2025 Inamarie Forseth
+
+```
+
 ```
