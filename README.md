@@ -190,7 +190,7 @@ npm test
 
 3. Trigger a deploy (push to `main`).
 
-```
+````
 
 ---
 
@@ -222,4 +222,7 @@ npm test
 
 MIT © 2025 Inamarie Forseth
 
-````
+```
+
+
+```
