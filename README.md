@@ -141,14 +141,16 @@ npm run prettier    # Run Prettier to format code
 
 3. Trigger a deploy (push to `main`).
 
-````
+```
 
 ```
+
 ## 🌐 API usage
 
 All data comes from the Noroff v2 API (Holidaze).
 
 **Common calls:**
+
 - Venues (list): `/holidaze/venues?page=&limit=&_bookings=true`
 - Venue (by id): `/holidaze/venues/:id?_bookings=true&_owner=true`
 - Profiles (self): `/holidaze/profiles/:username`
@@ -156,10 +158,10 @@ All data comes from the Noroff v2 API (Holidaze).
 - Manager CRUD: `/holidaze/venues` (requires auth + `venueManager`)
 
 **Helper behavior:**
+
 - Adds `Authorization: Bearer <token>` when available
 - Adds `X-Noroff-API-Key` for `/holidaze/*` routes
 - Normalizes API errors into friendly messages
-
 
 ## 🔐 Auth & session
 
@@ -167,13 +169,12 @@ All data comes from the Noroff v2 API (Holidaze).
 - `AuthGate` guards protected pages; `SessionHydrator` prevents hydration flicker.
 - After login, users are redirected back to their intended page.
 
-
-
 ## 🧪 Testing
 
 - Unit / component tests with **Jest** + **React Testing Library**
 
 **Run:**
+
 ```bash
 npm test
 
@@ -192,13 +193,11 @@ npm test
 
 ```
 
-
 ---
 
 ## 🧑‍🎨 Screenshots
 
 ![Home](./public/readme/home.png)
-
 
 ## ♿ Accessibility & UX
 
@@ -206,7 +205,6 @@ npm test
 - Tooltip hints on icon-only buttons (hidden on larger screens where text is visible)
 - Semantic headings and ARIA `role="status"` for async feedback
 - Color contrast checked for navbar/hero overlays
-
 
 ## 🛠 Troubleshooting
 
@@ -216,15 +214,15 @@ npm test
 - **“Missing NEXT_PUBLIC_API_URL”**: Add required env vars in Vercel and redeploy.
 - **Auth works locally but not on Vercel**: Confirm both `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_API_KEY` exist for Production & Preview.
 
-
 ## 📝 Notes
 
 - **Home vs Venues**: The home route redirects to `/venues`. This is fine and common when the listing is the main experience.
 - **Titles/Metadata**: The app uses a layout title template and per-page metadata (or a client `TitleSync` for dynamic titles like the profile username). This is the standard Next.js approach (rather than editing static HTML).
 
-
 ## 📄 License
 
 MIT © 2025 Inamarie Forseth
 
-````
+```
+
+```
