@@ -66,12 +66,13 @@ export async function getVenues(
 
 /**
  * Read one venue (optionally including bookings/owner).
- * Uses a direct fetch (like getVenues) to keep response shape consistent
- * during client-side navigation.
+ * Accepts an optional RequestInit (e.g., { signal }) as the 3rd argument.
  */
+// src/services/venues.ts
 export async function getVenueById(
   id: string,
-  params?: TVenueInclude
+  params?: TVenueInclude,
+  opts?: { signal?: AbortSignal } // ⬅️ add this
 ): Promise<TVenue | (TVenueWithBookings & { owner?: { name?: string } })> {
   const query = toQuery(params)
   const url = `${ENV.API_URL}/holidaze/venues/${encodeURIComponent(id)}${query}`
@@ -84,6 +85,7 @@ export async function getVenueById(
       'X-Noroff-API-Key': process.env.NEXT_PUBLIC_API_KEY ?? '',
     },
     cache: 'no-store',
+    signal: opts?.signal, // ⬅️ pass signal
   })
 
   const rawText = await res.text()
@@ -91,15 +93,9 @@ export async function getVenueById(
     throw new Error(rawText || `Failed to fetch venue (${res.status})`)
   }
 
-  // Holidaze can return { data, meta? } or the raw venue object—handle both.
   try {
-    const parsed = rawText ? (JSON.parse(rawText) as unknown) : null
-    if (
-      parsed &&
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'data' in parsed
-    ) {
+    const parsed = rawText ? JSON.parse(rawText) : null
+    if (parsed && typeof parsed === 'object' && 'data' in parsed) {
       return (parsed as TItemResponse<TVenue | TVenueWithBookings>).data
     }
     return parsed as TVenue | TVenueWithBookings
