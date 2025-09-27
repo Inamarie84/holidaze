@@ -12,7 +12,8 @@ type Props = {
 }
 
 /**
- * Guests field using your shared <GuestsInput /> with a focusable wrapper.
+ * Guests field using the shared <GuestsInput />.
+ * No role=button wrapper; clicking the container still focuses the input.
  */
 export default function SearchGuestsField({ value, onChange }: Props) {
   const ref = useRef<HTMLInputElement | null>(null)
@@ -20,12 +21,9 @@ export default function SearchGuestsField({ value, onChange }: Props) {
 
   return (
     <div
-      role="button"
-      tabIndex={0}
       onClick={focusInput}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && focusInput()}
       className="cursor-pointer rounded-lg border border-black/15 bg-white p-2 transition hover:bg-black/5 focus-within:ring-2 focus-within:ring-emerald"
-      aria-label="Guests input"
+      aria-label="Guests"
     >
       <GuestsInput
         id="guests"
@@ -40,7 +38,7 @@ export default function SearchGuestsField({ value, onChange }: Props) {
         min={1}
         max={50}
         inputClassName="w-full rounded-md border border-black/10 px-3 py-2 focus:outline-none"
-        // If GuestsInput is not typed with forwardRef, keep this directive:
+        // If GuestsInput doesn't forward a typed ref, keep this directive:
         // @ts-expect-error: GuestsInput doesn't expose a typed ref prop
         ref={ref}
       />

@@ -44,7 +44,7 @@ export default function SearchBar() {
   }
 
   return (
-    <section className="w-full border-b border-black/10 bg-sand">
+    <div className="w-full border-b border-black/10 bg-sand">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
         <form
           onSubmit={(e) => {
@@ -97,6 +97,6 @@ export default function SearchBar() {
           </div>
         </form>
       </div>
-    </section>
+    </div>
   )
 }

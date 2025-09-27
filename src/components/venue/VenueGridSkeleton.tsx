@@ -38,7 +38,7 @@ export default function VenueGridSkeleton({
       aria-live="polite"
     >
       {Array.from({ length: total }).map((_, i) => (
-        <article
+        <div
           key={i}
           className="overflow-hidden rounded-xl border border-black/10 bg-white"
           aria-hidden="true"
@@ -52,7 +52,7 @@ export default function VenueGridSkeleton({
               <Skeleton className="h-7 w-28" />
             </div>
           </div>
-        </article>
+        </div>
       ))}
     </div>
   )
