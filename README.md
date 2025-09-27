@@ -67,6 +67,7 @@ Implements both customer and venue manager flows against the Noroff v2 **Holidaz
 
 ```text
 src/
+  __test__/            # unit & component tests
   app/
    (auth)               # auth wrapper (login/register)
      login/             # auth page
@@ -74,9 +75,10 @@ src/
     (with-search)/
       venues/          # /venues listing (server entry + client components)
     profile/           # /profile (server wrapper + client page)
-   about/              # about page
-   contact/           # contact page
+    about/             # about page
+    contact/           # contact page
     api/               # route handlers
+    venues/
     layout.tsx         # global layout
   components/          # UI and feature components
   lib/                 # api.ts, holidaze.ts, env helpers
@@ -84,6 +86,7 @@ src/
   services/            # API calls (auth, profiles, venues, bookings)
   store/               # Zustand session store
   types/               # shared TypeScript types
+  hooks/               # custom React hooks
 public/
   readme/              # screenshots for README (e.g. public/readme/home.png)
   icon.png             # app icon (Next auto-uses /icon.png)
@@ -213,6 +216,67 @@ npm test
 - **404 favicon**: Keep `src/app/icon.png` (Next generates `/icon.png`).
 - **“Missing NEXT_PUBLIC_API_URL”**: Add required env vars in Vercel and redeploy.
 - **Auth works locally but not on Vercel**: Confirm both `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_API_KEY` exist for Production & Preview.
+
+## ⚠️ HTML validation note for `/venues/[id]/edit`
+
+**Why the W3C validator complains**
+
+This route uses a **client-side permission guard** (manager/owner). That can trigger a **client-side render bailout** in the Next.js App Router. When that happens, Next **streams** the initial HTML and **patches the `<head>` later** (injecting `<title>` / `<meta>`). Browsers end up with the correct `<head>`, but the validator only inspects the **first streamed chunk**, so it reports:
+
+- “head is missing a required title”
+- “title/meta/link appears inside body”
+
+You can confirm the bailout by viewing page source and seeing:
+
+````html
+<!-- BAILOUT_TO_CLIENT_SIDE_RENDERING -->
+
+
+- The final DOM (what users actually get) does include the correct <title> and <meta> tags. Verify in DevTools → Elements → <head>.
+
+  ### What I did to mitigate
+
+1) **Static route metadata** so title/description are defined server-side:
+
+```ts
+// app/venues/[id]/edit/layout.tsx
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: { absolute: 'Edit venue • Holidaze' },
+  description: 'Update your venue details',
+}
+
+export default function EditLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
+}
+
+````
+
+2. No head.tsx for this route (avoids duplication).
+3. No export const dynamic = 'force-dynamic' on this page (reduces late head mutations).
+4. Minimal server wrapper for the page:
+
+### Edit page server entry (App Router)
+
+```ts
+// app/venues/[id]/edit/page.tsx
+import EditVenuePageClient from './EditVenuePageClient'
+
+type PageProps = { params: Promise<{ id: string }> }
+
+export default async function Page({ params }: PageProps) {
+  const { id } = await params
+  return <EditVenuePageClient id={id} />
+}
+
+## How to verify correctness
+
+```
+
+1. Open the page in a browser → DevTools → Elements → <head>.
+2. You’ll see <title>Edit venue • Holidaze</title> and the description <meta>.
+3. The W3C validator reads only the first streamed chunk, not the final DOM—hence those warnings.
 
 ## 📝 Notes
 
