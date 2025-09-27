@@ -53,11 +53,7 @@ export default function AuthGate({
   // While hydrating, show fallback to avoid flicker / mismatches
   if (!hasHydrated) {
     return (
-      <>
-        {fallback ?? (
-          <div className="py-8 text-center text-gray-500">Loading…</div>
-        )}
-      </>
+      <>{fallback ?? <div className="py-8 text-center muted">Loading…</div>}</>
     )
   }
 

@@ -104,7 +104,7 @@ export default function ManagerVenues({ venues }: Props) {
                 </Link>
                 <Link
                   href={`/venues/${v.id}/edit`}
-                  className="inline-flex items-center rounded-lg bg-terracotta/90 px-3 py-1.5 text-white hover:opacity-90"
+                  className="inline-flex items-center rounded-lg bg-terracotta px-3 py-1.5 text-brand hover:opacity-90"
                 >
                   Edit
                 </Link>

@@ -1,4 +1,3 @@
-/* src/app/globals.css */
 @import 'tailwindcss';
 
 /* ------------------------------
@@ -7,7 +6,7 @@
 :root {
   --background: #ffffff;
   --foreground: #1c1c1c; /* dark base */
-  --foreground-rgb: 28, 28, 28; /* same color as RGB for opacity */
+  --foreground-rgb: 28, 28, 28; /* same as RGB for opacity */
 }
 
 /* ------------------------------
@@ -27,8 +26,8 @@
   /* Palette */
   --color-brand: #1c1c1c; /* matte black */
   --color-sand: #f4f1ee; /* soft off-white */
-  --color-grey: #a0a0a0; /* muted text/borders */
-  --color-emerald: #3da08d; /* primary action */
+  --color-grey: #a0a0a0; /* muted text/borders (custom token) */
+  --color-emerald: #0f766e; /* primary action */
   --color-terracotta: #e07a5f; /* warm accent */
 
   /* Base typography (mobile-first) */
@@ -65,7 +64,7 @@
 }
 
 /* ------------------------------
-   Body Defaults
+   Base / element defaults
 ------------------------------ */
 html {
   /* ensures in-page anchors consider sticky nav height */
@@ -138,17 +137,23 @@ h3 {
     line-height: var(--leading-body);
     color: inherit; /* allows parent (e.g. text-white) to control color */
   }
-
-  /* Muted helper */
-  .muted {
-    @apply text-grey;
-  }
 }
 
 /* ------------------------------
    Utilities (a11y, helpers)
+   NOTE: Utilities layer comes after components, so these win in cascade.
 ------------------------------ */
 @layer utilities {
+  /* Muted helper — AA contrast on white */
+  .muted {
+    @apply text-gray-500;
+  }
+
+  /* Muted heading helper */
+  .h2--muted {
+    @apply text-gray-500;
+  }
+
   /* Screen-reader only */
   .sr-only {
     position: absolute !important;
@@ -170,11 +175,6 @@ h3 {
     color: #ffffff;
   }
 
-  /* Muted heading helper */
-  .h2--muted {
-    @apply text-grey;
-  }
-
   /* Consistent focus ring helper */
   .focus-ring {
     @apply outline-none focus-visible:ring-2 focus-visible:ring-black/20;
@@ -182,7 +182,7 @@ h3 {
 }
 
 /* ------------------------------
-   Responsive Scaling for semantic classes
+   Responsive scaling for semantic classes
 ------------------------------ */
 @media (min-width: 640px) {
   .display {

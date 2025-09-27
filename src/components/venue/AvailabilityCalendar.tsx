@@ -136,7 +136,7 @@ export default function AvailabilityCalendar({
       </div>
 
       {/* Weekdays (Mon–Sun) */}
-      <div className="mb-2 grid grid-cols-7 gap-2 text-center text-sm text-grey">
+      <div className="mb-2 grid grid-cols-7 gap-2 text-center text-sm muted">
         {WEEKDAYS.map((w) => (
           <div key={w} className="py-1">
             {w}
@@ -153,9 +153,10 @@ export default function AvailabilityCalendar({
               className={[
                 'aspect-square select-none rounded-lg border text-center leading-[2.25rem] sm:leading-[2.5rem]',
                 c.booked
-                  ? 'bg-[#e07a5f] text-white border-transparent'
+                  ? 'bg-terracotta text-black border-transparent' // ⬅️ black text for contrast
                   : 'border-black/15',
-                c.isPast && !c.booked ? 'opacity-40' : '',
+                // was: c.isPast && !c.booked ? 'opacity-40' : ''
+                c.isPast && !c.booked ? 'muted' : '', // ⬅️ use muted instead of opacity
                 c.isToday && !c.booked && !c.isPast
                   ? 'ring-2 ring-emerald'
                   : '',
@@ -168,7 +169,13 @@ export default function AvailabilityCalendar({
               {c.label}
             </div>
           ) : (
-            <div key={c.key} />
+            <div
+              key={c.key}
+              className="aspect-square select-none rounded-lg border border-transparent text-center leading-[2.25rem] sm:leading-[2.5rem] muted"
+              aria-hidden="true"
+            >
+              {c.label}
+            </div>
           )
         )}
       </div>
@@ -177,16 +184,16 @@ export default function AvailabilityCalendar({
       <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
         <div className="flex items-center gap-2">
           <span className="inline-block h-3 w-3 rounded bg-[#e07a5f]" />
-          <span className="text-grey">Booked</span>
+          <span className="muted">Booked</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-block h-3 w-3 rounded border border-black/15" />
-          <span className="text-grey">Available</span>
+          <span className="muted">Available</span>
         </div>
         {disablePast && (
           <div className="flex items-center gap-2">
             <span className="inline-block h-3 w-3 rounded bg-black/10" />
-            <span className="text-grey">Past</span>
+            <span className="muted">Past</span>
           </div>
         )}
       </div>

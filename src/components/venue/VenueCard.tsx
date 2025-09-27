@@ -80,13 +80,13 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
         <h3 className="h3 mb-1 line-clamp-1 underline-offset-4 group-hover:underline">
           {venue.name}
         </h3>
-        <p className="body text-sm text-grey line-clamp-2">
+        <p className="body text-sm muted line-clamp-2">
           {venue.description || 'No description provided.'}
         </p>
 
         <div className="mt-2 flex items-center justify-between text-sm">
           <span className="font-semibold">{venue.price} NOK</span>
-          <span className="text-grey">Max {venue.maxGuests} guests</span>
+          <span className="muted">Max {venue.maxGuests} guests</span>
         </div>
       </div>
     </Link>

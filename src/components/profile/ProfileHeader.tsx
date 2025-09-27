@@ -59,7 +59,7 @@ export default function ProfileHeader({
           <h1 className="h1 text-xl sm:text-2xl font-semibold leading-tight">
             {displayName}
           </h1>
-          <p className="text-sm text-gray-600">{displayEmail}</p>
+          <p className="text-sm muted">{displayEmail}</p>
         </div>
       </div>
 

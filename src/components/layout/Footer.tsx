@@ -53,8 +53,8 @@ export default function Footer() {
                   Contact
                 </Link>
               </li>
-              <li className="text-grey">Privacy (coming soon)</li>
-              <li className="text-grey">Terms (coming soon)</li>
+              <li className="muted">Privacy (coming soon)</li>
+              <li className="muted">Terms (coming soon)</li>
             </ul>
           </nav>
 
@@ -104,7 +104,7 @@ export default function Footer() {
 
       <div className="border-t border-black/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-          <p className="body text-grey text-center">© {year} Holidaze.</p>
+          <p className="body muted text-center">© {year} Holidaze.</p>
         </div>
       </div>
     </footer>
