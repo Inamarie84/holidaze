@@ -7,20 +7,28 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-type PageProps = {
-  searchParams: Record<string, string | undefined>
-}
-
 /**
- * Login page (server entry).
- * Reads `role` and `redirect` from the URL and passes to the client form.
+ * Next 15: `searchParams` is a Promise you should `await`.
  */
-export default function LoginPage({ searchParams }: PageProps) {
-  const role = searchParams?.role
-  const redirect =
-    typeof searchParams?.redirect === 'string' && searchParams.redirect
-      ? searchParams.redirect
-      : '/profile'
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const sp = await searchParams
+  const role =
+    typeof sp.role === 'string'
+      ? sp.role
+      : Array.isArray(sp.role)
+        ? sp.role[0]
+        : undefined
+  const redirectRaw =
+    typeof sp.redirect === 'string'
+      ? sp.redirect
+      : Array.isArray(sp.redirect)
+        ? sp.redirect[0]
+        : undefined
+  const redirect = redirectRaw && redirectRaw.trim() ? redirectRaw : '/profile'
 
   return <LoginPageClient role={role} redirect={redirect} />
 }

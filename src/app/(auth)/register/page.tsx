@@ -7,15 +7,23 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-type PageProps = {
-  searchParams: Record<string, string | undefined>
-}
-
 /**
- * Registration page (server entry).
- * Determines initial role from the URL.
+ * Next 15: `searchParams` is a Promise you should `await`.
  */
-export default function RegisterPage({ searchParams }: PageProps) {
-  const initialRole = searchParams?.role === 'manager' ? 'manager' : 'customer'
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const sp = await searchParams
+  const roleParam =
+    typeof sp.role === 'string'
+      ? sp.role
+      : Array.isArray(sp.role)
+        ? sp.role[0]
+        : undefined
+  const initialRole =
+    roleParam === 'manager' ? ('manager' as const) : 'customer'
+
   return <RegisterPageClient initialRole={initialRole} />
 }
