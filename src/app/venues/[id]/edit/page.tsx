@@ -1,13 +1,8 @@
 // app/venues/[id]/edit/page.tsx
 import EditVenuePageClient from './EditVenuePageClient'
-import type { Metadata } from 'next'
 
-export const dynamic = 'force-dynamic'
-
-export const metadata: Metadata = {
-  title: 'Edit venue • Holidaze',
-  description: 'Update your venue details',
-}
+// ❌ Remove this line entirely:
+// export const dynamic = 'force-dynamic'
 
 type PageProps = { params: Promise<{ id: string }> }
 
