@@ -23,7 +23,6 @@ export default function SearchGuestsField({ value, onChange }: Props) {
     <div
       onClick={focusInput}
       className="cursor-pointer rounded-lg border border-black/15 bg-white p-2 transition hover:bg-black/5 focus-within:ring-2 focus-within:ring-emerald"
-      aria-label="Guests"
     >
       <GuestsInput
         id="guests"
