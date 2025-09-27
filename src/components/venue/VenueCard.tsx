@@ -7,12 +7,10 @@ import type { TVenue, TVenueWithBookings } from '@/types/api'
 
 type Props = {
   venue: TVenue | TVenueWithBookings
-  /** If both provided, we show an availability badge (requires venue.bookings). */
   dateFrom?: string
   dateTo?: string
 }
 
-// Narrow to “has a concrete bookings array”
 function hasBookings(
   v: TVenue | TVenueWithBookings
 ): v is TVenueWithBookings & {
@@ -32,17 +30,12 @@ function isAvailable(
   const fromD = new Date(from)
   const toD = new Date(to)
   const overlaps = (bFrom: Date, bTo: Date) => !(toD <= bFrom || fromD >= bTo)
-
   const hasOverlap = venue.bookings.some((b) =>
     overlaps(new Date(b.dateFrom), new Date(b.dateTo))
   )
   return hasOverlap ? 'booked' : 'available'
 }
 
-/**
- * VenueCard
- * Lightweight card showing hero image, name, description, price, and capacity.
- */
 export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
   const image = venue.media?.[0]?.url || '/images/placeholder.jpg'
   const alt = venue.media?.[0]?.alt || venue.name
@@ -51,8 +44,12 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
   return (
     <Link
       href={`/venues/${venue.id}`}
-      aria-label={`View ${venue.name}`}
-      className="group cursor-pointer overflow-hidden rounded-lg border border-black/10 transition hover:shadow-lg"
+      aria-label={`View venue: ${venue.name}`}
+      className={[
+        'group cursor-pointer overflow-hidden rounded-lg border border-black/10 transition',
+        'hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald/50',
+        'block', // ensures big tap target
+      ].join(' ')}
     >
       <div className="relative aspect-[4/3] w-full">
         <Image
@@ -77,7 +74,7 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
       </div>
 
       <div className="p-4">
-        <h3 className="h3 mb-1 line-clamp-1 group-hover:underline">
+        <h3 className="h3 mb-1 line-clamp-1 underline-offset-4 group-hover:underline">
           {venue.name}
         </h3>
         <p className="body text-sm text-grey line-clamp-2">
@@ -85,8 +82,8 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
         </p>
 
         <div className="mt-2 flex items-center justify-between text-sm">
-          <span className="font-semibold">{`${venue.price} NOK`}</span>
-          <span className="text-grey">{`Max ${venue.maxGuests} guests`}</span>
+          <span className="font-semibold">{venue.price} NOK</span>
+          <span className="text-grey">Max {venue.maxGuests} guests</span>
         </div>
       </div>
     </Link>

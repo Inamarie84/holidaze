@@ -1,76 +1,114 @@
 // src/components/profile/MyBookings.tsx
-'use client'
-
 import Link from 'next/link'
 import type { TBooking } from '@/types/api'
 
 type Props = {
   bookings: TBooking[]
-  /** Shown when the list is empty */
   emptyText?: string
-  /** Visual tone for the list (default normal). Use 'muted' for past bookings */
   tone?: 'default' | 'muted'
+  /** Show the guest (customer) who made the booking, when available (manager view) */
+  showGuest?: boolean
+}
+
+function getThumbUrl(b: TBooking): string | undefined {
+  const url = b.venue?.media?.[0]?.url
+  return typeof url === 'string' && url.trim() ? url : undefined
 }
 
 export default function MyBookings({
   bookings,
-  emptyText,
+  emptyText = 'No bookings.',
   tone = 'default',
+  showGuest = false,
 }: Props) {
   if (!bookings?.length) {
     return (
-      <p className={`body ${tone === 'muted' ? 'muted' : ''}`}>
-        {emptyText ?? 'No bookings yet.'}
-      </p>
+      <p className={`body ${tone === 'muted' ? 'muted' : ''}`}>{emptyText}</p>
     )
   }
 
-  const fmt = (d: string | Date) =>
-    new Date(d).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-
-  const isMuted = tone === 'muted'
-
   return (
-    <ul
-      className={[
-        'divide-y divide-black/10 rounded-xl border border-black/10 bg-white',
-        isMuted ? 'text-grey' : '',
-      ].join(' ')}
-    >
+    <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
       {bookings.map((b) => {
-        const v = b.venue
+        const thumb = getThumbUrl(b)
+        const start = b.dateFrom?.slice(0, 10)
+        const end = b.dateTo?.slice(0, 10)
+        const venueId = b.venue?.id
+        const venueName = b.venue?.name ?? 'Venue'
+
         return (
-          <li key={b.id} className="p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div
-                  className={['font-semibold', isMuted ? 'text-grey' : ''].join(
-                    ' '
-                  )}
-                >
-                  {fmt(b.dateFrom)} – {fmt(b.dateTo)}
-                </div>
-                <div className="text-sm text-grey">
-                  {b.guests} guest{b.guests > 1 ? 's' : ''}
-                  {v ? ` • ${v.name}` : ''}
-                </div>
+          <li key={b.id} className="p-3 sm:p-4">
+            <div className="flex items-center gap-3">
+              {/* Thumbnail */}
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-sand">
+                {thumb ? (
+                  <img
+                    src={thumb}
+                    alt={`${venueName} thumbnail`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs muted">
+                    No image
+                  </div>
+                )}
               </div>
 
-              {v && (
-                <Link
-                  href={`/venues/${v.id}`}
-                  className={[
-                    'text-sm underline hover:opacity-80',
-                    isMuted ? 'text-grey' : '',
-                  ].join(' ')}
-                >
-                  View venue
-                </Link>
-              )}
+              {/* Content (left) */}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  {/* Venue name stays a link */}
+                  {venueId ? (
+                    <Link
+                      href={`/venues/${venueId}`}
+                      className="truncate font-medium hover:underline"
+                      title={venueName}
+                    >
+                      {venueName}
+                    </Link>
+                  ) : (
+                    <span className="truncate font-medium">{venueName}</span>
+                  )}
+                  <span className="muted text-sm">
+                    {start} – {end}
+                  </span>
+                </div>
+
+                {/* Optional guest name (manager view) */}
+                {showGuest && b.customer?.name && (
+                  <div className="text-sm muted">Guest: {b.customer.name}</div>
+                )}
+
+                {/* Guests count */}
+                {typeof b.guests === 'number' && (
+                  <div className="text-sm">
+                    {b.guests} {b.guests === 1 ? 'guest' : 'guests'}
+                  </div>
+                )}
+              </div>
+
+              {/* Right action: explicit View venue button */}
+              <div className="shrink-0">
+                {venueId ? (
+                  <Link
+                    href={`/venues/${venueId}`}
+                    className="inline-flex items-center justify-center rounded-lg border border-black/15 px-3 py-1.5 text-sm hover:bg-black/5 cursor-pointer"
+                    aria-label={`View ${venueName}`}
+                  >
+                    View venue
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-lg border border-black/15 px-3 py-1.5 text-sm opacity-50 cursor-not-allowed"
+                    aria-disabled="true"
+                  >
+                    View
+                  </button>
+                )}
+              </div>
             </div>
           </li>
         )

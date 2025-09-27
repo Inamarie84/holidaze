@@ -1,4 +1,3 @@
-// src/components/layout/MobileMenu.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -37,7 +36,7 @@ export default function MobileMenu({
 
   useEffect(() => setMounted(true), [])
 
-  // Close on ESC
+  // ESC to close
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false)
@@ -46,7 +45,7 @@ export default function MobileMenu({
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
-  // Trigger: add aria-expanded and keep it visibly “active” when open
+  // Trigger (open + close)
   const trigger = (
     <button
       type="button"
@@ -78,21 +77,23 @@ export default function MobileMenu({
       {open &&
         ReactDOM.createPortal(
           <>
-            {/* Backdrop — fill the page BELOW the navbar */}
+            {/* Backdrop: starts BELOW the navbar, not full-screen */}
             <div
               className="fixed inset-x-0 bottom-0 z-[180] bg-black/60 md:hidden"
-              style={{ top: 'var(--nav-height, 56px)' }} // don’t cover the navbar row
+              style={{ top: 'var(--nav-height, 56px)' }}
               onClick={() => setOpen(false)}
               aria-hidden="true"
             />
 
-            {/* Panel — full width, auto height (no bottom), sits below navbar */}
+            {/* Panel: below navbar, height = content (with safe max-h), same color as navbar */}
             <div
-              className="fixed left-0 right-0 z-[190] md:hidden border-t border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+              className="fixed inset-x-0 z-[190] md:hidden border-t border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
               style={{
                 top: 'var(--nav-height, 56px)',
                 backgroundColor: '#1c1c1c',
                 isolation: 'isolate',
+                maxHeight: 'calc(100dvh - var(--nav-height, 56px))',
+                overflowY: 'auto',
               }}
               role="dialog"
               aria-modal="true"
@@ -104,8 +105,8 @@ export default function MobileMenu({
                 </p>
               </div>
 
-              {/* Menu links; allow scroll only if too tall */}
-              <nav className="p-4 max-h-[calc(100dvh-var(--nav-height,56px)-64px)] overflow-y-auto">
+              {/* Links */}
+              <nav className="p-4">
                 <ul className="grid gap-2">
                   <li>
                     <Link

@@ -1,3 +1,4 @@
+/* src/app/globals.css */
 @import 'tailwindcss';
 
 /* ------------------------------
@@ -5,77 +6,30 @@
 ------------------------------ */
 :root {
   --background: #ffffff;
-  --foreground: #1c1c1c; /* your dark base */
+  --foreground: #1c1c1c; /* dark base */
   --foreground-rgb: 28, 28, 28; /* same color as RGB for opacity */
 }
 
-/* Expose Next font variables from layout.tsx to Tailwind tokens */
+/* ------------------------------
+   Theme Tokens (Tailwind v4)
+   - Fonts are exposed from layout.tsx (Next/font)
+   - Palette + Type scale
+------------------------------ */
 @theme inline {
+  /* Expose CSS vars as Tailwind colors/fonts */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Font vars come from layout.tsx */
+  /* Next/font variables from layout.tsx */
   --font-sans: var(--font-sans); /* Inter */
   --font-serif: var(--font-serif); /* DM Serif Display */
-}
 
-/* ------------------------------
-   Body Defaults
------------------------------- */
-html {
-  /* was: scroll-padding-top: 5rem; */
-  scroll-padding-top: var(--nav-height, 4rem);
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans); /* default = Inter */
-}
-
-/* Headings default to DM Serif even without utility classes */
-h1,
-h2,
-h3 {
-  font-family: var(--font-serif);
-}
-
-/* Make the whole date input + its native calendar icon show a pointer */
-.input-date {
-  cursor: pointer;
-}
-.input-date::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-}
-
-/* src/app/globals.css (any global CSS) */
-.sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-
-/* ------------------------------
-   Brand Palette + Type Scale
------------------------------- */
-@theme {
-  /* Colors */
+  /* Palette */
   --color-brand: #1c1c1c; /* matte black */
   --color-sand: #f4f1ee; /* soft off-white */
   --color-grey: #a0a0a0; /* muted text/borders */
   --color-emerald: #3da08d; /* primary action */
-  --color-terracotta: #e07a5f; /* secondary/warm accent */
+  --color-terracotta: #e07a5f; /* warm accent */
 
   /* Base typography (mobile-first) */
   --text-display: 3rem;
@@ -111,7 +65,41 @@ h3 {
 }
 
 /* ------------------------------
-   Semantic Typography (Components layer so utilities override)
+   Body Defaults
+------------------------------ */
+html {
+  /* ensures in-page anchors consider sticky nav height */
+  scroll-padding-top: var(--nav-height, 4rem);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans); /* Inter by default */
+}
+
+/* Headings default to DM Serif even without utility classes */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+}
+
+/* Make the whole date input + its native calendar icon show a pointer */
+.input-date {
+  cursor: pointer;
+}
+.input-date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+/* ------------------------------
+   Components (semantic text utilities)
 ------------------------------ */
 @layer components {
   /* Headings */
@@ -126,7 +114,7 @@ h3 {
     @apply font-serif tracking-tight;
     font-size: var(--text-h1);
     line-height: var(--leading-h1);
-    color: var(--color-brand); /* default everywhere */
+    color: var(--color-brand);
   }
 
   .h2 {
@@ -148,7 +136,7 @@ h3 {
     @apply font-sans;
     font-size: var(--text-body);
     line-height: var(--leading-body);
-    color: inherit; /* allow parent (e.g. text-white) to control color */
+    color: inherit; /* allows parent (e.g. text-white) to control color */
   }
 
   /* Muted helper */
@@ -157,8 +145,24 @@ h3 {
   }
 }
 
-/* Optional inverse helper for special cases */
+/* ------------------------------
+   Utilities (a11y, helpers)
+------------------------------ */
 @layer utilities {
+  /* Screen-reader only */
+  .sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  /* Inverse body text for dark backgrounds */
   .body--inverse {
     @apply font-sans;
     font-size: var(--text-body);
@@ -170,10 +174,15 @@ h3 {
   .h2--muted {
     @apply text-grey;
   }
+
+  /* Consistent focus ring helper */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-black/20;
+  }
 }
 
 /* ------------------------------
-   Responsive Scaling
+   Responsive Scaling for semantic classes
 ------------------------------ */
 @media (min-width: 640px) {
   .display {

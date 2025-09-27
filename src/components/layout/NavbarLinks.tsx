@@ -1,7 +1,5 @@
 'use client'
-
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
   MapPin,
   PlusCircle,
@@ -10,6 +8,7 @@ import {
   User2,
   LogOut,
 } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 type Props = {
   hasHydrated: boolean
@@ -33,25 +32,31 @@ export default function NavbarLinks({
   const pathname = usePathname()
 
   return (
-    <div className="ms-auto flex min-w-0 flex-wrap items-center gap-2">
+    <div className="ms-auto flex min-w-0 flex-wrap items-center gap-2 max-[430px]:gap-1">
       <Link
         href="/venues"
         prefetch={pathname !== '/venues'}
         aria-label="Browse venues"
-        className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 cursor-pointer"
+        className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
       >
         <MapPin size={18} aria-hidden="true" />
-        <span>Browse venues</span>
+        <span className="hidden sm:inline max-[430px]:hidden">
+          Browse venues
+        </span>
+        <span className="sm:hidden max-[430px]:hidden">Venues</span>
       </Link>
 
       {hasHydrated && isAuthed && isManager && (
         <Link
           href="/venues/new"
           aria-label="Create venue"
-          className="inline-flex h-9 items-center gap-1 rounded-lg bg-emerald px-3 text-sm text-white hover:opacity-90 cursor-pointer"
+          className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
         >
           <PlusCircle size={18} aria-hidden="true" />
-          <span>Create venue</span>
+          <span className="hidden sm:inline max-[430px]:hidden">
+            Create venue
+          </span>
+          <span className="sm:hidden max-[430px]:hidden">Create</span>
         </Link>
       )}
 
@@ -61,42 +66,46 @@ export default function NavbarLinks({
             href="/profile"
             aria-label="Profile"
             title={userName ?? 'Profile'}
-            className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 bg-terracotta/90 px-3 text-sm hover:bg-terracotta/70 cursor-pointer"
+            className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
           >
             <User2 size={18} aria-hidden="true" />
-            <span>{userName ?? 'Profile'}</span>
+            <span className="hidden sm:inline max-[430px]:hidden">
+              {userName ?? 'Profile'}
+            </span>
+            <span className="sm:hidden max-[430px]:hidden">Profile</span>
           </Link>
 
           <button
-            type="button"
-            onClick={onLogout}
+            onClick={onLogout} // ⬅️ use the prop
             aria-label="Log out"
-            className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 cursor-pointer"
+            className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
           >
             <LogOut size={18} aria-hidden="true" />
-            <span>Log out</span>
+            <span className="hidden sm:inline max-[430px]:hidden">Log out</span>
+            <span className="sm:hidden max-[430px]:hidden">Logout</span>
           </button>
         </>
       ) : (
         <>
           <button
-            type="button"
             onClick={onOpenRegister}
             aria-label="Register"
-            className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 cursor-pointer"
+            className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
           >
             <UserPlus size={18} aria-hidden="true" />
-            <span>Register</span>
+            <span className="hidden sm:inline max-[430px]:hidden">
+              Register
+            </span>
           </button>
 
           <button
-            type="button"
             onClick={onOpenLogin}
             aria-label="Log in"
-            className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 cursor-pointer"
+            className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
           >
             <LogIn size={18} aria-hidden="true" />
-            <span>Log in</span>
+            <span className="hidden sm:inline max-[430px]:hidden">Log in</span>
+            <span className="sm:hidden max-[430px]:hidden">Login</span>
           </button>
         </>
       )}

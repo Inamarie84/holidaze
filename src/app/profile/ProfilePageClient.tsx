@@ -135,7 +135,7 @@ export default function ProfilePageClient() {
 
   return (
     <Suspense fallback={SkeletonPage}>
-      <AuthGate redirectTo="/login" fallback={SkeletonPage}>
+      <AuthGate redirectTo="/venues" fallback={SkeletonPage}>
         <section
           aria-labelledby="profile-heading"
           className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8"
@@ -205,6 +205,7 @@ export default function ProfilePageClient() {
                     <MyBookings
                       bookings={managerUpcoming}
                       emptyText="No upcoming bookings for your venues yet."
+                      showGuest // <-- show guest name if available
                     />
                   </section>
                 </>

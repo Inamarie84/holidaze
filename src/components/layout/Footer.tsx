@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import * as React from 'react'
 import { SiInstagram, SiFacebook, SiMessenger, SiTiktok } from 'react-icons/si'
 import type { IconType } from 'react-icons'
@@ -10,14 +11,32 @@ export default function Footer() {
     <footer className="border-t border-black/10 bg-sand">
       {/* Top: brand centered */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-center">
-        <h2 className="h2">Holidaze</h2>
+        <Link
+          href="/venues"
+          aria-label="Holidaze — go to home"
+          className="inline-flex items-center gap-2 hover:opacity-90"
+        >
+          {/* Optional tiny logo/favicon; remove <Image> if you don’t want it */}
+          <Image
+            src="/icon.png"
+            alt=""
+            width={28}
+            height={28}
+            className="rounded"
+            priority
+          />
+          <span className="h2">Holidaze</span>
+        </Link>
       </div>
 
       {/* Middle: links + contact + socials */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6">
         <div className="grid gap-6 sm:grid-cols-3">
           {/* Site links */}
-          <div className="text-center sm:text-left">
+          <nav
+            aria-label="Footer navigation"
+            className="text-center sm:text-left"
+          >
             <div className="font-semibold mb-2">Explore</div>
             <ul className="space-y-1 text-sm">
               <li>
@@ -35,31 +54,14 @@ export default function Footer() {
                   Contact
                 </Link>
               </li>
-              <li>
-                <span
-                  className="hover:underline cursor-not-allowed"
-                  role="link"
-                  aria-disabled="true"
-                  title="Coming soon"
-                >
-                  Privacy
-                </span>
-              </li>
-              <li>
-                <span
-                  className="hover:underline cursor-not-allowed"
-                  role="link"
-                  aria-disabled="true"
-                  title="Coming soon"
-                >
-                  Terms
-                </span>
-              </li>
+              {/* Prefer plain text over disabled-look links for WAI-ARIA clarity */}
+              <li className="text-grey">Privacy (coming soon)</li>
+              <li className="text-grey">Terms (coming soon)</li>
             </ul>
-          </div>
+          </nav>
 
           {/* Contact */}
-          <div className="text-center">
+          <address className="not-italic text-center">
             <div className="font-semibold mb-2">Contact</div>
             <p className="text-sm">
               Phone:{' '}
@@ -73,7 +75,7 @@ export default function Footer() {
                 support@holidaze.com
               </a>
             </p>
-          </div>
+          </address>
 
           {/* Socials */}
           <div className="text-center sm:text-right">
@@ -123,18 +125,16 @@ function BrandIconLink({
   label: string
   href: string
 }) {
-  // Cast to a generic React component type to satisfy strict JSX typing
   const Icon = as as unknown as React.ComponentType<{
     className?: string
     size?: number
     'aria-hidden'?: boolean
   }>
-
   return (
     <a
       href={href}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       aria-label={label}
       className="transition-opacity hover:opacity-80 focus:opacity-80"
     >

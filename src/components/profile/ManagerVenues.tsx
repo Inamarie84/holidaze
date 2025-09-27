@@ -44,7 +44,7 @@ export default function ManagerVenues({ venues }: Props) {
         <p className="body muted mb-3">You haven’t created any venues yet.</p>
         <Link
           href="/venues/new"
-          className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90"
+          className="inline-flex items-center rounded-lg bg-emerald px-4 py-2 text-white hover:opacity-90 cursor-pointer"
         >
           Create venue
         </Link>

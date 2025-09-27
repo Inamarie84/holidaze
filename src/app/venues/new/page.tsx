@@ -1,5 +1,4 @@
-//src/venues/new/page.tsx
-
+// src/venues/new/page.tsx
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -13,26 +12,34 @@ import { errMsg } from '@/utils/errors'
 
 export default function CreateVenuePage() {
   const router = useRouter()
-  const { token, user } = useSession()
+  const { token, user, hasHydrated } = useSession()
 
   const isAuthed = !!token
   const isManager = !!user?.venueManager
   const canRender = useMemo(() => isAuthed && isManager, [isAuthed, isManager])
 
+  // Guard: after hydration only
   useEffect(() => {
+    if (!hasHydrated) return
+
+    // If not logged in, go to home (prevents logout → login redirect loop)
     if (!isAuthed) {
-      toast.error('Please log in to create a venue.')
-      router.push('/login?role=manager')
-    } else if (!isManager) {
-      toast.error('Only venue managers can create venues.')
-      router.push('/profile')
+      router.replace('/venues')
+      return
     }
-  }, [isAuthed, isManager, router])
+
+    // Logged in but not a manager
+    if (!isManager) {
+      toast.error('Only venue managers can create venues.')
+      router.replace('/profile')
+    }
+  }, [hasHydrated, isAuthed, isManager, router])
 
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(values: VenueFormValues) {
     if (submitting) return
+
     const priceNum =
       typeof values.price === 'string' ? Number(values.price) : values.price
     const guestsNum =
@@ -68,6 +75,7 @@ export default function CreateVenuePage() {
     }
   }
 
+  // While the guard decides (or user isn’t allowed), show a neutral state
   if (!canRender) {
     return (
       <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">

@@ -1,4 +1,4 @@
-// src/app/venues/[id]/edit/EditVenuePageClient.tsx  (CLIENT)
+// src/app/venues/[id]/edit/EditVenuePageClient.tsx
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -30,20 +30,19 @@ export default function EditVenuePageClient({
   const [venue, setVenue] = useState<VenueWithOwner | null>(
     (initialVenue as VenueWithOwner | null) ?? null
   )
-  const [loading, setLoading] = useState(!initialVenue) // if we have initial, skip first skeleton
+  const [loading, setLoading] = useState(!initialVenue)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
   const mounted = useRef(true)
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       mounted.current = false
-    },
-    []
-  )
+    }
+  }, [])
 
-  // Fetch the venue immediately (independent of auth) — avoids hydration race
+  // Fetch the venue (independent of auth) — avoids hydration races
   useEffect(() => {
     const ac = new AbortController()
     ;(async () => {
@@ -66,16 +65,20 @@ export default function EditVenuePageClient({
     })()
     return () => ac.abort()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]) // don't include `venue` here; we only want to run on ID changes
+  }, [id])
 
   // Permission checks — only after hydration knows who you are
   useEffect(() => {
     if (!hasHydrated) return
+
+    // If NOT logged in and you land here (e.g., you just logged out on this page),
+    // send home instead of login.
     if (!isAuthed) {
-      toast.error('Please log in.')
-      router.replace('/login?role=manager')
+      router.replace('/venues')
       return
     }
+
+    // Logged in but not a manager: push to profile
     if (!isManager) {
       toast.error('Only venue managers can edit venues.')
       router.replace('/profile')
@@ -126,7 +129,8 @@ export default function EditVenuePageClient({
 
   async function handleDelete() {
     if (!venue) return
-    if (!confirm('Delete this venue? This cannot be undone.')) return
+    const ok = confirm('Delete this venue? This cannot be undone.')
+    if (!ok) return
     try {
       setDeleting(true)
       await deleteVenue(venue.id)
