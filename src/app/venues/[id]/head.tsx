@@ -20,10 +20,9 @@ export default async function Head({ params }: Props) {
       imageUrl = v.media?.[0]?.url
     }
   } catch (err) {
-    // Keep safe defaults; optionally surface in dev only (no noisy logs in prod)
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.warn('Head: failed to load venue metadata', err)
+      // dev-only: intentionally not logging to console for submission
+      void err // prevent unused variable linting
     }
   }
 
