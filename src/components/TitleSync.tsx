@@ -1,14 +1,13 @@
 'use client'
+
 import { useEffect } from 'react'
 
-export default function TitleSync({ title }: { title?: string }) {
+export default function TitleSync({ title }: { title: string }) {
   useEffect(() => {
-    if (!title) return
-    const prev = document.title
-    document.title = title
-    return () => {
-      document.title = prev
+    if (typeof document !== 'undefined') {
+      document.title = title
     }
   }, [title])
+
   return null
 }

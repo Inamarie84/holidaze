@@ -148,19 +148,19 @@ export default function EditVenuePageClient({
 
   if (loadError || !venue) {
     return (
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         <p className="body text-red-600">{loadError ?? 'Venue not found'}</p>
-      </section>
+      </div>
     )
   }
 
   if (!isOwner) {
     return (
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         <p className="body text-red-600">
           You’re not allowed to edit this venue.
         </p>
-      </section>
+      </div>
     )
   }
 
