@@ -228,15 +228,15 @@ This route uses a **client-side permission guard** (manager/owner). That can tri
 
 You can confirm the bailout by viewing page source and seeing:
 
-````html
+```html
 <!-- BAILOUT_TO_CLIENT_SIDE_RENDERING -->
-
+```
 
 - The final DOM (what users actually get) does include the correct <title> and <meta> tags. Verify in DevTools → Elements → <head>.
 
   ### What I did to mitigate
 
-1) **Static route metadata** so title/description are defined server-side:
+1. **Static route metadata** so title/description are defined server-side:
 
 ```ts
 // app/venues/[id]/edit/layout.tsx
@@ -251,7 +251,7 @@ export default function EditLayout({ children }: { children: React.ReactNode }) 
   return <>{children}</>
 }
 
-````
+```
 
 2. No head.tsx for this route (avoids duplication).
 3. No export const dynamic = 'force-dynamic' on this page (reduces late head mutations).
@@ -270,9 +270,9 @@ export default async function Page({ params }: PageProps) {
   return <EditVenuePageClient id={id} />
 }
 
-## How to verify correctness
-
 ```
+
+## How to verify correctness
 
 1. Open the page in a browser → DevTools → Elements → <head>.
 2. You’ll see <title>Edit venue • Holidaze</title> and the description <meta>.
