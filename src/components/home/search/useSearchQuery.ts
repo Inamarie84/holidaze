@@ -1,4 +1,3 @@
-// src/components/home/search/useSearchQuery.ts
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
@@ -7,22 +6,28 @@ import { useDebounce } from '@/hooks/useDebounce'
 
 type Guests = number | ''
 
-/**
- * Centralized state + URL-sync for the venues search query.
- * Handles:
- * - initial state from URL
- * - back/forward syncing
- * - debounced destination typing
- * - auto-reset page=1 when any filter is present
- * - clearing invalid "to" when before "from"
- */
-export function useSearchQuery(opts: {
+type RouterShape = {
+  replace: (url: string) => void
+  push: (url: string) => void
+}
+
+type Opts = {
   sp: ReadonlyURLSearchParams
   pathname: string
-  router: { replace: (url: string) => void; push: (url: string) => void }
-}) {
-  const { sp, pathname, router } = opts
+  router: RouterShape
+}
 
+/**
+ * Centralized state + URL-sync for the venues search query.
+ *
+ * Responsibilities:
+ * - init state from URL (q, dateFrom, dateTo, guests)
+ * - keep state in sync when user navigates back/forward
+ * - debounce destination typing for live list updates
+ * - maintain `page=1` when any filter is applied
+ * - clear invalid "to" when earlier than "from"
+ */
+export function useSearchQuery({ sp, pathname, router }: Opts) {
   const [destination, setDestination] = useState(sp.get('q') ?? '')
   const [from, setFrom] = useState(sp.get('dateFrom') ?? '')
   const [to, setTo] = useState(sp.get('dateTo') ?? '')
@@ -30,7 +35,7 @@ export function useSearchQuery(opts: {
     sp.get('guests') ? Number(sp.get('guests')) : ''
   )
 
-  // keep local state in sync when user navigates (back/forward)
+  // Sync when URL changes (back/forward)
   useEffect(() => {
     setDestination(sp.get('q') ?? '')
     setFrom(sp.get('dateFrom') ?? '')
@@ -38,7 +43,7 @@ export function useSearchQuery(opts: {
     setGuests(sp.get('guests') ? Number(sp.get('guests')) : '')
   }, [sp])
 
-  // today (yyyy-mm-dd) for nicer UX default min
+  // today (yyyy-mm-dd) for min constraints
   const todayYMD = useMemo(() => {
     const d = new Date()
     const y = d.getFullYear()
@@ -47,21 +52,20 @@ export function useSearchQuery(opts: {
     return `${y}-${m}-${day}`
   }, [])
 
-  // If check-out is earlier than the newly selected check-in, clear it
+  // Clear invalid checkout when earlier than checkin
   useEffect(() => {
     if (from && to && new Date(to) <= new Date(from)) {
       setTo('')
     }
   }, [from, to])
 
-  // Treat /, /venues, and nested /venues/* as “venues index” for live updates
+  // Live update only on venues index (/, /venues, /venues/*)
   const onVenuesIndex =
     pathname === '/' ||
     pathname === '/venues' ||
-    pathname.startsWith('/venues?') ||
     pathname.startsWith('/venues/')
 
-  function buildQuery(q?: string, f?: string, t?: string, g?: Guests) {
+  const buildQuery = (q?: string, f?: string, t?: string, g?: Guests) => {
     const params = new URLSearchParams()
     if (q && q.trim()) params.set('q', q.trim())
     if (f) params.set('dateFrom', f)
@@ -74,7 +78,6 @@ export function useSearchQuery(opts: {
       !!t ||
       (typeof g === 'number' && g > 0)
 
-    // Always reset to page 1 when filters change
     if (hasFilters) params.set('page', '1')
 
     const qs = params.toString()
@@ -83,21 +86,24 @@ export function useSearchQuery(opts: {
 
   const debouncedDestination = useDebounce(destination, 450)
 
-  // Debounced destination updates (live only on the venues index)
+  // Debounced destination updates (live)
   useEffect(() => {
     if (!onVenuesIndex) return
     const qs = buildQuery(debouncedDestination, from, to, guests)
     router.replace(`/venues${qs}`)
-  }, [debouncedDestination, onVenuesIndex, from, to, guests, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedDestination, onVenuesIndex, from, to, guests])
 
-  // Immediate updates for date/guests
+  // Immediate updates for date/guests (live)
   useEffect(() => {
     if (!onVenuesIndex) return
     const qs = buildQuery(destination, from, to, guests)
     router.replace(`/venues${qs}`)
-  }, [destination, from, to, guests, onVenuesIndex, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [destination, from, to, guests, onVenuesIndex])
 
-  function submit() {
+  // Explicit submit (always navigates)
+  const submit = () => {
     const qs = buildQuery(destination, from, to, guests)
     router.push(`/venues${qs}`)
   }

@@ -6,15 +6,16 @@ import GuestsInput from '@/components/ui/GuestsInput'
 
 type Guests = number | ''
 
-export default function SearchGuestsField({
-  value,
-  onChange,
-}: {
+type Props = {
   value: Guests
   onChange: (v: Guests) => void
-}) {
-  const ref = useRef<HTMLInputElement | null>(null)
+}
 
+/**
+ * Guests field using your shared <GuestsInput /> with a focusable wrapper.
+ */
+export default function SearchGuestsField({ value, onChange }: Props) {
+  const ref = useRef<HTMLInputElement | null>(null)
   const focusInput = () => ref.current?.focus()
 
   return (
@@ -24,6 +25,7 @@ export default function SearchGuestsField({
       onClick={focusInput}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && focusInput()}
       className="cursor-pointer rounded-lg border border-black/15 bg-white p-2 transition hover:bg-black/5 focus-within:ring-2 focus-within:ring-emerald"
+      aria-label="Guests input"
     >
       <GuestsInput
         id="guests"
@@ -37,9 +39,9 @@ export default function SearchGuestsField({
         onChange={onChange}
         min={1}
         max={50}
-        // pass the ref to the input
         inputClassName="w-full rounded-md border border-black/10 px-3 py-2 focus:outline-none"
-        // @ts-expect-error: ref passthrough via any (quick approach)
+        // If GuestsInput is not typed with forwardRef, keep this directive:
+        // @ts-expect-error: GuestsInput doesn't expose a typed ref prop
         ref={ref}
       />
     </div>

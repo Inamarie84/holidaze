@@ -1,7 +1,8 @@
-// src/components/profile/ManagerVenuesSkeleton.tsx
 'use client'
+
 import Skeleton from '@/components/ui/Skeleton'
 
+/** Skeleton loader for the manager's venues grid. */
 export default function ManagerVenuesSkeleton() {
   return (
     <>

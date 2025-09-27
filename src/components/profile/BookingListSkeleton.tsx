@@ -1,8 +1,8 @@
-//src/app/comonents/profile/BookingListSkeleton.tsx
-
 'use client'
+
 import Skeleton from '@/components/ui/Skeleton'
 
+/** Skeleton loader for a list of bookings. */
 export default function BookingListSkeleton() {
   return (
     <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">

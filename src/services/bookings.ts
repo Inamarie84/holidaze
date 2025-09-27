@@ -1,9 +1,13 @@
-// src/services/bookings.ts
 import { api } from '@/lib/api'
 import { useSession } from '@/store/session'
 import type { TBooking, TBookingInclude } from '@/types/api'
 
-/** Build a clean query string from optional include flags. */
+/**
+ * Build a clean query string from optional include flags.
+ *
+ * @param params - Include flags (e.g., {_venue: true, _customer: true})
+ * @returns Query string starting with `?` or an empty string
+ */
 function toQuery(params?: TBookingInclude): string {
   if (!params) return ''
   const usp = new URLSearchParams()
@@ -15,13 +19,24 @@ function toQuery(params?: TBookingInclude): string {
   return qs ? `?${qs}` : ''
 }
 
-/** Auth helpers */
+/**
+ * Ensure an authenticated session exists.
+ *
+ * @returns Token and user object from the session store
+ * @throws Error if not authenticated
+ */
 function requireAuth() {
   const { token, user } = useSession.getState()
   if (!token) throw new Error('Not authenticated')
   return { token, user }
 }
 
+/**
+ * Auth guard that only allows customers (non-managers).
+ *
+ * @returns Token and user object from the session store
+ * @throws Error if not authenticated or user is a venue manager
+ */
 function requireCustomerAuth() {
   const { token, user } = requireAuth()
   if (user?.venueManager) {
@@ -32,22 +47,22 @@ function requireCustomerAuth() {
 
 /**
  * Fetch bookings (auth required).
- * Useful for e.g. managers viewing bookings on their venues if your endpoint permits.
- * Add include flags with params (e.g. { _venue: true, _customer: true }).
+ *
+ * @param params - Include flags (e.g., {_venue: true, _customer: true})
+ * @returns List of bookings
  */
 export async function getBookings(
   params?: TBookingInclude
 ): Promise<TBooking[]> {
   const { token } = requireAuth()
   const query = toQuery(params)
-  // Holidaze base path, consistent with your other services
   return api<TBooking[]>(`/holidaze/bookings${query}`, {
     token,
     useApiKey: true,
   })
 }
 
-/** Payload for creating/updating a booking */
+/** Payload for creating/updating a booking. */
 export type BookingUpsertInput = {
   venueId: string
   dateFrom: string // ISO
@@ -55,7 +70,12 @@ export type BookingUpsertInput = {
   guests: number
 }
 
-/** Create a booking (customer-only) */
+/**
+ * Create a booking (customer-only).
+ *
+ * @param input - Booking payload
+ * @returns Created booking
+ */
 export async function createBooking(
   input: BookingUpsertInput
 ): Promise<TBooking> {
@@ -70,7 +90,10 @@ export async function createBooking(
 
 /**
  * Update an existing booking (customer-only).
- * (Only include fields you allow users to change.)
+ *
+ * @param id - Booking id
+ * @param input - Partial payload to update
+ * @returns Updated booking
  */
 export async function updateBooking(
   id: string,
@@ -85,7 +108,12 @@ export async function updateBooking(
   })
 }
 
-/** Delete a booking (customer-only). */
+/**
+ * Delete a booking (customer-only).
+ * NOTE: Not currently surfaced in the UI; kept for future use.
+ * @param id - Booking id
+ * @returns Resolves when deletion succeeds
+ */
 export async function deleteBooking(id: string): Promise<void> {
   const { token } = requireCustomerAuth()
   await api<void>(`/holidaze/bookings/${id}`, {

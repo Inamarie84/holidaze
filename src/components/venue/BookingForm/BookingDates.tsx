@@ -1,20 +1,25 @@
-// src/components/venue/BookingForm/BookingDates.tsx
 'use client'
 
 import { useRef } from 'react'
 import DateField from '@/components/ui/DateField'
 
 type Props = {
+  /** Selected check-in (yyyy-mm-dd) */
   dateFrom: string
+  /** Selected check-out (yyyy-mm-dd) */
   dateTo: string
+  /** Minimum selectable date (yyyy-mm-dd) */
   minDate: string
   onFromChange: (v: string) => void
   onToChange: (v: string) => void
 }
 
-type WithShowPicker = HTMLInputElement & { showPicker?: () => void }
+type InputWithPicker = HTMLInputElement & { showPicker?: () => void }
 
-/** Two date inputs (Check-in / Check-out) with native-picker open on container click. */
+/**
+ * Two date inputs (Check-in / Check-out) that also open the native picker
+ * when their containers are clicked/activated.
+ */
 export default function BookingDates({
   dateFrom,
   dateTo,
@@ -22,18 +27,14 @@ export default function BookingDates({
   onFromChange,
   onToChange,
 }: Props) {
-  const checkInRef = useRef<HTMLInputElement | null>(null)
-  const checkOutRef = useRef<HTMLInputElement | null>(null)
+  const inRef = useRef<HTMLInputElement | null>(null)
+  const outRef = useRef<HTMLInputElement | null>(null)
 
   function openPicker(ref: React.RefObject<HTMLInputElement | null>) {
-    const el = ref.current
+    const el = ref.current as InputWithPicker | null
     if (!el) return
-    const maybe = el as WithShowPicker
-    if ('showPicker' in maybe && typeof maybe.showPicker === 'function') {
-      maybe.showPicker()
-    } else {
-      el.focus()
-    }
+    if (typeof el.showPicker === 'function') el.showPicker()
+    else el.focus()
   }
 
   return (
@@ -41,24 +42,20 @@ export default function BookingDates({
       <DateField
         label="Check-in"
         id="check-in"
-        ref={checkInRef}
+        ref={inRef}
         min={minDate}
         value={dateFrom}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          onFromChange(e.target.value)
-        }
-        onOpen={() => openPicker(checkInRef)}
+        onChange={(e) => onFromChange(e.target.value)}
+        onOpen={() => openPicker(inRef)}
       />
       <DateField
         label="Check-out"
         id="check-out"
-        ref={checkOutRef}
+        ref={outRef}
         min={dateFrom || minDate}
         value={dateTo}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          onToChange(e.target.value)
-        }
-        onOpen={() => openPicker(checkOutRef)}
+        onChange={(e) => onToChange(e.target.value)}
+        onOpen={() => openPicker(outRef)}
       />
     </div>
   )

@@ -1,5 +1,8 @@
 'use client'
 
+/**
+ * Small cost breakdown for the current selection.
+ */
 export default function PriceSummary({
   price,
   nights,

@@ -1,4 +1,3 @@
-// src/components/venue/VenueCard.tsx
 'use client'
 
 import Link from 'next/link'
@@ -7,6 +6,7 @@ import type { TVenue, TVenueWithBookings } from '@/types/api'
 
 type Props = {
   venue: TVenue | TVenueWithBookings
+  /** If provided with both dates and the venue has bookings, show availability badge */
   dateFrom?: string
   dateTo?: string
 }
@@ -36,6 +36,9 @@ function isAvailable(
   return hasOverlap ? 'booked' : 'available'
 }
 
+/**
+ * Lightweight venue card used in lists/grids.
+ */
 export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
   const image = venue.media?.[0]?.url || '/images/placeholder.jpg'
   const alt = venue.media?.[0]?.alt || venue.name
@@ -48,7 +51,7 @@ export default function VenueCard({ venue, dateFrom, dateTo }: Props) {
       className={[
         'group cursor-pointer overflow-hidden rounded-lg border border-black/10 transition',
         'hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald/50',
-        'block', // ensures big tap target
+        'block',
       ].join(' ')}
     >
       <div className="relative aspect-[4/3] w-full">

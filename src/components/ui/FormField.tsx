@@ -1,8 +1,9 @@
 'use client'
+
 import { cn } from '@/lib/cls'
 
 /**
- * Accessible form field wrapper connecting label, input and error text.
+ * Accessible form field wrapper connecting label, input, and optional error text.
  */
 export function FormField({
   id,
@@ -13,7 +14,7 @@ export function FormField({
 }: {
   id: string
   label: string
-  children: React.ReactNode // your <input ... />
+  children: React.ReactNode
   error?: string | null
   className?: string
 }) {
@@ -23,7 +24,6 @@ export function FormField({
       <label htmlFor={id} className="body block">
         {label}
       </label>
-      {/* consumer must pass the same id */}
       {children}
       {error && (
         <p id={describedBy} role="alert" className="text-sm text-red-600">

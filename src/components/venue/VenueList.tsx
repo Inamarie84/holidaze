@@ -1,4 +1,3 @@
-// src/components/venue/VenueList.tsx
 import Pagination from '@/components/ui/Pagination'
 import VenueCard from '@/components/venue/VenueCard'
 import { getVenues } from '@/services/venues'
@@ -20,7 +19,10 @@ export type VenueSearchParams = {
 
 type Props = { sp: VenueSearchParams; title?: string }
 
-// --- Async implementation (not exported as default) ---
+/**
+ * Server component that loads a paginated venues list (with or without filters),
+ * renders cards, and shows a Pagination control.
+ */
 async function VenueListImpl({ sp, title = 'Explore venues' }: Props) {
   const q = sp.q?.trim() || undefined
   const dateFrom = sp.dateFrom || undefined
@@ -122,7 +124,9 @@ async function VenueListImpl({ sp, title = 'Explore venues' }: Props) {
   )
 }
 
-// Export a sync-typed wrapper so call-sites don’t trip over async JSX
+/**
+ * Sync-typed wrapper around the async server component to keep call sites tidy.
+ */
 export default function VenueList(props: Props): ReactElement {
   const SyncImpl = VenueListImpl as unknown as (p: Props) => ReactElement
   return <SyncImpl {...props} />

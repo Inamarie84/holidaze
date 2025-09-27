@@ -1,4 +1,3 @@
-// src/components/venues/VenueGridSkeleton.tsx
 'use client'
 
 import Skeleton from '@/components/ui/Skeleton'
@@ -22,10 +21,7 @@ function gridClass(cols: Cols) {
   return parts.join(' ')
 }
 
-/**
- * VenueGridSkeleton
- * Responsive grid of card skeletons matching list layout.
- */
+/** Responsive grid of card skeletons matching list layout. */
 export default function VenueGridSkeleton({
   rows = 2,
   cols = { base: 1, sm: 2, lg: 3 },

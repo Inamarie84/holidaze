@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { updateMyAvatarAndSync } from '@/services/profiles'
 import toast from 'react-hot-toast'
 import { errMsg } from '@/utils/errors'
@@ -13,15 +13,16 @@ type Props = {
 }
 
 /**
- * Accessible modal for updating avatar.
+ * Accessible modal for updating the user's avatar by URL.
+ * Validates URL scheme, previews the image, and syncs session on success.
  */
 export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
   const [url, setUrl] = useState('')
   const [alt, setAlt] = useState('')
   const [loading, setLoading] = useState(false)
   const titleId = 'avatar-editor-title'
-  const closeRef = useRef<HTMLButtonElement | null>(null)
 
+  // Reset fields whenever the modal closes
   useEffect(() => {
     if (!open) {
       setUrl('')
@@ -30,12 +31,14 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
     }
   }, [open])
 
+  // Close on Escape for accessibility
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     if (open) document.addEventListener('keydown', onEsc)
     return () => document.removeEventListener('keydown', onEsc)
   }, [open, onClose])
 
+  // Only allow http/https previews
   const previewUrl = useMemo(() => {
     if (!url) return ''
     try {
@@ -129,7 +132,6 @@ export default function AvatarEditorModal({ open, onClose, onSaved }: Props) {
 
           <div className="mt-2 flex items-center justify-end gap-2">
             <button
-              ref={closeRef}
               type="button"
               onClick={onClose}
               className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5 cursor-pointer"

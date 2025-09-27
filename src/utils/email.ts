@@ -1,3 +1,7 @@
+/**
+ * Noroff domain helpers used by auth forms/validation.
+ */
+
 /** Noroff student email domain (case-insensitive check). */
 export const NOROFF_DOMAIN = '@stud.noroff.no'
 

@@ -4,19 +4,20 @@ import * as React from 'react'
 import { SiInstagram, SiFacebook, SiMessenger, SiTiktok } from 'react-icons/si'
 import type { IconType } from 'react-icons'
 
+/**
+ * Site footer: brand link, quick links, contact, and socials.
+ */
 export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
     <footer className="border-t border-black/10 bg-sand">
-      {/* Top: brand centered */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-center">
         <Link
           href="/venues"
           aria-label="Holidaze — go to home"
           className="inline-flex items-center gap-2 hover:opacity-90"
         >
-          {/* Optional tiny logo/favicon; remove <Image> if you don’t want it */}
           <Image
             src="/icon.png"
             alt=""
@@ -29,10 +30,8 @@ export default function Footer() {
         </Link>
       </div>
 
-      {/* Middle: links + contact + socials */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6">
         <div className="grid gap-6 sm:grid-cols-3">
-          {/* Site links */}
           <nav
             aria-label="Footer navigation"
             className="text-center sm:text-left"
@@ -54,13 +53,11 @@ export default function Footer() {
                   Contact
                 </Link>
               </li>
-              {/* Prefer plain text over disabled-look links for WAI-ARIA clarity */}
               <li className="text-grey">Privacy (coming soon)</li>
               <li className="text-grey">Terms (coming soon)</li>
             </ul>
           </nav>
 
-          {/* Contact */}
           <address className="not-italic text-center">
             <div className="font-semibold mb-2">Contact</div>
             <p className="text-sm">
@@ -77,7 +74,6 @@ export default function Footer() {
             </p>
           </address>
 
-          {/* Socials */}
           <div className="text-center sm:text-right">
             <div className="font-semibold mb-2">Follow us</div>
             <div className="flex items-center justify-center sm:justify-end gap-4">
@@ -106,7 +102,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom: copyright */}
       <div className="border-t border-black/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
           <p className="body text-grey text-center">© {year} Holidaze.</p>

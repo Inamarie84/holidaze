@@ -2,6 +2,7 @@
 
 import Skeleton from '@/components/ui/Skeleton'
 
+/** Skeleton for the venue detail page layout. */
 export default function VenueDetailSkeleton() {
   return (
     <section

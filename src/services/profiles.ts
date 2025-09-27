@@ -1,4 +1,3 @@
-// src/services/profiles.ts
 import { holidazeApi } from '@/lib/holidaze'
 import { useSession } from '@/store/session'
 import type {
@@ -9,11 +8,10 @@ import type {
 } from '@/types/api'
 
 /**
- * Pulls the current token and username from the session store.
- * Throws if not authenticated.
+ * Pull token + username from the session store.
  *
- * @throws {Error} When no token or username is present in the session.
- * @returns {{ token: string; username: string }} The auth token and username.
+ * @returns The bearer token and username
+ * @throws Error if not authenticated
  */
 function requireAuth(): { token: string; username: string } {
   const { token, user } = useSession.getState()
@@ -25,13 +23,7 @@ function requireAuth(): { token: string; username: string } {
 /**
  * Get the current user's profile.
  *
- * Makes: `GET /holidaze/profiles/:username`
- *
- * @example
- * const me = await getMyProfile()
- * console.log(me.email)
- *
- * @returns {Promise<TProfile>} The authenticated user's profile.
+ * @returns The authenticated user's profile
  */
 export async function getMyProfile(): Promise<TProfile> {
   const { token, username } = requireAuth()
@@ -42,19 +34,11 @@ export async function getMyProfile(): Promise<TProfile> {
 }
 
 /**
- * Update the current user's avatar.
+ * Update the current user's avatar via the profile endpoint.
  *
- * NOTE: The Holidaze API updates avatars via the profile endpoint:
- * `PUT /holidaze/profiles/:username` with `{ avatar: { url, alt? } }`.
- * Do **not** call `/media` (that returns 404).
- *
- * @example
- * await updateMyAvatar('https://images.example.com/me.jpg', 'My avatar')
- *
- * @param {string} url - Absolute URL to the avatar image.
- * @param {string} [alt] - Optional alt text for the image.
- * @returns {Promise<TProfile>} The updated profile after the change.
- * @throws {Error} If not authenticated or the API rejects the payload.
+ * @param url - Absolute image URL
+ * @param alt - Optional alt text
+ * @returns Updated profile
  */
 export async function updateMyAvatar(
   url: string,
@@ -69,19 +53,11 @@ export async function updateMyAvatar(
 }
 
 /**
- * Update avatar and immediately sync the in-memory session so the UI
- * reflects the change (e.g., navbar/profile header) without a reload.
+ * Update avatar and immediately sync the in-memory session so the UI updates.
  *
- * Tries `session.updateAvatar(url, alt)` first if your store exposes it,
- * otherwise falls back to `session.setUser(updatedUser)`.
- *
- * @example
- * const profile = await updateMyAvatarAndSync(newUrl, 'Avatar alt')
- * console.log(profile.avatar?.url)
- *
- * @param {string} url - Absolute URL to the avatar image.
- * @param {string} [alt] - Optional alt text for the image.
- * @returns {Promise<TProfile>} The updated profile.
+ * @param url - Absolute image URL
+ * @param alt - Optional alt text
+ * @returns Updated profile
  */
 export async function updateMyAvatarAndSync(
   url: string,
@@ -115,16 +91,9 @@ export async function updateMyAvatarAndSync(
 }
 
 /**
- * Get the authenticated user's personal bookings (as a customer),
- * including the associated venue on each booking.
+ * Get the authenticated customer's bookings, including the linked venue.
  *
- * Makes: `GET /holidaze/profiles/:username/bookings?_venue=true`
- *
- * @example
- * const bookings = await getMyBookings()
- * console.log(bookings[0].venue?.name)
- *
- * @returns {Promise<TBooking[]>} List of bookings with `_venue=true`.
+ * @returns List of bookings with `_venue=true`
  */
 export async function getMyBookings(): Promise<TBooking[]> {
   const { token, username } = requireAuth()
@@ -135,15 +104,9 @@ export async function getMyBookings(): Promise<TBooking[]> {
 }
 
 /**
- * Get venues owned by the authenticated user (manager view), without bookings.
+ * Get venues owned by the authenticated user (manager view), no bookings.
  *
- * Makes: `GET /holidaze/profiles/:username/venues`
- *
- * @example
- * const venues = await getMyVenues()
- * console.log(venues.length)
- *
- * @returns {Promise<TVenue[]>} List of venues the user manages.
+ * @returns List of venues the user manages
  */
 export async function getMyVenues(): Promise<TVenue[]> {
   const { token, username } = requireAuth()
@@ -154,18 +117,10 @@ export async function getMyVenues(): Promise<TVenue[]> {
 }
 
 /**
- * Get venues owned by the authenticated user (manager view), including
- * bookings and the owner object. Results are sorted by `updated desc`.
+ * Get venues owned by the authenticated user (manager view),
+ * including bookings and owner object. Sorted by `updated desc`.
  *
- * Makes:
- * `GET /holidaze/profiles/:username/venues?_bookings=true&_owner=true&sort=updated&sortOrder=desc`
- *
- * @example
- * const venues = await getMyVenuesWithBookings()
- * const firstVenueBookings = venues[0]?.bookings ?? []
- *
- * @returns {Promise<TVenueWithBookings[]>}
- * Venues the user manages, each with `bookings` and `owner`.
+ * @returns Venues the user manages, with bookings and owner
  */
 export async function getMyVenuesWithBookings(): Promise<TVenueWithBookings[]> {
   const { token, username } = requireAuth()

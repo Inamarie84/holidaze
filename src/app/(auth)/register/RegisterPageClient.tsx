@@ -1,4 +1,3 @@
-// src/app/(auth)/register/RegisterPageClient.tsx
 'use client'
 
 import { useRouter } from 'next/navigation'
@@ -11,13 +10,19 @@ import { Input } from '@/components/ui/Input'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { isNoroffStudentEmail, NOROFF_DOMAIN } from '@/utils/email'
 
+type Role = 'customer' | 'manager'
+
+/**
+ * Client-only registration form.
+ * Requires a Noroff student email for either role.
+ */
 export default function RegisterPageClient({
   initialRole,
 }: {
-  initialRole: 'customer' | 'manager'
+  initialRole: Role
 }) {
   const router = useRouter()
-  const [role, setRole] = useState<'customer' | 'manager'>(initialRole)
+  const [role, setRole] = useState<Role>(initialRole)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,19 +30,17 @@ export default function RegisterPageClient({
 
   // Validations
   const nameError = !name.trim() ? 'Name is required.' : null
-  // 🔴 Noroff email required for both roles
   const emailError =
     email.trim() === ''
-      ? '@stud.noroff.no email address is required.'
+      ? `${NOROFF_DOMAIN} email address is required.`
       : !isNoroffStudentEmail(email)
         ? `${NOROFF_DOMAIN} address required`
         : null
   const passwordError =
     password.length < 8 ? 'Password must be at least 8 characters' : null
 
-  function switchRole(next: 'customer' | 'manager') {
+  function switchRole(next: Role) {
     setRole(next)
-    // keep the URL consistent with the role label (like your login page)
     router.replace(`/register?role=${next}`)
   }
 
@@ -62,7 +65,7 @@ export default function RegisterPageClient({
   }
 
   const roleLabel = role === 'manager' ? 'Venue Manager' : 'Customer'
-  const switchTo = role === 'manager' ? 'customer' : 'manager'
+  const switchTo: Role = role === 'manager' ? 'customer' : 'manager'
   const switchLabel = switchTo === 'manager' ? 'Venue Manager' : 'Customer'
 
   return (
@@ -74,12 +77,10 @@ export default function RegisterPageClient({
         Create account
       </h1>
 
-      {/* Mirrors the login page messaging */}
       <p className="muted mb-4">
         You’re registering as <b>{roleLabel}</b>.
       </p>
 
-      {/* Small, non-blocking role switch (instead of radios) */}
       <p className="mb-6 text-sm">
         Not what you meant?{' '}
         <button
@@ -123,7 +124,7 @@ export default function RegisterPageClient({
             placeholder={`you${NOROFF_DOMAIN}`}
             autoComplete="email"
             inputMode="email"
-            // 🔒 Require Noroff email for both roles (pattern + title + required)
+            // Require Noroff email for both roles
             pattern={`^.+${NOROFF_DOMAIN.replace('.', '\\.')}$`}
             title={`Email must end with ${NOROFF_DOMAIN}`}
             disabled={loading}

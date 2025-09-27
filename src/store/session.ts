@@ -1,10 +1,14 @@
-// src/store/session.ts
 'use client'
 
+/**
+ * Auth/session store (Zustand + persist).
+ * - Persists { token, user } to localStorage
+ * - Exposes helpers to login, logout, set user, and update avatar
+ * - Tracks `hasHydrated` so you can gate UI on hydration
+ */
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-/** LocalStorage key for persisted session blob. */
 const STORAGE_KEY = 'holidaze_session'
 
 export type SessionUser = {
@@ -48,9 +52,7 @@ export const useSession = create<SessionState>()(
       version: 1,
 
       /**
-       * Identity migration: ensure required keys exist when versions change.
-       * We only return the persisted slice (token, user, hasHydrated),
-       * then cast to SessionState to satisfy the persist typings.
+       * Defensive migration: ensure required keys exist when versions change.
        */
       migrate: async (persisted: unknown) => {
         type PersistedShape = Partial<Pick<SessionState, 'token' | 'user'>>
@@ -75,9 +77,7 @@ export const useSession = create<SessionState>()(
         return next as unknown as SessionState
       },
 
-      /**
-       * Flip hasHydrated after rehydration completes.
-       */
+      /** Flip hasHydrated after rehydration completes. */
       onRehydrateStorage: () => () => {
         useSession.setState({ hasHydrated: true })
       },

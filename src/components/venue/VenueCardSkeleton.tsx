@@ -1,12 +1,8 @@
-// src/components/venue/VenueCardSkeleton.tsx
 'use client'
 
 import Skeleton from '@/components/ui/Skeleton'
 
-/**
- * VenueCardSkeleton
- * Card-shaped skeleton used inside venue grids/lists.
- */
+/** Card-shaped skeleton used inside venue grids/lists. */
 export default function VenueCardSkeleton() {
   return (
     <article className="overflow-hidden rounded-xl border border-black/10 bg-white">

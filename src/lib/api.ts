@@ -1,32 +1,36 @@
-// src/lib/api.ts
+/**
+ * Generic API wrapper for the Noroff v2 API (and sub-routes).
+ * - Adds JSON headers, optional Bearer token and API key
+ * - Ensures a single slash between base and path
+ * - Parses response safely (JSON -> fallback text)
+ * - Throws an Error with { status, body, url, method } on non-OK
+ * - By default returns `json.data` if present; set `unwrapData: false` to get the raw JSON
+ */
 const RAW_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 const BASE = RAW_BASE.replace(/\/+$/, '')
 
-type Opts = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+export type ApiOpts = {
+  method?: HttpMethod
   body?: unknown
   token?: string | null
   useApiKey?: boolean
   /** When false, return full parsed JSON (don’t auto-unwrap .data). Defaults to true. */
   unwrapData?: boolean
+  /** Pass-through init if you ever need it; currently unused. */
   // next?: RequestInit['next']
   // cache?: RequestInit['cache']
 }
 
-type ApiError = Error & {
+export type ApiError = Error & {
   status: number
   body: unknown
   url: string
   method: string
 }
 
-/**
- * Generic API wrapper for the Noroff v2 API (and Holidaze sub-routes).
- * - Throws an Error with { status, body, url, method } on non-OK responses
- * - Parses JSON safely (falls back to text if not JSON)
- * - Returns `json.data` if present; otherwise returns the whole parsed JSON
- */
-export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
+export async function api<T>(path: string, opts: ApiOpts = {}): Promise<T> {
   if (!BASE) throw new Error('Missing NEXT_PUBLIC_API_URL')
 
   const headers = new Headers()
@@ -38,7 +42,6 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
     headers.set('X-Noroff-API-Key', process.env.NEXT_PUBLIC_API_KEY)
   }
 
-  // Ensure exactly one slash between BASE and path
   const url = `${BASE}${path.startsWith('/') ? path : `/${path}`}`
 
   const res = await fetch(url, {
@@ -49,7 +52,7 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
     // ...(opts.next ? { next: opts.next } : {}),
   })
 
-  // Read body once; try JSON, fall back to text
+  // Read once; try JSON, fall back to text
   const rawText = await res.text()
   let parsed: unknown = null
   try {
@@ -91,9 +94,8 @@ export async function api<T>(path: string, opts: Opts = {}): Promise<T> {
     throw err
   }
 
-  // No content (204) or truly empty
+  // No content
   if (res.status === 204 || (!rawText && parsed == null)) {
-    // We must return something of type T; undefined is a reasonable sentinel.
     return undefined as unknown as T
   }
 

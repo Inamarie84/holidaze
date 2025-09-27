@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 import BookingDates from './BookingDates'
@@ -8,7 +9,6 @@ import PriceSummary from './PriceSummary'
 import JustBookedPanel from './JustBookedPanel'
 import DateError from './DateError'
 import { useBookingForm } from './useBookingForm'
-import Link from 'next/link'
 import type { TBooking } from '@/types/api'
 
 type Props = {
@@ -21,6 +21,10 @@ type Props = {
   }
 }
 
+/**
+ * Booking form wrapper that guards actions by role/auth and delegates
+ * date/guest logic to `useBookingForm`.
+ */
 export default function BookingForm({ venue }: Props) {
   const router = useRouter()
   const { token, user } = useSession()
@@ -56,7 +60,6 @@ export default function BookingForm({ venue }: Props) {
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        // auth guards + redirects are handled elsewhere (login page)
         submit()
       }}
       className="mt-2 space-y-3 rounded-xl border border-black/10 bg-white p-4"

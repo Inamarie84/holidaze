@@ -1,25 +1,23 @@
-// src/components/ui/Pagination.tsx
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
 
 type Props = {
-  /** current page (1-based) */
+  /** Current page (1-based) */
   page: number
-  /** total page count */
+  /** Total page count */
   pageCount: number
-  /** flags derived from API meta or computed locally */
+  /** Flags derived from API meta or computed locally */
   hasPrev: boolean
   hasNext: boolean
-  /** region label for screen readers */
+  /** Region label for screen readers */
   label?: string
-  /** optional override for the base path (default: /venues) */
+  /** Optional override for the base path (default: /venues) */
   basePath?: string
 }
 
 /**
- * Pagination
- * Uses API meta when available; falls back to computed flags.
+ * Accessible pager that keeps/updates query params and only toggles `page`.
  */
 export default function Pagination({
   page,

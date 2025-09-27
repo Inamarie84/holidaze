@@ -10,6 +10,9 @@ type Props = {
   error: string | null
 }
 
+/**
+ * Guests field with max guard and accessible inline error.
+ */
 export default function BookingGuestsField({
   maxGuests,
   value,
@@ -22,7 +25,7 @@ export default function BookingGuestsField({
         id="guests"
         label={`Guests (max ${maxGuests})`}
         value={value}
-        onChange={(v) => onChange((v as number) || 0)}
+        onChange={(v) => onChange((v as number) || 1)}
         min={1}
         max={maxGuests}
         required

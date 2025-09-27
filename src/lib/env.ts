@@ -1,8 +1,10 @@
-//src/lib/env.ts
-
+/**
+ * Normalized environment values used by services.
+ */
 const url = process.env.NEXT_PUBLIC_API_URL
 if (!url) throw new Error('Missing NEXT_PUBLIC_API_URL in .env.local')
 
 export const ENV = {
-  API_URL: url.replace(/\/+$/, ''), // strip trailing slash
+  /** Noroff API base without trailing slash. */
+  API_URL: url.replace(/\/+$/, ''),
 } as const

@@ -1,12 +1,11 @@
-// src/lib/holidaze.ts
-import { api } from '@/lib/api'
+/**
+ * Scoped helper for the Holidaze API paths.
+ * Automatically prefixes `/holidaze`, includes API key, and will unwrap `.data`
+ * unless `unwrapData: false` is sent.
+ */
+import { api, type ApiOpts } from '@/lib/api'
 
-type Opts = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-  token?: string | null
-  body?: unknown
-  unwrapData?: boolean // NEW: pass-through
-}
+type Opts = Pick<ApiOpts, 'method' | 'token' | 'body' | 'unwrapData'>
 
 export async function holidazeApi<T>(
   path: string,
@@ -18,6 +17,6 @@ export async function holidazeApi<T>(
     token: opts.token ?? undefined,
     useApiKey: true,
     body: opts.body,
-    unwrapData: opts.unwrapData, // NEW
+    unwrapData: opts.unwrapData,
   })
 }

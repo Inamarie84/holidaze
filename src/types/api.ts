@@ -1,4 +1,7 @@
-// src/types/api.ts
+/**
+ * Noroff/Holidaze API TypeScript types used across the app.
+ * Keep shapes minimal and extend as needed.
+ */
 
 /** Public image/media used across entities. */
 export type TMedia = {

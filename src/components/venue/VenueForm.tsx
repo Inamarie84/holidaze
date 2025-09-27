@@ -1,4 +1,3 @@
-// src/components/venue/VenueForm.tsx
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -6,17 +5,19 @@ import FormError from '@/components/ui/FormError'
 import type { VenueFormValues, MediaField } from '@/types/forms'
 
 /**
- * VenueForm
- * Used for both create and edit flows.
+ * Venue form used for both create and edit flows.
+ * Emits validated `VenueFormValues` on submit.
  */
 type Props = {
   mode: 'create' | 'edit'
   initialValues?: Partial<VenueFormValues>
   submitting?: boolean
+  /** Optional override for the submit button label. */
   submitLabel?: string
   onSubmit: (values: VenueFormValues) => void
   onCancel?: () => void
-  onDelete?: () => void // only shown if provided (for Edit)
+  /** If provided, a delete button is shown (edit mode). */
+  onDelete?: () => void
 }
 
 const emptyValues: VenueFormValues = {
@@ -267,8 +268,8 @@ export default function VenueForm({
                     <button
                       type="button"
                       onClick={() => removeMediaRow(m.id)}
-                      className="w-full rounded-lg border border-black/15 px-3 py-2 hover:bg-black/5 cursor-pointer"
                       aria-label={`Remove image ${idx + 1}`}
+                      className="w-full rounded-lg border border-black/15 px-3 py-2 hover:bg-black/5 cursor-pointer"
                     >
                       ✕
                     </button>

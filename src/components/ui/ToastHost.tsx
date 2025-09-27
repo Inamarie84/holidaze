@@ -1,12 +1,15 @@
-// src/components/ui/ToastHost.tsx
 'use client'
 
 import dynamic from 'next/dynamic'
 
-// Load Toaster only on the client to avoid TS/SSR complaints
+/**
+ * React Hot Toast host; loaded client-only to avoid SSR/hydration inconsistencies.
+ */
 const Toaster = dynamic(
   () => import('react-hot-toast').then((m) => m.Toaster),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 )
 
 export default function ToastHost() {

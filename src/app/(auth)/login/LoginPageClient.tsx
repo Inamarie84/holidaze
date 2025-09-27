@@ -12,6 +12,10 @@ import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type Props = { role?: string; redirect: string }
 
+/**
+ * Client-only login form.
+ * Submits credentials, stores session via `loginUser`, and navigates to `redirect`.
+ */
 export default function LoginPageClient({ role, redirect }: Props) {
   const router = useRouter()
   const [email, setEmail] = useState('')

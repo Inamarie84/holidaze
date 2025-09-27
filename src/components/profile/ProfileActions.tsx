@@ -1,8 +1,8 @@
-// src/components/profile/ProfileActions.tsx
 'use client'
 
 import Link from 'next/link'
 
+/** Small CTA cluster on the profile page. Keep lean to avoid duplication. */
 export default function ProfileActions() {
   return (
     <div className="mt-6 flex flex-wrap gap-2">
@@ -12,7 +12,6 @@ export default function ProfileActions() {
       >
         Browse venues
       </Link>
-      {/* Keep this lean to avoid duplicating CTAs already in the navbar/profile header */}
     </div>
   )
 }

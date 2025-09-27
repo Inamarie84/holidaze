@@ -77,7 +77,6 @@ export default function MobileMenu({
       {open &&
         ReactDOM.createPortal(
           <>
-            {/* Backdrop: starts BELOW the navbar, not full-screen */}
             <div
               className="fixed inset-x-0 bottom-0 z-[180] bg-black/60 md:hidden"
               style={{ top: 'var(--nav-height, 56px)' }}
@@ -85,7 +84,6 @@ export default function MobileMenu({
               aria-hidden="true"
             />
 
-            {/* Panel: below navbar, height = content (with safe max-h), same color as navbar */}
             <div
               className="fixed inset-x-0 z-[190] md:hidden border-t border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
               style={{

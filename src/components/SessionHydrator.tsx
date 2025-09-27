@@ -1,25 +1,28 @@
-// src/components/SessionHydrator.tsx
 'use client'
 
 import { useEffect, useRef } from 'react'
 import { useSession, type SessionUser } from '@/store/session'
 import { getMyProfile } from '@/services/profiles'
 
+/**
+ * Marks the session store as hydrated ASAP on the client,
+ * then (once) syncs missing fields (avatar/role) from the API
+ * after the user is authenticated.
+ */
 export default function SessionHydrator() {
   const { token, user, hasHydrated, setUser } = useSession()
   const didSyncRef = useRef(false)
 
-  // Ensure the in-memory store is marked hydrated as soon as we’re on the client.
+  // Flip hasHydrated promptly on the client to reduce UI flicker.
   useEffect(() => {
     if (!hasHydrated) {
-      // Flip the flag proactively; persist middleware will also flip it when ready.
       useSession.setState({ hasHydrated: true })
     }
-    // intentionally not depending on hasHydrated here — we only want to run once on mount
+    // run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // After hydration + when authenticated, optionally sync avatar/role from API once.
+  // After hydration, if logged in and some fields are missing, sync them.
   useEffect(() => {
     if (!hasHydrated) return
     if (!token || !user?.name) return
@@ -27,7 +30,6 @@ export default function SessionHydrator() {
 
     const needsRole = typeof user.venueManager !== 'boolean'
     const needsAvatar = !user.avatar
-
     if (!needsRole && !needsAvatar) {
       didSyncRef.current = true
       return

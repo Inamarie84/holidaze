@@ -1,8 +1,8 @@
-//src/app/components/profile/ProfileHeaderSkeleton.tsx
-
 'use client'
+
 import Skeleton from '@/components/ui/Skeleton'
 
+/** Skeleton placeholder for the profile header. */
 export default function ProfileHeaderSkeleton() {
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

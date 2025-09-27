@@ -3,7 +3,7 @@
 import { cn } from '@/lib/cls'
 
 /**
- * Generic skeleton block. Use width/height via className.
+ * Generic skeleton block. Use width/height via `className`.
  */
 export default function Skeleton({
   className,

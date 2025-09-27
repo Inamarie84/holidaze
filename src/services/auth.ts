@@ -1,4 +1,3 @@
-// src/services/auth.ts
 import { api } from '@/lib/api'
 import { holidazeApi } from '@/lib/holidaze'
 import { useSession } from '@/store/session'
@@ -12,7 +11,15 @@ import type {
 
 /**
  * Register a new user.
- * a Noroff student email is required.
+ *
+ * @remarks
+ * UI validation can enforce domain requirements for all roles.
+ * This function currently enforces the Noroff domain only for
+ * venue managers. Adjust here if your policy changes.
+ *
+ * @param input - Registration payload (optionally includes venueManager flag)
+ * @returns Auth response echoing created user fields
+ * @throws Error if a manager registers without a {@link NOROFF_DOMAIN} email
  */
 export async function registerUser(
   input: TRegisterInput & { venueManager?: boolean }
@@ -27,9 +34,14 @@ export async function registerUser(
   })
 }
 
-/** Log a user in and persist the session. */
+/**
+ * Log in and persist the session in the Zustand store.
+ *
+ * @param input - Login credentials
+ * @returns Auth response (access token + profile fields)
+ */
 export async function loginUser(input: TLoginInput): Promise<TAuthResponse> {
-  // Add _holidaze=true so we always get venueManager/avatar/banner in response
+  // Ensure we receive Holidaze-specific fields in the response
   const res = await api<TAuthResponse>('/auth/login?_holidaze=true', {
     method: 'POST',
     body: input,
@@ -47,7 +59,14 @@ export async function loginUser(input: TLoginInput): Promise<TAuthResponse> {
   return res
 }
 
-/** Fetch a specific profile by name (needs API key; token optional for private fields). */
+/**
+ * Fetch a specific profile by name.
+ *
+ * @param name - Profile (username)
+ * @param params - Optional query flags (e.g., {_bookings: true})
+ * @param token - Optional bearer token for private fields
+ * @returns The requested profile
+ */
 export async function getProfile(
   name: string,
   params?: Record<string, string | number | boolean | undefined>,
@@ -64,13 +83,19 @@ export async function getProfile(
   })
 }
 
-/** Convenience: fetch current user's profile (requires token). */
+/**
+ * Convenience: fetch the current user's profile (requires token).
+ *
+ * @returns The authenticated user's profile
+ * @throws Error if not authenticated
+ */
 export async function getMyProfile(): Promise<TProfile> {
   const { token, user } = useSession.getState()
   if (!token || !user?.name) throw new Error('Not authenticated')
   return getProfile(user.name, undefined, token)
 }
 
+/** Clear the active session from the store. */
 export function logoutUser() {
   useSession.getState().logout()
 }

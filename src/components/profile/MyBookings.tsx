@@ -1,4 +1,3 @@
-// src/components/profile/MyBookings.tsx
 import Link from 'next/link'
 import type { TBooking } from '@/types/api'
 
@@ -6,15 +5,20 @@ type Props = {
   bookings: TBooking[]
   emptyText?: string
   tone?: 'default' | 'muted'
-  /** Show the guest (customer) who made the booking, when available (manager view) */
+  /** Show the guest (customer) who made the booking, when available (manager view). */
   showGuest?: boolean
 }
 
+/** Small helper to get a venue thumbnail URL, when present. */
 function getThumbUrl(b: TBooking): string | undefined {
   const url = b.venue?.media?.[0]?.url
   return typeof url === 'string' && url.trim() ? url : undefined
 }
 
+/**
+ * List of bookings with venue name, dates, guests, optional guest name,
+ * and a "View venue" action.
+ */
 export default function MyBookings({
   bookings,
   emptyText = 'No bookings.',
@@ -42,6 +46,7 @@ export default function MyBookings({
               {/* Thumbnail */}
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-sand">
                 {thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={thumb}
                     alt={`${venueName} thumbnail`}
@@ -56,10 +61,9 @@ export default function MyBookings({
                 )}
               </div>
 
-              {/* Content (left) */}
+              {/* Content */}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline gap-x-2">
-                  {/* Venue name stays a link */}
                   {venueId ? (
                     <Link
                       href={`/venues/${venueId}`}
@@ -76,12 +80,10 @@ export default function MyBookings({
                   </span>
                 </div>
 
-                {/* Optional guest name (manager view) */}
                 {showGuest && b.customer?.name && (
                   <div className="text-sm muted">Guest: {b.customer.name}</div>
                 )}
 
-                {/* Guests count */}
                 {typeof b.guests === 'number' && (
                   <div className="text-sm">
                     {b.guests} {b.guests === 1 ? 'guest' : 'guests'}
@@ -89,7 +91,7 @@ export default function MyBookings({
                 )}
               </div>
 
-              {/* Right action: explicit View venue button */}
+              {/* Right action */}
               <div className="shrink-0">
                 {venueId ? (
                   <Link

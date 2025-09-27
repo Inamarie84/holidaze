@@ -1,4 +1,3 @@
-// src/components/venue/AvailabilityCalendar.tsx
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -56,7 +55,7 @@ export default function AvailabilityCalendar({
   const booked = useMemo(() => buildBookedSet(bookings), [bookings])
 
   const year = month.getFullYear()
-  const mIdx = month.getMonth() // 0..11
+  const mIdx = month.getMonth()
   const firstOfMonth = new Date(year, mIdx, 1)
 
   // JS getDay(): 0=Sun..6=Sat → shift so Monday=0..Sunday=6

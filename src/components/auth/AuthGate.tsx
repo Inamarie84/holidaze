@@ -1,4 +1,3 @@
-// src/components/auth/AuthGate.tsx
 'use client'
 
 import { useEffect, useMemo, useRef } from 'react'
@@ -6,15 +5,20 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useSession } from '@/store/session'
 
 type Props = {
-  /** Where to send unauthenticated users. Defaults to /login. */
+  /** Where to send unauthenticated users. Defaults to "/login". */
   redirectTo?: string
-  /** Query key used to pass the post-login return URL. Defaults to "redirect". */
+  /** Query key that carries the return URL. Defaults to "redirect". */
   redirectParam?: string
-  /** Optional fallback shown while hydrating (e.g., a skeleton). */
+  /** Optional fallback (e.g. skeleton) during hydration. */
   fallback?: React.ReactNode
   children?: React.ReactNode
 }
 
+/**
+ * Client-only guard for protected pages. While hydrating it shows a fallback.
+ * After hydration, if there is no token, it redirects to `redirectTo`
+ * and passes the current URL in `redirectParam`.
+ */
 export default function AuthGate({
   redirectTo = '/login',
   redirectParam = 'redirect',
@@ -27,7 +31,7 @@ export default function AuthGate({
   const search = useSearchParams()
   const redirectedRef = useRef(false)
 
-  // Recreate the current URL so we can return to it after login
+  // Compose current URL to return to after login
   const currentUrl = useMemo(() => {
     const qs = search?.toString()
     return qs ? `${pathname}?${qs}` : pathname
@@ -36,20 +40,17 @@ export default function AuthGate({
   useEffect(() => {
     if (!hasHydrated) return
     if (token) return
-
-    // Prevent double replace if React re-runs effects
     if (redirectedRef.current) return
     redirectedRef.current = true
 
     const url = new URL(redirectTo, window.location.origin)
-    // Don’t stomp an existing redirect param if one is already present
     if (!url.searchParams.has(redirectParam) && currentUrl) {
       url.searchParams.set(redirectParam, currentUrl)
     }
     router.replace(url.pathname + url.search)
   }, [hasHydrated, token, redirectTo, redirectParam, currentUrl, router])
 
-  // While hydrating, show skeleton (or nothing) to avoid flicker
+  // While hydrating, show fallback to avoid flicker / mismatches
   if (!hasHydrated) {
     return (
       <>
@@ -60,9 +61,9 @@ export default function AuthGate({
     )
   }
 
-  // If we’re unauthenticated post-hydration, we’ve already triggered a redirect.
+  // If unauthenticated post-hydration, the redirect is already in-flight
   if (!token) return null
 
-  // Authenticated → render protected content
+  // Authenticated
   return <>{children}</>
 }

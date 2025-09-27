@@ -1,7 +1,10 @@
 'use client'
+
 import { cn } from '@/lib/cls'
 
-/** Consistent submit button with busy state. */
+/**
+ * Consistent submit button with busy/disabled state.
+ */
 export function SubmitButton({
   busy,
   children,

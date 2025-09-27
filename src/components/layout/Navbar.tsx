@@ -5,10 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useSession } from '@/store/session'
 import NavbarLogo from './NavbarLogo'
 import NavbarLinks from './NavbarLinks'
-import MobileMenu from './MobileMenu' // ⬅️ mobile menu
+import MobileMenu from './MobileMenu'
 import useNavHeight from './useNavHeight'
 import { RegisterModal, LoginModal } from './AuthModals'
 
+/**
+ * Global navbar with brand, desktop links, and mobile menu trigger.
+ * Handles auth modal routing and a safe logout redirect.
+ */
 export default function Navbar() {
   const { user, token, logout, hasHydrated } = useSession()
   const isManager = !!user?.venueManager
@@ -19,7 +23,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
 
   const router = useRouter()
-  const headerRef = useNavHeight() // updates --nav-height CSS var
+  const headerRef = useNavHeight()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4)
@@ -28,7 +32,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // If user finishes login/register via modals, route to profile
+  // If a modal is open and the user authenticates, close modal and go to profile.
   useEffect(() => {
     if (!token) return
     if (openLogin || openRegister) {
@@ -39,10 +43,13 @@ export default function Navbar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, openLogin, openRegister])
 
-  // Navigate away first, then clear the session (prevents /profile guard from bouncing to /login)
+  /**
+   * Navigate to a public route first, then clear the session
+   * to avoid guards pushing to the generic login page.
+   */
   function logoutAndGoHome() {
-    router.replace('/venues') // go somewhere public first
-    requestAnimationFrame(() => logout()) // then clear session
+    router.replace('/venues')
+    requestAnimationFrame(() => logout())
   }
 
   return (
@@ -53,7 +60,7 @@ export default function Navbar() {
           'sticky top-0 z-50',
           scrolled
             ? 'bg-[#1c1c1cCC] supports-[backdrop-filter]:bg-[#1c1c1cB8] backdrop-blur-md'
-            : 'bg-[#1c1c1c]    supports-[backdrop-filter]:bg-[#1c1c1cF2] backdrop-blur',
+            : 'bg-[#1c1c1c] supports-[backdrop-filter]:bg-[#1c1c1cF2] backdrop-blur',
           scrolled
             ? 'border-b border-black/10 shadow-md shadow-black/10'
             : 'border-b-0',
@@ -61,11 +68,10 @@ export default function Navbar() {
         ].join(' ')}
       >
         <nav className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* One row: logo left, desktop links right, mobile trigger right (hidden on md+) */}
           <div className="flex items-center justify-between py-2">
             <NavbarLogo />
 
-            {/* Desktop links (md and up) */}
+            {/* Desktop (md+) */}
             <div className="hidden md:block">
               <NavbarLinks
                 hasHydrated={hasHydrated}
@@ -78,7 +84,7 @@ export default function Navbar() {
               />
             </div>
 
-            {/* Mobile menu trigger + portal panel (< md) */}
+            {/* Mobile (< md) */}
             <div className="md:hidden">
               <MobileMenu
                 isAuthed={isAuthed}

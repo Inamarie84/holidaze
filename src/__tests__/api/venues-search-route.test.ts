@@ -1,5 +1,3 @@
-// src/__tests__/api/venues-search-route.test.ts
-
 // 1) Mock NextResponse.json (Next runtime APIs aren’t available in Jest)
 jest.mock('next/server', () => ({
   NextResponse: {

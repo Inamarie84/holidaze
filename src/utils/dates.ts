@@ -1,20 +1,22 @@
-// src/utils/dates.ts
+/**
+ * Date & booking helpers (pure and SSR/CSR safe).
+ */
 
-/** Parse ISO to timestamp, return 0 if invalid */
+/** Parse ISO to timestamp, return 0 if invalid. */
 export function ts(iso?: string) {
   if (!iso) return 0
   const n = Date.parse(iso)
   return Number.isNaN(n) ? 0 : n
 }
 
-/** Today at midnight (local) */
+/** Today at midnight (local). */
 export function todayMidnight() {
   const d = new Date()
   d.setHours(0, 0, 0, 0)
   return d
 }
 
-/** Split bookings into upcoming vs past based on dateTo */
+/** Split bookings into upcoming vs past based on dateTo. */
 export function partitionBookings<
   T extends { dateFrom: string; dateTo: string },
 >(list: T[]) {
@@ -30,13 +32,13 @@ export function partitionBookings<
   return { upcoming, past }
 }
 
-/** yyyy-mm-dd | Date -> Date at local midnight (no time) */
+/** yyyy-mm-dd | Date -> Date at local midnight (no time). */
 export function toDay(dateStr: string | Date) {
   const d = new Date(dateStr)
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
 }
 
-/** Overlap helper (treat end as checkout/exclusive) */
+/** Overlap helper (treat end as checkout/exclusive). */
 export function rangesOverlap(
   aStart: Date,
   aEnd: Date,
@@ -46,7 +48,7 @@ export function rangesOverlap(
   return !(aEnd <= bStart || aStart >= bEnd)
 }
 
-/** Check if a [from,to) range is available vs existing bookings */
+/** Check if a [from,to) range is available vs existing bookings. */
 export function isRangeAvailable<
   T extends { dateFrom: string | Date; dateTo: string | Date },
 >(bookings: T[] | undefined, from: Date, to: Date) {

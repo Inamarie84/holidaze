@@ -1,4 +1,10 @@
-// src/utils/errors.ts
+/**
+ * Extract a human-friendly message from:
+ * - Noroff v2 API error envelopes
+ * - Errors thrown by our `api()` helper (which attach { body, status, ... })
+ * - fetch/Response-like shapes
+ * - plain strings / generic JS errors
+ */
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null
@@ -12,10 +18,6 @@ function getNumber(v: unknown): number | undefined {
   return typeof v === 'number' ? v : undefined
 }
 
-/**
- * Extract a human-friendly message from Noroff v2 API errors, our api() throws,
- * fetch/Response shapes, or generic JS errors. Safe to use everywhere.
- */
 export function errMsg(e: unknown): string {
   // Standard JS Error
   if (e instanceof Error && e.message) return e.message
@@ -38,7 +40,9 @@ export function errMsg(e: unknown): string {
       .filter(Boolean)
       .join(', ')
     if (messages) {
-      const statusCode = getNumber(body?.statusCode)
+      const statusCode = getNumber(
+        (body as { statusCode?: number })?.statusCode
+      )
       return humanize(messages, statusCode)
     }
   }
@@ -46,17 +50,21 @@ export function errMsg(e: unknown): string {
   // Noroff { body: { message, status, statusCode } }
   if (
     body &&
-    (typeof body.message === 'string' || typeof body.status === 'string')
+    (typeof (body as { message?: unknown }).message === 'string' ||
+      typeof (body as { status?: unknown }).status === 'string')
   ) {
-    const msg = getString(body.message) ?? getString(body.status) ?? 'Error'
-    const statusCode = getNumber(body.statusCode)
+    const msg =
+      getString((body as { message?: unknown }).message) ??
+      getString((body as { status?: unknown }).status) ??
+      'Error'
+    const statusCode = getNumber((body as { statusCode?: unknown }).statusCode)
     return humanize(msg, statusCode)
   }
 
   // Flat error shapes { message, statusCode }
   if (isRecord(e)) {
     const flatMsg = getString(e.message)
-    const flatCode = getNumber(e.statusCode)
+    const flatCode = getNumber((e as { statusCode?: unknown }).statusCode)
     if (flatMsg || typeof flatCode === 'number') {
       return humanize(flatMsg ?? 'Error', flatCode)
     }
@@ -73,9 +81,7 @@ export function errMsg(e: unknown): string {
   }
 }
 
-/**
- * Map common statuses/phrases to friendlier copy.
- */
+/** Map common statuses/phrases to friendlier copy. */
 function humanize(message: string, statusCode?: number): string {
   const m = message.toLowerCase()
 

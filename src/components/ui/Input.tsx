@@ -1,8 +1,12 @@
-// src/components/ui/Input.tsx
 'use client'
+
 import { cn } from '@/lib/cls'
 
-/** Base input used across forms. */
+/**
+ * Base input used across forms.
+ * Includes `suppressHydrationWarning` to avoid visual diffs when browser extensions
+ * (e.g. password-managers) mutate attributes before React hydrates.
+ */
 export function Input({
   className,
   ...props

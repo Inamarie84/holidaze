@@ -1,4 +1,3 @@
-// src/components/ui/Modal.tsx
 'use client'
 
 import { useEffect } from 'react'
@@ -10,12 +9,14 @@ type ModalProps = {
   children: React.ReactNode
 }
 
+/**
+ * Lightweight, accessible modal (ESC to close, backdrop click to close).
+ * Renders nothing when `open` is false.
+ */
 export default function Modal({ open, onClose, title, children }: ModalProps) {
   useEffect(() => {
     if (!open) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
@@ -34,7 +35,6 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
         onClick={onClose}
         aria-hidden="true"
       />
-      {/* ⬇️ Add the explicit text color so content is dark on white */}
       <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl text-[var(--color-foreground)]">
         {title ? (
           <h2 id="modal-title" className="h3 mb-3">

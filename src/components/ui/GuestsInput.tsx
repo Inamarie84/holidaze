@@ -1,6 +1,7 @@
 'use client'
 
 type GuestsValue = number | ''
+
 type Props = {
   id: string
   label: React.ReactNode
@@ -14,6 +15,9 @@ type Props = {
   'aria-describedby'?: string
 }
 
+/**
+ * Numeric input specialized for selecting guests. Emits `''` when the field is empty.
+ */
 export default function GuestsInput({
   id,
   label,

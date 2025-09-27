@@ -1,4 +1,3 @@
-// src/components/profile/ManagerVenues.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -15,6 +14,10 @@ function updatedAt(v: TVenueWithBookings) {
   return ts(v.updated) || ts(v.created)
 }
 
+/**
+ * Grid of venues the manager owns, with quick actions.
+ * Allows optimistic delete with rollback on failure.
+ */
 export default function ManagerVenues({ venues }: Props) {
   const [items, setItems] = useState<TVenueWithBookings[]>([])
 
@@ -76,7 +79,7 @@ export default function ManagerVenues({ venues }: Props) {
             </div>
 
             <div className="p-4">
-              <h3 className="h4 mb-1">{v.name}</h3>
+              <h3 className="h3 mb-1">{v.name}</h3>
               <p className="muted text-sm">
                 {city}
                 {city && country ? ', ' : ''}

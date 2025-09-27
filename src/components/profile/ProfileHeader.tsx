@@ -1,4 +1,3 @@
-// src/components/profile/ProfileHeader.tsx
 'use client'
 
 import Image from 'next/image'
@@ -8,12 +7,18 @@ import type { TProfile } from '@/types/api'
 type Props = {
   profile: TProfile
   onEditAvatar?: () => void
-  // Optional counters so we can show role-appropriate badges
+  /** Customer: number of upcoming bookings. */
   customerUpcomingCount?: number
+  /** Manager: number of upcoming bookings across venues. */
   managerUpcomingCount?: number
+  /** Manager: number of venues owned. */
   managerVenuesCount?: number
 }
 
+/**
+ * Top section of profile: avatar, name/email, role badge, and counters.
+ * Prefers session avatar for instant UI sync post-update.
+ */
 export default function ProfileHeader({
   profile,
   onEditAvatar,
@@ -26,7 +31,6 @@ export default function ProfileHeader({
   const displayName = profile.name || sessionUser?.name || ''
   const displayEmail = profile.email || sessionUser?.email || ''
 
-  // ✅ Prefer the session avatar first (store updates immediately after PUT)
   const avatarUrl =
     sessionUser?.avatar?.url ?? profile.avatar?.url ?? '/images/placeholder.jpg'
 
@@ -42,7 +46,7 @@ export default function ProfileHeader({
       <div className="flex items-center gap-4">
         <div className="relative h-16 w-16 overflow-hidden rounded-full border border-black/10">
           <Image
-            key={avatarUrl} // 🔑 force Image to re-render when URL changes
+            key={avatarUrl}
             src={avatarUrl}
             alt={avatarAlt}
             fill
@@ -87,6 +91,7 @@ export default function ProfileHeader({
 
         {onEditAvatar && (
           <button
+            type="button"
             onClick={onEditAvatar}
             className="ml-2 inline-flex items-center bg-sand rounded-lg border border-black/15 px-3 py-1.5 text-sm hover:bg-sand/20 cursor-pointer"
           >

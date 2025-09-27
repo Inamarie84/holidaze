@@ -1,4 +1,3 @@
-// src/components/venue/BookingForm/useBookingForm.ts
 'use client'
 
 import { useMemo, useState } from 'react'
@@ -17,9 +16,14 @@ type VenueCtx = {
 type ExternalCtx = {
   token: string | null
   isManager: boolean
-  onAfterSuccess?: () => void // e.g. router.refresh()
+  /** Optional hook (e.g., router.refresh) after success */
+  onAfterSuccess?: () => void
 }
 
+/**
+ * All state/derived values for the BookingForm plus a `submit()` action.
+ * Handles auth/role guards, date validation, overlap checks, and success reset.
+ */
 export function useBookingForm(venue: VenueCtx, ext: ExternalCtx) {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -49,7 +53,6 @@ export function useBookingForm(venue: VenueCtx, ext: ExternalCtx) {
     if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()))
       return 'Invalid dates.'
     if (to <= from) return 'Check-out must be after check-in.'
-    // ✅ no `any` needed here
     if (!isRangeAvailable(venue.bookings, toDay(from), toDay(to))) {
       return 'Selected dates overlap an existing booking.'
     }

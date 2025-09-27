@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import type { TMedia } from '@/types/api'
 
 type Props = {
-  images: TMedia[] // pass empty [] if none; we’ll fall back to placeholder
+  images: TMedia[] // pass [] if none; we’ll fall back to placeholder
   venueName: string // for accessible alt/figcaption fallback
   activeIndex: number
   onChange: (index: number) => void
@@ -14,9 +14,9 @@ type Props = {
 /**
  * Accessible, semantic gallery:
  * - <figure> + <figcaption>
- * - Keyboard: arrow keys to move focus/selection on the thumbnail row
+ * - Keyboard: arrow keys / Home / End on the thumbnail row
  * - Uses a safe placeholder when no images exist
- * - No Next/Image on purpose (external URLs from API), to avoid domain config snags
+ * - Uses <img> to avoid Next/Image remote config complexity
  */
 export default function Gallery({
   images,
@@ -31,7 +31,7 @@ export default function Gallery({
 
   const listRef = useRef<HTMLDivElement>(null)
 
-  // Keep the active thumb in view on change
+  // Keep the active thumb in view
   useEffect(() => {
     const list = listRef.current
     if (!list) return

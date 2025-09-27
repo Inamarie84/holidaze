@@ -76,7 +76,7 @@ export default function NavbarLinks({
           </Link>
 
           <button
-            onClick={onLogout} // ⬅️ use the prop
+            onClick={onLogout}
             aria-label="Log out"
             className="inline-flex h-9 items-center leading-none gap-1 rounded-lg border border-white/20 px-3 text-sm hover:bg-white/10 max-[430px]:px-2 cursor-pointer"
           >

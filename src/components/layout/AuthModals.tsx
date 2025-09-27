@@ -8,7 +8,10 @@ type ModalProps = {
   onClose: () => void
 }
 
-/** Registration picker modal */
+/**
+ * Registration role picker shown in a modal.
+ * Lets users choose Customer or Venue Manager flows.
+ */
 export function RegisterModal({ open, onClose }: ModalProps) {
   return (
     <Modal open={open} onClose={onClose} title="Create account">
@@ -38,7 +41,10 @@ export function RegisterModal({ open, onClose }: ModalProps) {
   )
 }
 
-/** Login picker modal */
+/**
+ * Login role picker shown in a modal.
+ * Sends users to the correct role-specific login screen.
+ */
 export function LoginModal({ open, onClose }: ModalProps) {
   return (
     <Modal open={open} onClose={onClose} title="Log in">

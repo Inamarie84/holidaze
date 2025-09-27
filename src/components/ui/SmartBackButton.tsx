@@ -1,4 +1,3 @@
-// src/components/ui/SmartBackButton.tsx
 'use client'
 
 import { useRouter } from 'next/navigation'
@@ -6,10 +5,17 @@ import { ArrowLeft } from 'lucide-react'
 
 type Props = {
   label?: string
+  /** Fallback path if history is empty and no prevPath in sessionStorage */
   fallback?: string
   className?: string
 }
 
+/**
+ * Smarter "Back" button that tries:
+ * 1) real history back (if available)
+ * 2) previously tracked in-app route (sessionStorage)
+ * 3) a provided fallback (default: /venues)
+ */
 export default function SmartBackButton({
   label = 'Back',
   fallback = '/venues',
@@ -18,22 +24,13 @@ export default function SmartBackButton({
   const router = useRouter()
 
   function goBack() {
-    // 1) Real history back if there is at least one previous entry
     const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
-    if (idx > 0) {
-      router.back()
-      return
-    }
+    if (idx > 0) return router.back()
 
-    // 2) Our tracked previous in-app route
     const prev = sessionStorage.getItem('prevPath')
     const here = `${location.pathname}${location.search}`
-    if (prev && prev !== here) {
-      router.push(prev)
-      return
-    }
+    if (prev && prev !== here) return router.push(prev)
 
-    // 3) Fallback
     router.push(fallback)
   }
 
@@ -47,7 +44,7 @@ export default function SmartBackButton({
         className,
       ].join(' ')}
     >
-      <ArrowLeft size={18} aria-hidden="true" />
+      <ArrowLeft size={18} aria-hidden />
       <span className="body">{label}</span>
     </button>
   )

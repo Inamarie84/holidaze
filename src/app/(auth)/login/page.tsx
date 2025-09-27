@@ -1,4 +1,3 @@
-// src/app/(auth)/login/page.tsx
 import type { Metadata } from 'next'
 import LoginPageClient from './LoginPageClient'
 
@@ -8,15 +7,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | undefined>>
-}) {
-  const sp = await searchParams
-  const role = sp?.role
+type PageProps = {
+  searchParams: Record<string, string | undefined>
+}
+
+/**
+ * Login page (server entry).
+ * Reads `role` and `redirect` from the URL and passes to the client form.
+ */
+export default function LoginPage({ searchParams }: PageProps) {
+  const role = searchParams?.role
   const redirect =
-    typeof sp?.redirect === 'string' && sp.redirect ? sp.redirect : '/profile'
+    typeof searchParams?.redirect === 'string' && searchParams.redirect
+      ? searchParams.redirect
+      : '/profile'
 
   return <LoginPageClient role={role} redirect={redirect} />
 }
