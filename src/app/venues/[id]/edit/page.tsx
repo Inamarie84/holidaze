@@ -1,3 +1,4 @@
+// src/app/venues/[id]/edit/page.tsx
 import type { Metadata } from 'next'
 import EditVenuePageClient from './EditVenuePageClient'
 import { ENV } from '@/lib/env'
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
   description: 'Update your venue details',
 }
 
+// Keep this if you want it dynamic
 export const dynamic = 'force-dynamic'
 
 async function fetchVenueServer(id: string) {
@@ -21,13 +23,13 @@ async function fetchVenueServer(id: string) {
   return 'data' in json ? json.data : json
 }
 
-/** Server shell for the Edit Venue page. */
-export default async function EditVenuePage({
-  params,
-}: {
-  params: { id: string }
-}) {
-  const { id } = params
+// ✅ Important: use a concrete prop type and a const component
+type PageProps = { params: Promise<{ id: string }> }
+
+const Page = async ({ params }: PageProps) => {
+  const { id } = await params
   const initialVenue = await fetchVenueServer(id) // may be null
   return <EditVenuePageClient id={id} initialVenue={initialVenue} />
 }
+
+export default Page
