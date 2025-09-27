@@ -4,6 +4,9 @@ import type { TVenue } from '@/types/api'
 
 type Props = { params: Promise<{ id: string }> }
 
+const truncate = (s: string, n: number) =>
+  s.length > n ? `${s.slice(0, n)}…` : s
+
 export default async function Head({ params }: Props) {
   const { id } = await params
 
@@ -16,14 +19,11 @@ export default async function Head({ params }: Props) {
     const v = await holidazeApi<TVenue>(`/venues/${id}`, { method: 'GET' })
     if (v) {
       title = v.name || title
-      description = (v.description || description).slice(0, 150)
+      description = v.description ? truncate(v.description, 150) : description
       imageUrl = v.media?.[0]?.url
     }
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') {
-      // dev-only: intentionally not logging to console for submission
-      void err // prevent unused variable linting
-    }
+  } catch {
+    // keep defaults; no logs for submission
   }
 
   return (
@@ -39,6 +39,7 @@ export default async function Head({ params }: Props) {
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+      {/* Favicon is provided in root layout via `icons`; don’t duplicate here */}
     </>
   )
 }

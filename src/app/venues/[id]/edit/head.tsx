@@ -1,4 +1,4 @@
-// src/app/venues/[id]/edit/head.tsx
+// app/venues/[id]/edit/head.tsx
 export default function Head() {
   const title = 'Edit venue • Holidaze'
   const description = 'Update your venue details'
@@ -14,7 +14,7 @@ export default function Head() {
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      {/* Favicon is already provided by root layout via `icons`, so we do NOT add it here */}
+      {/* Favicon is provided by root layout; don’t duplicate here */}
     </>
   )
 }
