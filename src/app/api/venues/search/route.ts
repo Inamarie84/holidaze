@@ -1,22 +1,24 @@
-// src/app/api/venues/search/route.ts
 import { NextResponse } from 'next/server'
 import { ENV } from '@/lib/env'
 import type { TVenueWithBookings, TListResponse } from '@/types/api'
 
-/** yyyy-mm-dd -> Date at local midnight */
+/** yyyy-mm-dd -> Date at local midnight (prevents TZ off-by-one). */
 function toDay(dateStr: string | Date) {
   const d = new Date(dateStr)
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
 }
+
+/** Overlap check treating end as checkout (exclusive). */
 function rangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) {
-  // treat end as checkout (exclusive)
   return !(aEnd <= bStart || aStart >= bEnd)
 }
 
 /**
  * GET /api/venues/search
- * Query params: q, dateFrom, dateTo, guests, page=1, limit=12
- * Returns { data, meta } shaped like Noroff's list response.
+ * Query: q, dateFrom, dateTo, guests, page=1, limit=12
+ * - Pulls from Noroff upstream (search or list) with `_bookings=true`
+ * - Applies local availability + guests filtering
+ * - Returns a Noroff-like { data, meta } envelope
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -32,7 +34,6 @@ export async function GET(req: Request) {
     Math.min(100, Number(searchParams.get('limit') || '12'))
   )
 
-  // Use Noroff's search endpoint when q is present; otherwise list recent venues.
   const upstreamPath = q
     ? `/holidaze/venues/search?q=${encodeURIComponent(q)}&_bookings=true&limit=100`
     : `/holidaze/venues?_bookings=true&sort=created&sortOrder=desc&limit=100`
@@ -55,7 +56,6 @@ export async function GET(req: Request) {
     )
   }
 
-  // IMPORTANT: this keeps { data, meta } intact
   const upstream = (await res.json()) as TListResponse<TVenueWithBookings>
   const venues = upstream.data ?? []
 

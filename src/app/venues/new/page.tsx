@@ -1,15 +1,19 @@
-// src/venues/new/page.tsx
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import VenueForm from '@/components/venue/VenueForm'
-import type { VenueFormValues } from '@/types/forms'
-import { createVenue } from '@/services/venues'
 import { useSession } from '@/store/session'
+import { createVenue } from '@/services/venues'
 import { errMsg } from '@/utils/errors'
+import type { VenueFormValues } from '@/types/forms'
 
+/**
+ * Create Venue page (client):
+ * - Requires authenticated venue manager
+ * - Submits to /venues
+ */
 export default function CreateVenuePage() {
   const router = useRouter()
   const { token, user, hasHydrated } = useSession()
@@ -18,17 +22,13 @@ export default function CreateVenuePage() {
   const isManager = !!user?.venueManager
   const canRender = useMemo(() => isAuthed && isManager, [isAuthed, isManager])
 
-  // Guard: after hydration only
+  // Guard after hydration only
   useEffect(() => {
     if (!hasHydrated) return
-
-    // If not logged in, go to home (prevents logout → login redirect loop)
     if (!isAuthed) {
       router.replace('/venues')
       return
     }
-
-    // Logged in but not a manager
     if (!isManager) {
       toast.error('Only venue managers can create venues.')
       router.replace('/profile')
@@ -75,7 +75,6 @@ export default function CreateVenuePage() {
     }
   }
 
-  // While the guard decides (or user isn’t allowed), show a neutral state
   if (!canRender) {
     return (
       <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">

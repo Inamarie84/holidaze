@@ -1,19 +1,24 @@
-// src/app/venues/[id]/edit/EditVenuePageClient.tsx
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import VenueForm from '@/components/venue/VenueForm'
-import type { VenueFormValues } from '@/types/forms'
-import { getVenueById, updateVenue, deleteVenue } from '@/services/venues'
-import { useSession } from '@/store/session'
-import { errMsg } from '@/utils/errors'
-import type { TVenueWithBookings } from '@/types/api'
 import VenueDetailSkeleton from '@/components/venue/VenueDetailSkeleton'
+import { useSession } from '@/store/session'
+import { getVenueById, updateVenue, deleteVenue } from '@/services/venues'
+import { errMsg } from '@/utils/errors'
+import type { VenueFormValues } from '@/types/forms'
+import type { TVenueWithBookings } from '@/types/api'
 
 type VenueWithOwner = TVenueWithBookings & { owner?: { name?: string } }
 
+/**
+ * Client logic for editing an existing venue:
+ * - Loads venue with owner info
+ * - Enforces manager + owner permissions
+ * - Submits updates or delete
+ */
 export default function EditVenuePageClient({
   id,
   initialVenue,
@@ -36,13 +41,14 @@ export default function EditVenuePageClient({
   const [deleting, setDeleting] = useState(false)
 
   const mounted = useRef(true)
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       mounted.current = false
-    }
-  }, [])
+    },
+    []
+  )
 
-  // Fetch the venue (independent of auth) — avoids hydration races
+  // Fetch venue (independent of auth) — avoids hydration races
   useEffect(() => {
     const ac = new AbortController()
     ;(async () => {
@@ -70,15 +76,10 @@ export default function EditVenuePageClient({
   // Permission checks — only after hydration knows who you are
   useEffect(() => {
     if (!hasHydrated) return
-
-    // If NOT logged in and you land here (e.g., you just logged out on this page),
-    // send home instead of login.
     if (!isAuthed) {
       router.replace('/venues')
       return
     }
-
-    // Logged in but not a manager: push to profile
     if (!isManager) {
       toast.error('Only venue managers can edit venues.')
       router.replace('/profile')
@@ -129,8 +130,7 @@ export default function EditVenuePageClient({
 
   async function handleDelete() {
     if (!venue) return
-    const ok = confirm('Delete this venue? This cannot be undone.')
-    if (!ok) return
+    if (!confirm('Delete this venue? This cannot be undone.')) return
     try {
       setDeleting(true)
       await deleteVenue(venue.id)
@@ -143,7 +143,7 @@ export default function EditVenuePageClient({
     }
   }
 
-  // ===== Render states =====
+  // Render states
   if (loading) return <VenueDetailSkeleton />
 
   if (loadError || !venue) {

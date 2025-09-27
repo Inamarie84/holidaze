@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { useSession } from '@/store/session'
 import { getVenueById, deleteVenue } from '@/services/venues'
 import type { TVenueWithBookings } from '@/types/api'
-import toast from 'react-hot-toast'
 import AvailabilityCalendar from '@/components/venue/AvailabilityCalendar'
 import SmartBackButton from '@/components/ui/SmartBackButton'
 import VenueDetailSkeleton from '@/components/venue/VenueDetailSkeleton'
@@ -23,6 +23,11 @@ function Chip({ children }: { children: React.ReactNode }) {
   )
 }
 
+/**
+ * Client venue detail page:
+ * - Loads venue with bookings/owner
+ * - Shows booking form (customers) and edit/delete (owner managers)
+ */
 export default function VenueDetailsPageClient({ id }: { id: string }) {
   const router = useRouter()
   const { user } = useSession()

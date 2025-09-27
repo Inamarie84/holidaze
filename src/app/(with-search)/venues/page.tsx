@@ -1,23 +1,32 @@
-import VenueList, { VenueSearchParams } from '@/components/venue/VenueList'
+import type { Metadata } from 'next'
+import VenueList, { type VenueSearchParams } from '@/components/venue/VenueList'
 
-export const metadata = { title: 'Venues', description: 'Browse all venues' }
+export const metadata: Metadata = {
+  title: 'Venues',
+  description: 'Browse all venues',
+}
+
+// Force dynamic so search results always reflect latest filters/data
 export const dynamic = 'force-dynamic'
 
-export default async function VenuesPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}) {
-  const spIn = await searchParams
-  const toStr = (v: unknown) => (typeof v === 'string' ? v : undefined)
+type PageProps = {
+  searchParams: Record<string, string | string[] | undefined>
+}
+
+/**
+ * Venues index with server-side param normalization.
+ */
+export default function VenuesPage({ searchParams }: PageProps) {
+  const first = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v
 
   const sp: VenueSearchParams = {
-    q: toStr(spIn.q),
-    dateFrom: toStr(spIn.dateFrom),
-    dateTo: toStr(spIn.dateTo),
-    guests: toStr(spIn.guests),
-    page: toStr(spIn.page) ?? '1',
-    limit: toStr(spIn.limit) ?? '12',
+    q: first(searchParams.q),
+    dateFrom: first(searchParams.dateFrom),
+    dateTo: first(searchParams.dateTo),
+    guests: first(searchParams.guests),
+    page: first(searchParams.page) ?? '1',
+    limit: first(searchParams.limit) ?? '12',
   }
 
   return (

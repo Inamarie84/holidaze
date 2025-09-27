@@ -1,5 +1,6 @@
-// src/app/venues/[id]/edit/page.tsx  (SERVER)
 import type { Metadata } from 'next'
+import EditVenuePageClient from './EditVenuePageClient'
+import { ENV } from '@/lib/env'
 
 export const metadata: Metadata = {
   title: 'Edit venue • Holidaze',
@@ -7,9 +8,6 @@ export const metadata: Metadata = {
 }
 
 export const dynamic = 'force-dynamic'
-
-import EditVenuePageClient from './EditVenuePageClient'
-import { ENV } from '@/lib/env'
 
 async function fetchVenueServer(id: string) {
   const url = `${ENV.API_URL}/holidaze/venues/${encodeURIComponent(id)}?_owner=true`
@@ -23,12 +21,13 @@ async function fetchVenueServer(id: string) {
   return 'data' in json ? json.data : json
 }
 
+/** Server shell for the Edit Venue page. */
 export default async function EditVenuePage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }) {
-  const { id } = await params
+  const { id } = params
   const initialVenue = await fetchVenueServer(id) // may be null
   return <EditVenuePageClient id={id} initialVenue={initialVenue} />
 }

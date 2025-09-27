@@ -1,5 +1,9 @@
 import VenueGridSkeleton from '@/components/venue/VenueGridSkeleton'
 
+/**
+ * Route-level loading UI for /venues.
+ * Mirrors the grid layout to avoid layout shift.
+ */
 export default function Loading() {
   return (
     <section

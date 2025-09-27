@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, Suspense } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import AuthGate from '@/components/auth/AuthGate'
 import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileHeaderSkeleton from '@/components/profile/ProfileHeaderSkeleton'
@@ -11,16 +11,22 @@ import MyBookings from '@/components/profile/MyBookings'
 import ProfileActions from '@/components/profile/ProfileActions'
 import AvatarEditorModal from '@/components/profile/AvatarEditorModal'
 import Skeleton from '@/components/ui/Skeleton'
-import type { TProfile, TBooking, TVenueWithBookings } from '@/types/api'
+import TitleSync from '@/components/TitleSync'
+import { useSession } from '@/store/session'
+import { partitionBookings } from '@/utils/dates'
 import {
   getMyProfile,
   getMyBookings,
   getMyVenuesWithBookings,
 } from '@/services/profiles'
-import { partitionBookings } from '@/utils/dates'
-import { useSession } from '@/store/session'
-import TitleSync from '@/components/TitleSync'
+import type { TProfile, TBooking, TVenueWithBookings } from '@/types/api'
 
+/**
+ * Client-side profile controller:
+ * - Auth-gated
+ * - Loads either user bookings (customer) or venues + bookings (manager)
+ * - Handles avatar update modal
+ */
 export default function ProfilePageClient() {
   const { token, user, hasHydrated } = useSession()
 
@@ -52,7 +58,8 @@ export default function ProfilePageClient() {
     }
 
     let cancelled = false
-    async function load() {
+
+    ;(async () => {
       try {
         setLoading(true)
         setError(null)
@@ -74,16 +81,13 @@ export default function ProfilePageClient() {
         }
       } catch (err) {
         if (!mounted.current) return
-        const msg =
-          err instanceof Error ? err.message : 'Failed to load profile'
-        setError(msg)
+        setError(err instanceof Error ? err.message : 'Failed to load profile')
       } finally {
         if (!mounted.current) return
         setLoading(false)
       }
-    }
+    })()
 
-    load()
     return () => {
       cancelled = true
     }
@@ -205,7 +209,7 @@ export default function ProfilePageClient() {
                     <MyBookings
                       bookings={managerUpcoming}
                       emptyText="No upcoming bookings for your venues yet."
-                      showGuest // <-- show guest name if available
+                      showGuest
                     />
                   </section>
                 </>

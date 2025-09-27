@@ -1,5 +1,6 @@
-// src/app/layout.tsx
-
+import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
+import { Suspense } from 'react'
 import { Inter, DM_Serif_Display } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
@@ -8,7 +9,6 @@ import SessionHydrator from '@/components/SessionHydrator'
 import ToastHost from '@/components/ui/ToastHost'
 import BackToTop from '@/components/ui/BackToTop'
 import RouteHistoryTracker from '@/components/RouteHistoryTracker'
-import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const dmSerif = DM_Serif_Display({
@@ -17,7 +17,7 @@ const dmSerif = DM_Serif_Display({
   variable: '--font-serif',
 })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     default: 'Holidaze',
     template: '%s • Holidaze',
@@ -26,21 +26,22 @@ export const metadata = {
   icons: { icon: '/icon.png' },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+/**
+ * Root layout: global providers, nav/footer, and app chrome.
+ */
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${dmSerif.variable} antialiased flex min-h-screen flex-col`}
       >
-        {/* Make the session available to all client components immediately */}
+        {/* Hydrate session store ASAP for client components */}
         <SessionHydrator />
 
         <ToastHost />
         <Navbar />
+
+        {/* Track route history for “smart back” behavior */}
         <Suspense fallback={null}>
           <RouteHistoryTracker />
         </Suspense>

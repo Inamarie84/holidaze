@@ -1,4 +1,3 @@
-// src/app/profile/page.tsx
 import type { Metadata } from 'next'
 import ProfilePageClient from './ProfilePageClient'
 
@@ -9,6 +8,7 @@ export const metadata: Metadata = {
   description: 'Your account',
 }
 
+/** Profile page shell that renders the client logic. */
 export default function Page() {
   return <ProfilePageClient />
 }

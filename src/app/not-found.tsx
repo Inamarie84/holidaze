@@ -1,7 +1,9 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata = { title: 'Page not found — Holidaze' }
+export const metadata: Metadata = { title: 'Page not found — Holidaze' }
 
+/** App-wide 404 page. */
 export default function NotFound() {
   return (
     <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
