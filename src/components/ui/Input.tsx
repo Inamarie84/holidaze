@@ -1,3 +1,4 @@
+// src/components/ui/Input.tsx
 'use client'
 import { cn } from '@/lib/cls'
 
@@ -8,6 +9,7 @@ export function Input({
 }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
+      suppressHydrationWarning
       {...props}
       className={cn(
         'w-full rounded-lg border border-black/15 px-3 py-2',

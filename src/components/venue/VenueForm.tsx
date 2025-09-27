@@ -47,6 +47,11 @@ export default function VenueForm({
   onCancel,
   onDelete,
 }: Props) {
+  // Labels (use mode for defaults, allow override via submitLabel)
+  const defaultLabel = mode === 'create' ? 'Create venue' : 'Save changes'
+  const busyLabel = mode === 'create' ? 'Creating…' : 'Saving…'
+  const primaryLabel = submitLabel ?? defaultLabel
+
   // merge defaults + initialValues (deep-ish)
   const start = useMemo(() => {
     const v = { ...emptyValues, ...initialValues }
@@ -219,47 +224,59 @@ export default function VenueForm({
           <button
             type="button"
             onClick={addMediaRow}
-            className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5"
+            className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5 cursor-pointer"
           >
             Add image
           </button>
         </div>
 
         <div className="space-y-3">
-          {media.map((m, idx) => (
-            <div key={m.id} className="grid gap-3 sm:grid-cols-12">
-              <div className="sm:col-span-7">
-                <label className="body mb-1 block">{`Image URL ${idx + 1}`}</label>
-                <input
-                  type="url"
-                  value={m.url}
-                  onChange={(e) => updateMediaRow(m.id, 'url', e.target.value)}
-                  placeholder="https://…"
-                  className="w-full rounded-lg border border-black/15 px-3 py-2"
-                />
+          {media.map((m, idx) => {
+            // Must always have ≥1 image; first image (idx 0) can’t be removed.
+            const canRemove = media.length > 1 && idx > 0
+
+            return (
+              <div key={m.id} className="grid gap-3 sm:grid-cols-12">
+                <div className="sm:col-span-7">
+                  <label className="body mb-1 block">{`Image URL ${idx + 1}`}</label>
+                  <input
+                    type="url"
+                    value={m.url}
+                    onChange={(e) =>
+                      updateMediaRow(m.id, 'url', e.target.value)
+                    }
+                    placeholder="https://…"
+                    className="w-full rounded-lg border border-black/15 px-3 py-2"
+                  />
+                </div>
+
+                <div className="sm:col-span-4">
+                  <label className="body mb-1 block">Alt text</label>
+                  <input
+                    value={m.alt}
+                    onChange={(e) =>
+                      updateMediaRow(m.id, 'alt', e.target.value)
+                    }
+                    className="w-full rounded-lg border border-black/15 px-3 py-2"
+                    placeholder="Front of the cabin at sunset"
+                  />
+                </div>
+
+                {canRemove && (
+                  <div className="sm:col-span-1 flex items-end">
+                    <button
+                      type="button"
+                      onClick={() => removeMediaRow(m.id)}
+                      className="w-full rounded-lg border border-black/15 px-3 py-2 hover:bg-black/5 cursor-pointer"
+                      aria-label={`Remove image ${idx + 1}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="sm:col-span-4">
-                <label className="body mb-1 block">Alt text</label>
-                <input
-                  value={m.alt}
-                  onChange={(e) => updateMediaRow(m.id, 'alt', e.target.value)}
-                  className="w-full rounded-lg border border-black/15 px-3 py-2"
-                  placeholder="Front of the cabin at sunset"
-                />
-              </div>
-              <div className="sm:col-span-1 flex items-end">
-                <button
-                  type="button"
-                  onClick={() => removeMediaRow(m.id)}
-                  className="w-full rounded-lg border border-black/15 px-3 py-2 hover:bg-black/5 disabled:opacity-50"
-                  aria-label={`Remove image ${idx + 1}`}
-                  disabled={media.length === 1}
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
@@ -332,37 +349,34 @@ export default function VenueForm({
       </section>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-3">
+      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center rounded-lg border border-black/15 px-4 py-2 hover:bg-black/5"
+            className="inline-flex items-center justify-center rounded-lg border border-black/15 px-4 py-2 text-sm hover:bg-black/5 cursor-pointer"
           >
             Cancel
           </button>
         )}
-        {onDelete && mode === 'edit' && (
+
+        {onDelete && (
           <button
             type="button"
             onClick={onDelete}
-            className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-white hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:opacity-90 cursor-pointer"
           >
             Delete
           </button>
         )}
+
         <button
           type="submit"
-          disabled={submitting || hasBlockingErrors}
+          disabled={submitting}
           aria-busy={submitting}
-          className="inline-flex items-center rounded-lg bg-emerald px-5 py-2.5 text-white hover:opacity-90 disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-lg bg-emerald px-4 py-2 text-sm text-white hover:opacity-90 disabled:opacity-60 shrink-0 whitespace-nowrap cursor-pointer"
         >
-          {submitting
-            ? mode === 'create'
-              ? 'Creating…'
-              : 'Saving…'
-            : (submitLabel ??
-              (mode === 'create' ? 'Create Venue' : 'Save changes'))}
+          {submitting ? busyLabel : primaryLabel}
         </button>
       </div>
     </form>

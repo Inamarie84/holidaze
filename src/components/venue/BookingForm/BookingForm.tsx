@@ -8,7 +8,7 @@ import PriceSummary from './PriceSummary'
 import JustBookedPanel from './JustBookedPanel'
 import DateError from './DateError'
 import { useBookingForm } from './useBookingForm'
-
+import Link from 'next/link'
 import type { TBooking } from '@/types/api'
 
 type Props = {
@@ -65,12 +65,12 @@ export default function BookingForm({ venue }: Props) {
       {!token && (
         <div className="mb-2 flex items-center justify-between gap-3 rounded-lg border border-emerald/30 bg-sand px-3 py-2">
           <p className="body text-sm">Please log in to book this venue.</p>
-          <a
+          <Link
             href="/login?role=customer"
-            className="inline-flex items-center rounded-md bg-emerald px-3 py-1.5 text-white hover:opacity-90"
+            className="inline-flex items-center rounded-md bg-emerald px-3 py-1.5 text-sm text-white hover:opacity-90 shrink-0 whitespace-nowrap"
           >
             Log in
-          </a>
+          </Link>
         </div>
       )}
 

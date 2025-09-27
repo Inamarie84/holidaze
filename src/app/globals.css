@@ -137,7 +137,7 @@ h3 {
   }
 
   .h3 {
-    @apply font-semibold;
+    @apply font-serif font-semibold;
     font-size: var(--text-h3);
     line-height: var(--leading-h3);
     color: var(--color-brand);
