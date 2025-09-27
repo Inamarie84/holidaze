@@ -110,30 +110,30 @@ export default function ProfilePageClient() {
   )
 
   const SkeletonPage = (
-    <section
-      aria-labelledby="profile-loading-heading"
-      className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8"
-    >
-      <h2 id="profile-loading-heading" className="sr-only">
-        Loading profile
-      </h2>
+    <section className="pt-8 md:pt-12 pb-20 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <h2 className="sr-only">Loading profile</h2>
+
       <ProfileHeaderSkeleton />
-      <section aria-hidden className="mt-6">
+
+      {/* Skeleton actions row: presentational only */}
+      <div aria-hidden className="mt-6">
         <div className="flex flex-wrap gap-3">
           <Skeleton className="h-10 w-32" />
           <Skeleton className="h-10 w-40" />
           <Skeleton className="h-10 w-28" />
         </div>
-      </section>
+      </div>
+
       {likelyManager && (
-        <section aria-hidden className="mt-10">
+        <div aria-hidden className="mt-10">
           <ManagerVenuesSkeleton />
-        </section>
+        </div>
       )}
-      <section aria-hidden className="mt-10">
+
+      <div aria-hidden className="mt-10">
         <h2 className="h2 mb-4">Upcoming Bookings</h2>
         <BookingListSkeleton />
-      </section>
+      </div>
     </section>
   )
 
@@ -157,22 +157,26 @@ export default function ProfilePageClient() {
           {loading && (
             <>
               <ProfileHeaderSkeleton />
-              <section aria-hidden className="mt-6">
+
+              {/* Skeleton actions row: presentational only */}
+              <div aria-hidden className="mt-6">
                 <div className="flex flex-wrap gap-3">
                   <Skeleton className="h-10 w-32" />
                   <Skeleton className="h-10 w-40" />
                   <Skeleton className="h-10 w-28" />
                 </div>
-              </section>
+              </div>
+
               {likelyManager && (
-                <section aria-hidden className="mt-10">
+                <div aria-hidden className="mt-10">
                   <ManagerVenuesSkeleton />
-                </section>
+                </div>
               )}
-              <section aria-hidden className="mt-10">
+
+              <div aria-hidden className="mt-10">
                 <h2 className="h2 mb-4">Upcoming Bookings</h2>
                 <BookingListSkeleton />
-              </section>
+              </div>
             </>
           )}
 
