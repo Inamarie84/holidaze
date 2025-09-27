@@ -6,12 +6,10 @@ import VenueGridSkeleton from '@/components/venue/VenueGridSkeleton'
  */
 export default function Loading() {
   return (
-    <section
-      aria-label="Loading venues"
-      aria-busy="true"
-      aria-live="polite"
-      className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8"
-    >
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <h2 id="venues-loading" className="sr-only">
+        Loading venues
+      </h2>
       <VenueGridSkeleton rows={2} cols={{ base: 1, sm: 2, lg: 3 }} />
     </section>
   )
