@@ -1,18 +1,20 @@
-type Props = { params: Promise<{ id: string }> }
-
-export default async function Head(_props: Props) {
-  // Static title/description for edit page (no need to fetch)
+// src/app/venues/[id]/edit/head.tsx
+export default function Head() {
   const title = 'Edit venue • Holidaze'
   const description = 'Update your venue details'
+
   return (
     <>
       <title>{title}</title>
       <meta name="description" content={description} />
+      {/* Open Graph */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
+      {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      {/* Favicon is already provided by root layout via `icons`, so we do NOT add it here */}
     </>
   )
 }
