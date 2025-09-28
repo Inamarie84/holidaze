@@ -12,15 +12,16 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-black/10 bg-sand">
+      {/* Brand */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 text-center">
         <Link
-          href="/venues"
-          aria-label="Holidaze — go to home"
+          href="/"
+          aria-label="Holidaze — Home"
           className="inline-flex items-center gap-2 hover:opacity-90"
         >
           <Image
             src="/icon.png"
-            alt=""
+            alt="" // decorative
             width={28}
             height={28}
             className="rounded"
@@ -30,6 +31,7 @@ export default function Footer() {
         </Link>
       </div>
 
+      {/* Nav + Contact + Socials */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6">
         <div className="grid gap-6 sm:grid-cols-3">
           <nav
@@ -76,32 +78,41 @@ export default function Footer() {
 
           <div className="text-center sm:text-right">
             <div className="font-semibold mb-2">Follow us</div>
-            <div className="flex items-center justify-center sm:justify-end gap-4">
-              <BrandIconLink
-                href="https://instagram.com/yourpage"
-                label="Instagram"
-                as={SiInstagram}
-              />
-              <BrandIconLink
-                href="https://facebook.com/yourpage"
-                label="Facebook"
-                as={SiFacebook}
-              />
-              <BrandIconLink
-                href="https://m.me/yourpage"
-                label="Messenger"
-                as={SiMessenger}
-              />
-              <BrandIconLink
-                href="https://tiktok.com/@yourpage"
-                label="TikTok"
-                as={SiTiktok}
-              />
-            </div>
+            <ul className="flex items-center justify-center sm:justify-end gap-4">
+              <li>
+                <BrandIconLink
+                  href="https://instagram.com/yourpage"
+                  label="Instagram"
+                  as={SiInstagram}
+                />
+              </li>
+              <li>
+                <BrandIconLink
+                  href="https://facebook.com/yourpage"
+                  label="Facebook"
+                  as={SiFacebook}
+                />
+              </li>
+              <li>
+                <BrandIconLink
+                  href="https://m.me/yourpage"
+                  label="Messenger"
+                  as={SiMessenger}
+                />
+              </li>
+              <li>
+                <BrandIconLink
+                  href="https://tiktok.com/@yourpage"
+                  label="TikTok"
+                  as={SiTiktok}
+                />
+              </li>
+            </ul>
           </div>
         </div>
       </div>
 
+      {/* Copyright */}
       <div className="border-t border-black/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
           <p className="body muted text-center">© {year} Holidaze.</p>

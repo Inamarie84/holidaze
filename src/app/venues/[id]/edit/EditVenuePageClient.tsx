@@ -203,7 +203,7 @@ export default function EditVenuePageClient({
           type="button"
           onClick={handleDelete}
           disabled={deleting}
-          className="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-white hover:opacity-90 disabled:opacity-60 cursor-pointer"
+          className="inline-flex items-center rounded-lg bg-terracotta px-4 py-2 text-brand hover:opacity-90 disabled:opacity-60 cursor-pointer"
         >
           {deleting ? 'Deleting…' : 'Delete'}
         </button>

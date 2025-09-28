@@ -145,6 +145,7 @@ export default function VenueForm({
           </label>
           <input
             id="name"
+            type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -236,11 +237,18 @@ export default function VenueForm({
             // Must always have ≥1 image; first image (idx 0) can’t be removed.
             const canRemove = media.length > 1 && idx > 0
 
+            // Stable, unique ids for label ↔ control association
+            const urlId = `media-${m.id}-url`
+            const altId = `media-${m.id}-alt`
+
             return (
               <div key={m.id} className="grid gap-3 sm:grid-cols-12">
                 <div className="sm:col-span-7">
-                  <label className="body mb-1 block">{`Image URL ${idx + 1}`}</label>
+                  <label htmlFor={urlId} className="body mb-1 block">
+                    {`Image URL ${idx + 1}`}
+                  </label>
                   <input
+                    id={urlId}
                     type="url"
                     value={m.url}
                     onChange={(e) =>
@@ -252,8 +260,12 @@ export default function VenueForm({
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label className="body mb-1 block">Alt text</label>
+                  <label htmlFor={altId} className="body mb-1 block">
+                    Alt text
+                  </label>
                   <input
+                    id={altId}
+                    type="text"
                     value={m.alt}
                     onChange={(e) =>
                       updateMediaRow(m.id, 'alt', e.target.value)
@@ -304,8 +316,12 @@ export default function VenueForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="body mb-1 block">Address</label>
+            <label htmlFor="address" className="body mb-1 block">
+              Address
+            </label>
             <input
+              id="address"
+              type="text"
               value={location.address}
               onChange={(e) =>
                 setLocation({ ...location, address: e.target.value })
@@ -315,8 +331,12 @@ export default function VenueForm({
           </div>
 
           <div>
-            <label className="body mb-1 block">City</label>
+            <label htmlFor="city" className="body mb-1 block">
+              City
+            </label>
             <input
+              id="city"
+              type="text"
               value={location.city}
               onChange={(e) =>
                 setLocation({ ...location, city: e.target.value })
@@ -326,8 +346,12 @@ export default function VenueForm({
           </div>
 
           <div>
-            <label className="body mb-1 block">ZIP</label>
+            <label htmlFor="zip" className="body mb-1 block">
+              ZIP
+            </label>
             <input
+              id="zip"
+              type="text"
               value={location.zip}
               onChange={(e) =>
                 setLocation({ ...location, zip: e.target.value })
@@ -337,8 +361,12 @@ export default function VenueForm({
           </div>
 
           <div>
-            <label className="body mb-1 block">Country</label>
+            <label htmlFor="country" className="body mb-1 block">
+              Country
+            </label>
             <input
+              id="country"
+              type="text"
               value={location.country}
               onChange={(e) =>
                 setLocation({ ...location, country: e.target.value })

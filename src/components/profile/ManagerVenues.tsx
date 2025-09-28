@@ -14,10 +14,6 @@ function updatedAt(v: TVenueWithBookings) {
   return ts(v.updated) || ts(v.created)
 }
 
-/**
- * Grid of venues the manager owns, with quick actions.
- * Allows optimistic delete with rollback on failure.
- */
 export default function ManagerVenues({ venues }: Props) {
   const [items, setItems] = useState<TVenueWithBookings[]>([])
 
@@ -59,7 +55,17 @@ export default function ManagerVenues({ venues }: Props) {
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((v) => {
         const img = v.media?.[0]?.url || '/images/placeholder.jpg'
-        const alt = v.media?.[0]?.alt || v.name
+        const providedAlt = v.media?.[0]?.alt?.trim()
+        const label = v.name
+        const isPlaceholder = img.endsWith('/images/placeholder.jpg')
+        // Decorative in grid if alt would duplicate the title or if placeholder
+        const alt =
+          isPlaceholder ||
+          !providedAlt ||
+          providedAlt.toLowerCase() === label.toLowerCase()
+            ? ''
+            : providedAlt
+
         const city = v.location?.city ?? ''
         const country = v.location?.country ?? ''
 
@@ -71,7 +77,7 @@ export default function ManagerVenues({ venues }: Props) {
             <div className="relative aspect-[4/3] w-full">
               <Image
                 src={img}
-                alt={alt}
+                alt={alt} // '' => decorative (title provides the name)
                 fill
                 className="object-cover"
                 sizes="(max-width:1024px) 50vw, 33vw"

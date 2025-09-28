@@ -17,7 +17,7 @@ function getThumbUrl(b: TBooking): string | undefined {
 
 /**
  * List of bookings with venue name, dates, guests, optional guest name,
- * and a "View venue" action.
+ * and a single unified "row link" to the venue (no duplicate links).
  */
 export default function MyBookings({
   bookings,
@@ -39,20 +39,36 @@ export default function MyBookings({
         const end = b.dateTo?.slice(0, 10)
         const venueId = b.venue?.id
         const venueName = b.venue?.name ?? 'Venue'
+        const venueHref = venueId ? `/venues/${venueId}` : undefined
+
+        const Row = venueHref ? Link : ('div' as any)
+        const rowProps = venueHref
+          ? {
+              href: venueHref,
+              className:
+                'group flex items-center gap-3 no-underline focus:outline-none',
+              // Accessible name comes from visible content; no redundant title/aria-label
+            }
+          : {
+              className: 'flex items-center gap-3',
+            }
 
         return (
           <li key={b.id} className="p-3 sm:p-4">
-            <div className="flex items-center gap-3">
-              {/* Thumbnail */}
+            {/* When venue exists, the entire row is a single link.
+                This removes "Adjacent links to the same URL". */}
+            <Row {...rowProps}>
+              {/* Thumbnail: decorative to avoid duplicating the venue name */}
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-sand">
                 {thumb ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={thumb}
-                    alt={`${venueName} thumbnail`}
+                    alt="" // decorative
                     className="h-full w-full object-cover"
                     loading="lazy"
                     decoding="async"
+                    aria-hidden="true"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs muted">
@@ -64,17 +80,9 @@ export default function MyBookings({
               {/* Content */}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline gap-x-2">
-                  {venueId ? (
-                    <Link
-                      href={`/venues/${venueId}`}
-                      className="truncate font-medium hover:underline"
-                      title={venueName}
-                    >
-                      {venueName}
-                    </Link>
-                  ) : (
-                    <span className="truncate font-medium">{venueName}</span>
-                  )}
+                  <span className="truncate font-medium group-hover:underline">
+                    {venueName}
+                  </span>
                   <span className="muted text-sm">
                     {start} – {end}
                   </span>
@@ -91,27 +99,13 @@ export default function MyBookings({
                 )}
               </div>
 
-              {/* Right action */}
+              {/* Right "CTA" – just styled text inside the same link (or plain text when no venue) */}
               <div className="shrink-0">
-                {venueId ? (
-                  <Link
-                    href={`/venues/${venueId}`}
-                    className="inline-flex items-center justify-center rounded-lg border border-black/15 px-3 py-1.5 text-sm hover:bg-black/5 cursor-pointer"
-                    aria-label={`View ${venueName}`}
-                  >
-                    View venue
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center rounded-lg border border-black/15 px-3 py-1.5 text-sm opacity-50 cursor-not-allowed"
-                    aria-disabled="true"
-                  >
-                    View
-                  </button>
-                )}
+                <span className="inline-flex items-center justify-center rounded-lg border border-black/15 px-3 py-1.5 text-sm group-hover:bg-black/5">
+                  View venue
+                </span>
               </div>
-            </div>
+            </Row>
           </li>
         )
       })}

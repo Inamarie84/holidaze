@@ -138,7 +138,7 @@ export default function VenueDetailsPageClient({ id }: { id: string }) {
 
       <section className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-black/10 bg-white p-4">
-          <h3 className="h3 mb-3">Availability</h3>
+          <h2 className="h3 mb-3">Availability</h2>
           <AvailabilityCalendar bookings={venue.bookings ?? []} />
           <p className="muted text-xs mt-2">
             * Check-out day is available for new check-ins.
