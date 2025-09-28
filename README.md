@@ -221,8 +221,6 @@ npm test
 
 ## ⚠️ HTML validation note for `/venues/[id]/edit`
 
-## ⚠️ HTML validation note for `/venues/[id]/edit`
-
 This route can **bail out to client-side rendering** due to the manager/owner guard. In that case, Next.js **streams** the first HTML chunk and patches `<head>` (title/meta) **after hydration**.  
 The W3C validator reads only the first chunk, so it may report:
 
