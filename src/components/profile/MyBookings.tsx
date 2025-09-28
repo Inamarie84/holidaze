@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 import type { TBooking } from '@/types/api'
 
 type Props = {
@@ -13,6 +14,25 @@ type Props = {
 function getThumbUrl(b: TBooking): string | undefined {
   const url = b.venue?.media?.[0]?.url
   return typeof url === 'string' && url.trim() ? url : undefined
+}
+
+/** Wraps row content in a Link when href is provided; otherwise a div. */
+function RowWrapper({
+  href,
+  className,
+  children,
+}: {
+  href?: string
+  className?: string
+  children: ReactNode
+}) {
+  return href ? (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  ) : (
+    <div className={className}>{children}</div>
+  )
 }
 
 /**
@@ -41,23 +61,18 @@ export default function MyBookings({
         const venueName = b.venue?.name ?? 'Venue'
         const venueHref = venueId ? `/venues/${venueId}` : undefined
 
-        const Row = venueHref ? Link : ('div' as any)
-        const rowProps = venueHref
-          ? {
-              href: venueHref,
-              className:
-                'group flex items-center gap-3 no-underline focus:outline-none',
-              // Accessible name comes from visible content; no redundant title/aria-label
-            }
-          : {
-              className: 'flex items-center gap-3',
-            }
-
         return (
           <li key={b.id} className="p-3 sm:p-4">
             {/* When venue exists, the entire row is a single link.
                 This removes "Adjacent links to the same URL". */}
-            <Row {...rowProps}>
+            <RowWrapper
+              href={venueHref}
+              className={
+                venueHref
+                  ? 'group flex items-center gap-3 no-underline focus:outline-none'
+                  : 'flex items-center gap-3'
+              }
+            >
               {/* Thumbnail: decorative to avoid duplicating the venue name */}
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-sand">
                 {thumb ? (
@@ -105,7 +120,7 @@ export default function MyBookings({
                   View venue
                 </span>
               </div>
-            </Row>
+            </RowWrapper>
           </li>
         )
       })}
