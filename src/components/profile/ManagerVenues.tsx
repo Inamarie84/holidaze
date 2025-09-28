@@ -58,7 +58,6 @@ export default function ManagerVenues({ venues }: Props) {
         const providedAlt = v.media?.[0]?.alt?.trim()
         const label = v.name
         const isPlaceholder = img.endsWith('/images/placeholder.jpg')
-        // Decorative in grid if alt would duplicate the title or if placeholder
         const alt =
           isPlaceholder ||
           !providedAlt ||
@@ -72,19 +71,20 @@ export default function ManagerVenues({ venues }: Props) {
         return (
           <li
             key={v.id}
-            className="overflow-hidden rounded-xl border border-black/10 bg-white"
+            className="flex h-full flex-col overflow-hidden rounded-xl border border-black/10 bg-white"
           >
             <div className="relative aspect-[4/3] w-full">
               <Image
                 src={img}
-                alt={alt} // '' => decorative (title provides the name)
+                alt={alt}
                 fill
                 className="object-cover"
                 sizes="(max-width:1024px) 50vw, 33vw"
               />
             </div>
 
-            <div className="p-4">
+            {/* Make content a column and let it grow */}
+            <div className="flex flex-1 flex-col p-4">
               <h3 className="h3 mb-1">{v.name}</h3>
               <p className="muted text-sm">
                 {city}
@@ -101,7 +101,8 @@ export default function ManagerVenues({ venues }: Props) {
                 </span>
               </div>
 
-              <div className="mt-4 flex items-center gap-2">
+              {/* Push actions to the bottom of the card */}
+              <div className="mt-auto pt-4 flex items-center gap-2">
                 <Link
                   href={`/venues/${v.id}`}
                   className="inline-flex items-center rounded-lg border border-black/15 px-3 py-1.5 hover:bg-black/5"
