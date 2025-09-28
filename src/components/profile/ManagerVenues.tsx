@@ -83,7 +83,6 @@ export default function ManagerVenues({ venues }: Props) {
               />
             </div>
 
-            {/* Make content a column and let it grow */}
             <div className="flex flex-1 flex-col p-4">
               <h3 className="h3 mb-1">{v.name}</h3>
               <p className="muted text-sm">
@@ -101,7 +100,6 @@ export default function ManagerVenues({ venues }: Props) {
                 </span>
               </div>
 
-              {/* Push actions to the bottom of the card */}
               <div className="mt-auto pt-4 flex items-center gap-2">
                 <Link
                   href={`/venues/${v.id}`}
