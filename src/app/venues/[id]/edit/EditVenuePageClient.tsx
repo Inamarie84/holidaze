@@ -48,28 +48,34 @@ export default function EditVenuePageClient({
     []
   )
 
-  // Fetch venue (independent of auth) — avoids hydration races
   useEffect(() => {
+    let isActive = true
     const ac = new AbortController()
+
+    if (!venue) setLoading(true)
     ;(async () => {
       try {
-        setLoadError(null)
-        if (!venue) setLoading(true)
         const v = (await getVenueById(
           id,
           { _owner: true },
           { signal: ac.signal }
         )) as VenueWithOwner
-        if (!mounted.current || ac.signal.aborted) return
+        if (!isActive) return
         setVenue(v)
+        setLoadError(null)
       } catch (err) {
-        if (!mounted.current || ac.signal.aborted) return
+        if (!isActive) return
         setLoadError(errMsg(err))
+        setVenue(null)
       } finally {
-        if (mounted.current && !ac.signal.aborted) setLoading(false)
+        if (isActive) setLoading(false)
       }
     })()
-    return () => ac.abort()
+
+    return () => {
+      isActive = false
+      ac.abort()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
