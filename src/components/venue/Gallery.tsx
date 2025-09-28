@@ -123,7 +123,7 @@ export default function Gallery({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img.url}
-                    alt="" // decorative inside control to avoid redundancy
+                    alt=""
                     aria-hidden="true"
                     className="h-full w-full object-cover"
                   />
