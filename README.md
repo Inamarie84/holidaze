@@ -3,8 +3,11 @@
 A modern accommodation booking site built with **Next.js**, **TypeScript**, and **Tailwind CSS**.  
 Implements both customer and venue manager flows against the Noroff v2 **Holidaze** API.
 
-**Live:** https://holidaze-ten.vercel.app  
-**Repo:** https://github.com/Inamarie84/holidaze
+**Quick links**
+
+- Live app: <https://holidaze-ten.vercel.app>
+- Repo: <https://github.com/Inamarie84/holidaze>
+- Figma (style guide + prototypes): <https://www.figma.com/design/KDaHXNcwFR5T9rgVpZptwi/Holidaze?node-id=0-1&p=f&t=ltehOma7xwRipU6J-0>
 
 ---
 
@@ -101,14 +104,14 @@ git clone https://github.com/Inamarie84/holidaze.git
 cd holidaze
 ```
 
-3. Install dependencies:
+2. Install dependencies:
 
 ```bash
 npm install
 
 ```
 
-4. Environment Variables – create .env.local:
+3. Environment Variables – create .env.local:
 
 ```bash
 # Base Noroff v2 API (no trailing slash)
@@ -120,14 +123,14 @@ NEXT_PUBLIC_API_KEY=YOUR_API_KEY_HERE
 
 ```
 
-5. Run the development server: (http://localhost:3000)
+4. Run the development server: (http://localhost:3000)
 
 ```bash
 npm run dev
 
 ```
 
-6. Other scripts:
+5. Other scripts:
 
 ```bash
 npm run build      # Create an optimized production build
@@ -218,69 +221,35 @@ npm test
 
 ## ⚠️ HTML validation note for `/venues/[id]/edit`
 
-**Why the W3C validator complains**
+## ⚠️ HTML validation note for `/venues/[id]/edit`
 
-This route uses a **client-side permission guard** (manager/owner). That can trigger a **client-side render bailout** in the Next.js App Router. When that happens, Next **streams** the initial HTML and **patches the `<head>` later** (injecting `<title>` / `<meta>`). Browsers end up with the correct `<head>`, but the validator only inspects the **first streamed chunk**, so it reports:
+This route can **bail out to client-side rendering** due to the manager/owner guard. In that case, Next.js **streams** the first HTML chunk and patches `<head>` (title/meta) **after hydration**.  
+The W3C validator reads only the first chunk, so it may report:
 
-- “head is missing a required title”
-- “title/meta/link appears inside body”
+- “`<head>` missing required `<title>`”
+- “`<title>/<meta>` appears inside `<body>`”
 
-You can confirm the bailout by viewing page source and seeing:
+**Mitigations implemented**
 
-```html
-<!-- BAILOUT_TO_CLIENT_SIDE_RENDERING -->
-```
+- Static route `metadata` in `app/venues/[id]/edit/layout.tsx`
+- No `head.tsx` for this route (avoids duplication)
+- No `dynamic = 'force-dynamic'`
+- Server wrapper that passes `id` to the client page
 
-- The final DOM (what users actually get) does include the correct <title> and <meta> tags. Verify in DevTools → Elements → <head>.
-
-  ### What I did to mitigate
-
-1. **Static route metadata** so title/description are defined server-side:
-
-```ts
-// app/venues/[id]/edit/layout.tsx
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: { absolute: 'Edit venue • Holidaze' },
-  description: 'Update your venue details',
-}
-
-export default function EditLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
-}
-
-```
-
-2. No head.tsx for this route (avoids duplication).
-3. No export const dynamic = 'force-dynamic' on this page (reduces late head mutations).
-4. Minimal server wrapper for the page:
-
-### Edit page server entry (App Router)
-
-```ts
-// app/venues/[id]/edit/page.tsx
-import EditVenuePageClient from './EditVenuePageClient'
-
-type PageProps = { params: Promise<{ id: string }> }
-
-export default async function Page({ params }: PageProps) {
-  const { id } = await params
-  return <EditVenuePageClient id={id} />
-}
-
-```
-
-## How to verify correctness
-
-1. Open the page in a browser → DevTools → Elements → <head>.
-2. You’ll see <title>Edit venue • Holidaze</title> and the description <meta>.
-3. The W3C validator reads only the first streamed chunk, not the final DOM—hence those warnings.
+**Verify**
+Open DevTools → **Elements → `<head>`** on that page: you’ll see  
+`<title>Edit venue • Holidaze</title>` and the description `<meta>`.  
+(The validator warning is about the streamed chunk, not the final DOM.)
 
 ## 📝 Notes
 
 - **Home vs Venues**: The home route redirects to `/venues`. This is fine and common when the listing is the main experience.
 - **Titles/Metadata**: The app uses a layout title template and per-page metadata (or a client `TitleSync` for dynamic titles like the profile username). This is the standard Next.js approach (rather than editing static HTML).
+
+## 🧭 Future work
+
+- Extract repeated button utilities into Tailwind component classes (`@apply`) for consistency.
+- Mark first above-the-fold hero/card image as `priority` (Next/Image) to satisfy LCP hint.
 
 ## 📄 License
 
