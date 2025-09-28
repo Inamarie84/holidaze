@@ -205,7 +205,6 @@ npm test
 ## ♿ Accessibility & UX
 
 - Keyboard-focusable controls
-- Tooltip hints on icon-only buttons (hidden on larger screens where text is visible)
 - Semantic headings and ARIA `role="status"` for async feedback
 - Color contrast checked for navbar/hero overlays
 
